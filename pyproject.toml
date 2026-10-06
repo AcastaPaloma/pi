@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pi-sim"
+version = "0.1.0"
+description = "A small, paper-inspired bimanual UR5e MuJoCo playground"
+requires-python = ">=3.11"
+dependencies = ["mujoco==3.15.0", "gymnasium==1.4.0", "numpy>=1.26,<3", "pillow>=10"]
+
+[tool.setuptools.packages.find]
+include = ["pi_sim*"]
+
+[tool.setuptools.package-data]
+pi_sim = ["assets/**/*"]
