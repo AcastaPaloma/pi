@@ -2,6 +2,36 @@
 
 Everything is installed in `mini-vla`. Run these from this project folder.
 
+**Batch 128 observations for your encoder:**
+
+```bash
+conda activate mini-vla
+python examples/batch_observations.py
+python examples/batch_observations.py --source real --prepare-demo
+```
+
+Use `robot.observations()` to get the NumPy batch directly. See the [short batch guide](docs/BATCH_ENCODER.md) for Python snippets, grids of 128 scenes, and the real-data cache.
+
+**Capture camera images and proprioception directly:**
+
+```bash
+conda activate mini-vla
+python -m pi_observe sim
+python examples/observe_robot.py
+```
+
+Captures are saved under `outputs/observations/`. The [observation guide](docs/OBSERVATIONS.md) also explains reading your physical SO-101 pair after configuring its serial ports, calibration files, and cameras.
+
+**Get data for your low-level encoder:**
+
+```bash
+conda activate mini-vla
+python -m pi_data sample --episode 0 --frame 100 --goal-seconds 2
+python -m pi_data serve
+```
+
+Open http://127.0.0.1:8000/docs. The [encoder guide](docs/ENCODER_DATA.md) explains the selected real folding dataset, all observation/action endpoints, and H100 sizing. The sample is saved to `outputs/encoder_sample.npz`.
+
 **Watch the robot pick up the block:**
 
 ```bash

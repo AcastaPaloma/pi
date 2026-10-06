@@ -1,8 +1,14 @@
 # A small MuJoCo robot playground
 
+**For your encoder: [128 observations directly in Python](docs/BATCH_ENCODER.md).** Use `RobotBatch(...).observations()` for static simulated scenes or `FoldingBatch(...).observations()` for fast cached real SO-101 samples. Both return batched RGB images, proprioception, and text; neither includes a model or policy. A 128-scene preview and a small real-data cache are ready in `outputs/`.
+
 Two UR5e arms with Robotiq grippers, a table, a red block, and three cameras. Start by reaching a green target; then try picking up the block. Everything runs locally without a learned model.
 
 **Already installed in your `mini-vla` conda environment.** Its existing PyTorch installation was left as-is. This project uses MuJoCo, NumPy and Gymnasium, with no PyTorch code.
+
+**Read and capture robot observations:** run `python -m pi_observe sim` or use `Observer.read()` directly. The [observation guide](docs/OBSERVATIONS.md) covers RGB cameras, proprioception, timing, saved captures, optional goals/history, and the read-only physical SO-101 configuration.
+
+**Building the low-level VLA encoder?** Start with the [folding dataset and API guide](docs/ENCODER_DATA.md). It covers real SO-101 garment-folding demonstrations, camera/state/text/goal/action endpoints, NumPy inputs, and an H100 budget. Run `python -m pi_data serve` in `mini-vla`, then open http://127.0.0.1:8000/docs.
 
 ## 1. Watch it work
 

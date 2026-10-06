@@ -9,8 +9,12 @@ description = "A small, paper-inspired bimanual UR5e MuJoCo playground"
 requires-python = ">=3.11"
 dependencies = ["mujoco==3.15.0", "gymnasium==1.4.0", "numpy>=1.26,<3", "pillow>=10"]
 
+[project.optional-dependencies]
+data = ["av>=16,<19", "pyarrow>=20,<26", "huggingface-hub>=1,<2", "fastapi>=0.115,<1", "uvicorn>=0.34,<1", "httpx>=0.28,<1"]
+capture = ["opencv-python>=4.10,<5", "feetech-servo-sdk==1.0.0", "pyserial>=3.5,<4"]
+
 [tool.setuptools.packages.find]
-include = ["pi_sim*"]
+include = ["pi_sim*", "pi_data*", "pi_observe*"]
 
 [tool.setuptools.package-data]
 pi_sim = ["assets/**/*"]

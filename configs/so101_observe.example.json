@@ -1,0 +1,16 @@
+{
+  "task": "Fold the sheet of paper in half",
+  "subtask": null,
+  "arms": {
+    "left": {"port": "/dev/ttyACM0", "calibration": "/absolute/path/to/left_follower.json"},
+    "right": {"port": "/dev/ttyACM1", "calibration": "/absolute/path/to/right_follower.json"}
+  },
+  "cameras": {
+    "left_wrist": {"device": 0, "width": 640, "height": 480, "fps": 30},
+    "right_wrist": {"device": 1, "width": 640, "height": 480, "fps": 30},
+    "right_front": {"device": 2, "width": 640, "height": 480, "fps": 30}
+  },
+  "goal_images": {},
+  "max_age_ms": 200,
+  "max_skew_ms": 100
+}
