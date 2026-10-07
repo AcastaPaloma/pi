@@ -11,7 +11,7 @@ import json
 from pathlib import Path
 
 import av
-from huggingface_hub import hf_hub_download, snapshot_download
+from huggingface_hub import hf_hub_download, list_repo_files, snapshot_download
 import numpy as np
 from PIL import Image
 import pyarrow.parquet as pq
@@ -33,34 +33,47 @@ class FoldingDataset:
     no decoder/container is shared between threads or processes.
     """
 
-    def __init__(self, root: str | Path | None = None):
+    def __init__(self, root: str | Path | None = None, *, repo=REPO, revision=REVISION,
+                 subset=SUBSET, cameras=CAMERAS, dimension=12, units=UNITS,
+                 units_source=UNITS_SOURCE, excluded_episodes=()):
+        self.repo, self.revision, self.subset = repo, revision, subset
+        self.cameras, self.dimension = tuple(cameras), dimension
+        self.units, self.units_source = list(units), units_source
+        self.split_policy = "SHA256 episode ranking, 10% validation; not a generalization split"
         self.root = Path(root).expanduser() if root is not None else None
         self.info = json.loads(self._file("meta/info.json").read_text())
         self.fps = int(self.info["fps"])
         self.episodes = {
             int(row["episode_index"]): row
-            for row in pq.read_table(self._file("meta/episodes/chunk-000/file-000.parquet")).to_pylist()
+            for path in self._episode_files()
+            for row in pq.read_table(path).to_pylist()
         }
+        if len(self.episodes) != self.info.get("total_episodes", len(self.episodes)):
+            raise ValueError("Episode metadata is incomplete or contains duplicate ids")
+        self.excluded_episodes = tuple(excluded_episodes)
+        for episode in self.excluded_episodes:
+            self.episodes.pop(episode, None)
         self.tasks = {
             int(row["task_index"]): row["task"]
             for row in pq.read_table(self._file("meta/tasks.parquet")).to_pylist()
         }
         self.names = self.info["features"]["action"]["names"]
-        if len(self.names) != 12 or self.info["features"]["observation.state"]["names"] != self.names:
-            raise ValueError("Expected matching 12D bimanual state/action schemas")
-        for camera in CAMERAS:
+        if len(self.names) != self.dimension or self.info["features"]["observation.state"]["names"] != self.names:
+            raise ValueError("Expected matching state/action schemas")
+        for camera in self.cameras:
             if f"observation.images.{camera}" not in self.info["features"]:
                 raise ValueError(f"Missing camera {camera}")
         for ep in self.episodes.values():
             if ep["length"] < 1 or ep["dataset_to_index"] - ep["dataset_from_index"] != ep["length"]:
                 raise ValueError("Invalid episode length/index range")
-            for camera in CAMERAS:
+            for camera in self.cameras:
                 key = f"videos/observation.images.{camera}"
                 duration = ep[f"{key}/to_timestamp"] - ep[f"{key}/from_timestamp"]
                 if abs(duration - ep["length"] / self.fps) > 0.5 / self.fps:
                     raise ValueError(f"Episode {ep['episode_index']}: {camera} duration mismatch")
         # Exact 90/10 episode split. Hash ranking is reproducible across machines.
-        ordered = sorted(self.episodes, key=lambda ep: hashlib.sha256(f"lehome-v1:{ep}".encode()).digest())
+        salt = "lehome-v1" if self.repo == REPO else f"{self.repo}:{self.revision}"
+        ordered = sorted(self.episodes, key=lambda ep: hashlib.sha256(f"{salt}:{ep}".encode()).digest())
         n_val = max(1, round(len(ordered) * 0.1))
         self.validation_ids = frozenset(ordered[:n_val])
 
@@ -71,7 +84,20 @@ class FoldingDataset:
             if not path.is_file():
                 raise FileNotFoundError(f"Missing local dataset file: {path}")
             return path
-        return Path(hf_hub_download(REPO, f"{SUBSET}/{relative}", repo_type="dataset", revision=REVISION))
+        remote = f"{self.subset}/{relative}" if self.subset else relative
+        return Path(hf_hub_download(self.repo, remote, repo_type="dataset", revision=self.revision))
+
+    def _episode_files(self):
+        if self.root is not None:
+            paths = sorted((self.root / "meta/episodes").rglob("*.parquet"))
+            if not paths:
+                raise FileNotFoundError(f"No episode metadata under {self.root}")
+            return paths
+        prefix = f"{self.subset}/" if self.subset else ""
+        paths = sorted(path[len(prefix):] for path in list_repo_files(
+            self.repo, repo_type="dataset", revision=self.revision)
+            if path.startswith(prefix + "meta/episodes/") and path.endswith(".parquet"))
+        return [self._file(path) for path in paths]
 
     def episode(self, episode: int) -> dict:
         if episode not in self.episodes:
@@ -108,7 +134,7 @@ class FoldingDataset:
         if not np.allclose(arrays["timestamp"], np.arange(n) / self.fps, atol=0.5 / self.fps, rtol=0):
             raise ValueError(f"Episode {episode}: inconsistent frame timestamps")
         for key in ("action", "observation.state"):
-            if arrays[key].shape != (n, 12) or not np.isfinite(arrays[key]).all():
+            if arrays[key].shape != (n, self.dimension) or not np.isfinite(arrays[key]).all():
                 raise ValueError(f"Episode {episode}: invalid {key}")
         return arrays
 
@@ -119,8 +145,8 @@ class FoldingDataset:
         return ep
 
     def _video(self, episode: int, camera: str) -> tuple[Path, float]:
-        if camera not in CAMERAS:
-            raise KeyError(f"Unknown camera {camera}; expected {CAMERAS}")
+        if camera not in self.cameras:
+            raise KeyError(f"Unknown camera {camera}; expected {self.cameras}")
         ep = self.episode(episode)
         key = f"videos/observation.images.{camera}"
         chunk, file = ep[f"{key}/chunk_index"], ep[f"{key}/file_index"]
@@ -185,20 +211,21 @@ class FoldingDataset:
         goal_frame = frame + goal_delta
         task = self.tasks[int(rows["task_index"][frame])]
         return {
-            "source": {"repo": REPO, "revision": REVISION, "subset": SUBSET},
+            "source": {"repo": self.repo, "revision": self.revision, "subset": self.subset,
+                       "excluded_episodes": list(self.excluded_episodes)},
             "episode": episode, "frame": frame, "split": self.split(episode),
             "timestamp_seconds": float(rows["timestamp"][frame]), "fps": self.fps,
-            "camera_order": list(CAMERAS),
+            "camera_order": list(self.cameras),
             "proprioception": {"position": rows["observation.state"][frame].tolist(), "names": self.names,
-                               "units": "source_native", "units_per_dimension": UNITS,
-                               "units_reference": UNITS_SOURCE},
+                               "units": "source_native", "units_per_dimension": self.units,
+                               "units_reference": self.units_source},
             "text": {"task": task, "task_source": "dataset", "subtask": None,
                      "control_mode": "joint_position", "control_mode_source": "adapter_schema",
                      "quality": None, "mistake": None, "speed": None},
             "actions": {"values": rows["action"][np.minimum(action_indices, n - 1)].tolist(),
                         "valid": (action_indices < n).tolist(), "names": self.names,
-                        "units": "source_native", "units_per_dimension": UNITS,
-                        "units_reference": UNITS_SOURCE, "start_frame": frame, "step_seconds": 1 / self.fps},
+                        "units": "source_native", "units_per_dimension": self.units,
+                        "units_reference": self.units_source, "start_frame": frame, "step_seconds": 1 / self.fps},
             "history": {"frames": np.maximum(history_indices, 0).tolist(), "valid": (history_indices >= 0).tolist(),
                         "position": rows["observation.state"][np.maximum(history_indices, 0)].tolist()},
             "visual_subgoal": {"frame": goal_frame, "delta_seconds": goal_delta / self.fps,
@@ -209,22 +236,22 @@ class FoldingDataset:
     def arrays(self, episode: int, frame: int, *, size: int = 448, **kwargs) -> dict[str, np.ndarray]:
         """Framework-free encoder inputs + supervised action targets.
 
-        history_images: [T,3,H,W,3]; images/subgoal_images: [3,H,W,3].
+        history_images: [T,C,H,W,3]; images/subgoal_images: [C,H,W,3].
         Strings use NumPy Unicode, so np.load(..., allow_pickle=False) works.
         """
         sample = self.sample(episode, frame, **kwargs)
         needed = set(sample["history"]["frames"] + [sample["visual_subgoal"]["frame"]])
-        decoded = {index: np.stack([self.image(episode, index, cam, size) for cam in CAMERAS]) for index in needed}
+        decoded = {index: np.stack([self.image(episode, index, cam, size) for cam in self.cameras]) for index in needed}
         return {
             "images": decoded[frame],
-            "camera_names": np.asarray(CAMERAS),
+            "camera_names": np.asarray(self.cameras),
             "proprioception": np.asarray(sample["proprioception"]["position"], dtype=np.float32),
             "history_images": np.stack([decoded[index] for index in sample["history"]["frames"]]),
             "history_proprioception": np.asarray(sample["history"]["position"], dtype=np.float32),
             "history_valid": np.asarray(sample["history"]["valid"], dtype=bool),
             "history_frames": np.asarray(sample["history"]["frames"], dtype=np.int64),
             "subgoal_images": decoded[sample["visual_subgoal"]["frame"]],
-            "subgoal_valid": np.ones(len(CAMERAS), dtype=bool),
+            "subgoal_valid": np.ones(len(self.cameras), dtype=bool),
             "subgoal_frame": np.asarray(sample["visual_subgoal"]["frame"], dtype=np.int64),
             "subgoal_delta_seconds": np.asarray(sample["visual_subgoal"]["delta_seconds"], dtype=np.float32),
             "subgoal_strictly_future": np.asarray(sample["visual_subgoal"]["strictly_future"]),
@@ -250,7 +277,8 @@ class FoldingDataset:
 
     def prepare(self, episode: int = 0, all_videos: bool = False) -> None:
         if all_videos and self.root is None:
-            snapshot_download(REPO, repo_type="dataset", revision=REVISION, allow_patterns=f"{SUBSET}/**", max_workers=4)
+            snapshot_download(self.repo, repo_type="dataset", revision=self.revision,
+                              allow_patterns=f"{self.subset}/**" if self.subset else None, max_workers=4)
         self._rows(episode)
-        for camera in CAMERAS:
+        for camera in self.cameras:
             self._video(episode, camera)

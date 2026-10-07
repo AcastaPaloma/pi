@@ -5,7 +5,7 @@ import mujoco
 import numpy as np
 
 from .env import RobotEnv
-from .scene import JOINTS
+from .scene import CAMERAS, JOINTS
 
 
 class RobotBatch:
@@ -18,7 +18,7 @@ class RobotBatch:
     """
 
     def __init__(self, batch_size=128, image_size=224, seed=0,
-                 cameras=("left_wrist", "right_wrist", "front")):
+                 cameras=CAMERAS):
         if not isinstance(batch_size, int) or not 1 <= batch_size <= 4096:
             raise ValueError("batch_size must be 1..4096")
         if not cameras or len(set(cameras)) != len(cameras) or set(cameras) - set(RobotEnv.camera_names):
@@ -48,18 +48,18 @@ class RobotBatch:
         """Sample new static poses and object positions; invalidate cached RGB.
 
         Small joint perturbations are for visual/input testing. They are not
-        collision-validated demonstrations or examples of successful folding.
+        collision-validated demonstrations or examples of successful manipulation.
         """
         self._check_open()
         if seed is not None:
             self._rng = np.random.default_rng(seed)
         self._qpos[:] = self._home
-        offsets = self._rng.uniform(-0.15, 0.15, (self.batch_size, 12))
+        offsets = self._rng.uniform(-0.15, 0.15, (self.batch_size, 10))
         self._qpos[:, self._joint_indices] = np.clip(self._home[self._joint_indices] + offsets, self._limits[:, 0], self._limits[:, 1])
         cube_index = self._env.model.joint("cube_joint").qposadr[0]
-        self._qpos[:, cube_index:cube_index + 2] = self._rng.uniform([-0.35, -0.22], [0.15, 0.20], (self.batch_size, 2))
+        self._qpos[:, cube_index:cube_index + 2] = self._rng.uniform([-0.26, -0.06], [-0.1, 0.04], (self.batch_size, 2))
         self._mocap[:] = self._home_mocap
-        self._mocap[:, 0, :2] = self._rng.uniform([-0.35, -0.05], [0.1, 0.3], (self.batch_size, 2))
+        self._mocap[:, 0, :2] = self._rng.uniform([-0.26, -0.04], [-0.1, 0.04], (self.batch_size, 2))
         self._generation += 1
         self._cache = None
         return self
@@ -77,17 +77,18 @@ class RobotBatch:
             names, units = [], []
             for side, arm in self._env.robot.items():
                 # Hand linkage is unchanged from the settled home configuration.
-                gripper_id = self._env.model.joint(f"{side}_gripper_right_driver_joint").qposadr[0]
-                opening = np.clip(1 - self._qpos[:, gripper_id] / 0.8, 0, 1)
-                positions.extend([self._qpos[:, arm.qpos_ids], opening[:, None]])
+                gripper_id = self._env.model.joint(f"{side}_gripper").qposadr[0]
+                low, high = self._env.model.actuator_ctrlrange[arm.gripper_actuator]
+                opening = np.clip((self._qpos[:, gripper_id] - low) / (high - low), 0, 1)
+                positions.extend([np.rad2deg(self._qpos[:, arm.qpos_ids]), opening[:, None] * 100])
                 names.extend([f"{side}_{joint}.pos" for joint in JOINTS] + [f"{side}_gripper.pos"])
-                units.extend(["radian"] * 6 + ["gripper_fraction_0_closed_1_open"])
+                units.extend(["degree"] * 5 + ["gripper_percent_0_closed_100_open"])
             self._cache = {
                 "proprioception": np.concatenate(positions, axis=1).astype(np.float32),
                 "camera_names": np.asarray(self.cameras),
                 "state_names": np.asarray(names), "state_units": np.asarray(units),
                 "task": np.full(self.batch_size, "Observe the robot and table."),
-                "source": np.asarray("mujoco_static_bimanual_ur5e"),
+                "source": np.asarray("mujoco_static_bimanual_so101"),
                 "scene_id": np.arange(self.batch_size, dtype=np.int64),
                 "generation": np.asarray(self._generation),
             }

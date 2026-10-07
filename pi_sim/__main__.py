@@ -12,7 +12,7 @@ from .demo import ScriptedDemo
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Two UR5e arms, one easy task. No training required.")
+    parser = argparse.ArgumentParser(description="Two SO-101 arms, one easy task. No training required.")
     parser.add_argument("--task", choices=("reach", "pick_place"), default="reach")
     parser.add_argument("--demo", action="store_true", help="Run a scripted controller")
     parser.add_argument("--headless", action="store_true", help="Run the demo without a window")
@@ -20,6 +20,8 @@ def main():
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--steps", type=int, default=2000, help="Maximum steps per episode (100 seconds)")
     parser.add_argument("--screenshot", type=Path, help="Save the final front-camera image")
+    parser.add_argument("--object-shape", choices=("cube", "cylinder"), default="cube")
+    parser.add_argument("--object-color", choices=("red", "green", "blue", "yellow"), default="red")
     args = parser.parse_args()
     episodes = args.episodes if args.episodes is not None else (1 if args.headless else 0)
     if episodes < 0 or args.steps < 1 or (args.headless and episodes == 0):
@@ -27,7 +29,8 @@ def main():
     if not args.headless and sys.platform == "darwin" and "MJPYTHON_BIN" not in os.environ:
         launcher = Path(sys.executable).with_name("mjpython")
         os.execv(str(launcher), [str(launcher), "-m", "pi_sim", *sys.argv[1:]])
-    with RobotEnv(task=args.task, max_episode_steps=args.steps) as env:
+    with RobotEnv(task=args.task, max_episode_steps=args.steps,
+                  object_shape=args.object_shape, object_color=args.object_color) as env:
         obs, _ = env.reset(seed=args.seed)
         demo = ScriptedDemo(env)
         automatic = args.demo or args.headless
@@ -56,7 +59,7 @@ def main():
             with mujoco.viewer.launch_passive(env.model, env.data, key_callback=events.append,
                                              show_left_ui=False, show_right_ui=False) as viewer:
                 viewer.cam.lookat[:] = [0, 0, 0.10]
-                viewer.cam.distance = 2.5
+                viewer.cam.distance = 1.2
                 viewer.cam.azimuth = 125
                 viewer.cam.elevation = -28
                 visual_flags = viewer.opt.flags.copy()

@@ -6,15 +6,17 @@ from pathlib import Path
 import numpy as np
 
 from .dataset import FoldingDataset
+from .manipulation import DATASETS, ManipulationDataset
 
 
 def main():
-    parser = argparse.ArgumentParser(description="LeHome low-level encoder data (no PyTorch)")
-    parser.add_argument("--root", help="Offline local four_types_merged directory; otherwise use the HF cache")
+    parser = argparse.ArgumentParser(description="SO-101 manipulation encoder data (no PyTorch)")
+    parser.add_argument("--root", help="Offline local LeRobot v3 dataset root; otherwise use the HF cache")
+    parser.add_argument("--dataset", choices=(*DATASETS, "folding"), default="multitask")
     commands = parser.add_subparsers(dest="command", required=True)
-    prepare = commands.add_parser("prepare", help="Download metadata, actions, and an episode's three video files")
+    prepare = commands.add_parser("prepare", help="Download metadata, actions, and an episode's video files")
     prepare.add_argument("--episode", type=int, default=0)
-    prepare.add_argument("--all", action="store_true", help="Download the full 4.48 GB selected subset")
+    prepare.add_argument("--all", action="store_true", help="Download the entire selected dataset")
     serve = commands.add_parser("serve", help="Start read-only HTTP API with interactive /docs")
     serve.add_argument("--port", type=int, default=8000)
     sample = commands.add_parser("sample", help="Export one encoder example as NumPy arrays")
@@ -26,7 +28,7 @@ def main():
     sample.add_argument("--seed", type=int, default=0)
     sample.add_argument("--output", type=Path, default=Path("outputs/encoder_sample.npz"))
     args = parser.parse_args()
-    ds = FoldingDataset(args.root)
+    ds = FoldingDataset(args.root) if args.dataset == "folding" else ManipulationDataset(args.root, dataset=args.dataset)
     if args.command == "prepare":
         ds.prepare(args.episode, all_videos=args.all)
         print(json.dumps({"ready": True, "episode": args.episode, "all": args.all,

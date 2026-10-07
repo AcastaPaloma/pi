@@ -22,10 +22,10 @@ class ScriptedDemo:
     def action(self):
         if self.env.task == "reach":
             return self.env.action_toward(self.goal)
-        targets = [np.r_[self.cube[:2], 0.18], np.r_[self.cube[:2], 0.028],
-                   np.r_[self.cube[:2], 0.028], np.r_[self.cube[:2], 0.18],
-                   np.r_[self.goal[:2], 0.18], np.r_[self.goal[:2], 0.032],
-                   np.r_[self.goal[:2], 0.032], np.r_[self.goal[:2], 0.20]]
+        targets = [np.r_[self.cube[:2], 0.075], np.r_[self.cube[:2], 0.022],
+                   np.r_[self.cube[:2], 0.022], np.r_[self.cube[:2], 0.075],
+                   np.r_[self.goal[:2], 0.075], np.r_[self.goal[:2], 0.022],
+                   np.r_[self.goal[:2], 0.022], np.r_[self.goal[:2], 0.075]]
         opening = 1.0 if self.phase in (0, 1, 6, 7) else 0.0
         target = targets[self.phase]
         self.ticks += 1

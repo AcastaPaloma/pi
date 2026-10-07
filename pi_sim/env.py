@@ -7,7 +7,7 @@ import mujoco
 import numpy as np
 from gymnasium import spaces
 
-from .scene import ARMS, JOINTS, build_model
+from .scene import ARMS, CAMERAS, JOINTS, build_model
 
 
 def _quat_to_rotvec(quat):
@@ -32,12 +32,12 @@ class Arm:
 
     def __post_init__(self):
         m = self.env.model
-        self.joint_ids = np.array([m.joint(f"{self.name}_{j}_joint").id for j in JOINTS])
+        self.joint_ids = np.array([m.joint(f"{self.name}_{j}").id for j in JOINTS])
         self.qpos_ids = m.jnt_qposadr[self.joint_ids]
         self.dof_ids = m.jnt_dofadr[self.joint_ids]
         self.actuator_ids = np.array([m.actuator(f"{self.name}_{j}").id for j in JOINTS])
-        self.gripper_actuator = m.actuator(f"{self.name}_gripper_fingers_actuator").id
-        self.site_id = m.site(f"{self.name}_gripper_pinch").id
+        self.gripper_actuator = m.actuator(f"{self.name}_gripper").id
+        self.site_id = m.site(f"{self.name}_gripperframe").id
 
     @property
     def joint_positions(self):
@@ -49,9 +49,9 @@ class Arm:
 
     @property
     def gripper_opening(self):
-        # Normalized linkage angle, not a calibrated distance between fingertips.
-        angle = self.env.data.joint(f"{self.name}_gripper_right_driver_joint").qpos[0]
-        return float(np.clip(1 - angle / 0.8, 0, 1))
+        angle = self.env.data.joint(f"{self.name}_gripper").qpos[0]
+        low, high = self.env.model.actuator_ctrlrange[self.gripper_actuator]
+        return float(np.clip((angle - low) / (high - low), 0, 1))
 
     @property
     def position(self):
@@ -65,19 +65,22 @@ class Arm:
 
 
 class RobotEnv(gym.Env):
-    """Bimanual UR5e, with easy left-arm reach and physical pick/place tasks.
+    """Bimanual SO-101, with easy left-arm reach and physical pick/place tasks.
 
-    All positions use world coordinates in meters; rotations use radians.
+    Cartesian positions use world meters and rotations use radians.
+    State and joint commands use degrees plus 0–100 grippers. Arm/raw MuJoCo
+    angles remain radians. Model joint origins require a hardware calibration audit.
     `model`, `data`, and `robot['left'/'right']` are public integration points.
     """
 
     metadata = {"render_modes": ["rgb_array"], "render_fps": 20}
     control_dt = 0.05
     delta_scale = 0.02
-    camera_names = ("front", "left_wrist", "right_wrist")
+    camera_names = CAMERAS
 
     def __init__(self, task="reach", control_mode="ee_delta", images=False,
-                 image_size=448, max_episode_steps=400, render_mode=None):
+                 image_size=448, max_episode_steps=400, render_mode=None,
+                 object_shape="cube", object_color="red"):
         if task not in ("reach", "pick_place"):
             raise ValueError("task must be 'reach' or 'pick_place'")
         if control_mode not in ("ee_delta", "ee", "joint"):
@@ -91,7 +94,8 @@ class RobotEnv(gym.Env):
         self.task, self.control_mode = task, control_mode
         self.images, self.image_size = images, image_size
         self.max_episode_steps, self.render_mode = max_episode_steps, render_mode
-        self.model = build_model()
+        self.object_shape, self.object_color = object_shape, object_color
+        self.model = build_model(object_shape, object_color)
         self.data = mujoco.MjData(self.model)
         self._ik_data = mujoco.MjData(self.model)
         self.robot = {side: Arm(self, side) for side in ARMS}
@@ -99,19 +103,19 @@ class RobotEnv(gym.Env):
         self._renderer = None
         self._ready = False
         self._done = False
-        self._workspace_low = np.array([[-0.50, -0.32, 0.025], [-0.08, -0.32, 0.025]])
-        self._workspace_high = np.array([[0.08, 0.32, 0.60], [0.50, 0.32, 0.60]])
+        self._workspace_low = np.array([[-0.30, -0.08, 0.016], [0.05, -0.08, 0.016]])
+        self._workspace_high = np.array([[-0.05, 0.13, 0.26], [0.30, 0.13, 0.26]])
         if control_mode == "ee_delta":
             low, high = np.tile([-1., -1., -1., 0.], 2), np.ones(8)
         elif control_mode == "ee":
             low = np.concatenate([np.r_[p, [-np.pi] * 3, 0.] for p in self._workspace_low])
             high = np.concatenate([np.r_[p, [np.pi] * 3, 1.] for p in self._workspace_high])
         else:
-            low = np.concatenate([np.r_[self.model.actuator_ctrlrange[a.actuator_ids, 0], 0.] for a in self.robot.values()])
-            high = np.concatenate([np.r_[self.model.actuator_ctrlrange[a.actuator_ids, 1], 1.] for a in self.robot.values()])
+            low = np.concatenate([np.r_[np.rad2deg(self.model.actuator_ctrlrange[a.actuator_ids, 0]), 0.] for a in self.robot.values()])
+            high = np.concatenate([np.r_[np.rad2deg(self.model.actuator_ctrlrange[a.actuator_ids, 1]), 100.] for a in self.robot.values()])
         self.action_space = spaces.Box(low.astype(np.float32), high.astype(np.float32))
-        obs = {"state": spaces.Box(-np.inf, np.inf, (14,), np.float32),
-               "joint_velocity": spaces.Box(-np.inf, np.inf, (12,), np.float32),
+        obs = {"state": spaces.Box(-np.inf, np.inf, (12,), np.float32),
+               "joint_velocity": spaces.Box(-np.inf, np.inf, (10,), np.float32),
                "ee_pose": spaces.Box(-np.inf, np.inf, (14,), np.float32),
                "cube_position": spaces.Box(-np.inf, np.inf, (3,), np.float32),
                "goal_position": spaces.Box(-np.inf, np.inf, (3,), np.float32)}
@@ -122,7 +126,7 @@ class RobotEnv(gym.Env):
     @property
     def goal_position(self):
         pos = self.data.mocap_pos[0].copy()
-        pos[2] = 0.14 if self.task == "reach" else 0.02
+        pos[2] = 0.07 if self.task == "reach" else 0.015
         return pos
 
     def reset(self, *, seed=None, options=None):
@@ -133,16 +137,17 @@ class RobotEnv(gym.Env):
             raise ValueError(f"Unknown reset options: {sorted(unknown)}")
         mujoco.mj_resetData(self.model, self.data)
         for arm in self.robot.values():
-            home = np.array([-np.pi / 2, -np.pi / 2, np.pi / 2, -np.pi / 2, -np.pi / 2, 0])
+            home = np.array([0, -0.8, 0.8, 1.57, -0.0487])
             self.data.qpos[arm.qpos_ids] = home
             self.data.ctrl[arm.actuator_ids] = home
-            self.data.ctrl[arm.gripper_actuator] = 0
-        jitter = self.np_random.uniform(-0.025, 0.025, (2, 2)) if options.get("randomize", True) else np.zeros((2, 2))
-        self.data.joint("cube_joint").qpos[:3] = np.r_[np.array([-0.22, -0.10]) + jitter[0], 0.021]
-        self.data.mocap_pos[0] = np.r_[np.array([-0.18, 0.16]) + jitter[1], 0.001]
+            self.data.qpos[self.model.joint(f"{arm.name}_gripper").qposadr[0]] = self.model.actuator_ctrlrange[arm.gripper_actuator, 1]
+            self.data.ctrl[arm.gripper_actuator] = self.model.actuator_ctrlrange[arm.gripper_actuator, 1]
+        jitter = self.np_random.uniform(-0.008, 0.008, (2, 2)) if options.get("randomize", True) else np.zeros((2, 2))
+        self.data.joint("cube_joint").qpos[:3] = np.r_[np.array([-0.20, -0.025]) + jitter[0], 0.016]
+        self.data.mocap_pos[0] = np.r_[np.array([-0.14, -0.02]) + jitter[1], 0.001]
         self.model.site_rgba[self.model.site("reach_target").id, 3] = 0.55 if self.task == "reach" else 0
         mujoco.mj_forward(self.model, self.data)
-        # Let contact constraints and the gripper's four-bar linkages settle.
+        # Let contact constraints and the gripper's servo constraints settle.
         for _ in range(100):
             mujoco.mj_step(self.model, self.data)
         self.data.time = 0
@@ -160,13 +165,14 @@ class RobotEnv(gym.Env):
             raise RuntimeError("Call reset() first")
         rows = []
         for i, arm in enumerate(self.robot.values()):
-            opening = 1 - self.data.ctrl[arm.gripper_actuator] / 255
+            low, high = self.model.actuator_ctrlrange[arm.gripper_actuator]
+            opening = (self.data.ctrl[arm.gripper_actuator] - low) / (high - low)
             if self.control_mode == "ee_delta":
                 rows.append(np.r_[np.zeros(3), opening])
             elif self.control_mode == "ee":
                 rows.append(np.r_[self._ee_targets[i], _quat_to_rotvec(self._orientations[i]), opening])
             else:
-                rows.append(np.r_[self.data.ctrl[arm.actuator_ids], opening])
+                rows.append(np.r_[np.rad2deg(self.data.ctrl[arm.actuator_ids]), opening * 100])
         return np.concatenate(rows).astype(np.float32)
 
     def action_toward(self, position, *, arm="left", opening=1.0):
@@ -203,11 +209,18 @@ class RobotEnv(gym.Env):
             mujoco.mju_mat2Quat(q, d.site_xmat[arm.site_id])
             mujoco.mju_subQuat(rotation_error, quaternion, q)
             rotation_world = d.site_xmat[arm.site_id].reshape(3, 3) @ rotation_error
-            error = np.r_[pos_error, rotation_world * 0.3]
+            if self.control_mode == "ee_delta":
+                # Keep the finger approach axis downward; leave yaw unconstrained.
+                axis = d.site_xmat[arm.site_id].reshape(3, 3)[:, 0]
+                rotation_world = np.cross(axis, [0., 0., -1.])
+            error = np.r_[pos_error, rotation_world * 0.08]
             if np.linalg.norm(pos_error) < 0.0002 and np.linalg.norm(rotation_world) < 0.002:
                 break
             mujoco.mj_jacSite(self.model, d, jp, jr, arm.site_id)
-            jac = np.vstack([jp[:, arm.dof_ids], jr[:, arm.dof_ids] * 0.3])
+            angular_jac = jr[:, arm.dof_ids]
+            if self.control_mode == "ee_delta":
+                angular_jac = (np.eye(3) - np.outer(axis, axis)) @ angular_jac
+            jac = np.vstack([jp[:, arm.dof_ids], angular_jac * 0.08])
             dq = jac.T @ np.linalg.solve(jac @ jac.T + 1e-4 * np.eye(6), error)
             d.qpos[arm.qpos_ids] = np.clip(d.qpos[arm.qpos_ids] + np.clip(dq, -0.15, 0.15), limits[:, 0], limits[:, 1])
         mujoco.mj_kinematics(self.model, d)
@@ -223,7 +236,7 @@ class RobotEnv(gym.Env):
         rows = action.reshape(2, -1)
         for i, (arm, row) in enumerate(zip(self.robot.values(), rows)):
             if self.control_mode == "joint":
-                target = row[:6]
+                target = np.deg2rad(row[:len(JOINTS)])
             else:
                 if self.control_mode == "ee_delta":
                     self._ee_targets[i] = np.clip(self._ee_targets[i] + row[:3] * self.delta_scale,
@@ -235,7 +248,8 @@ class RobotEnv(gym.Env):
             # Rate-limit the PD target to avoid snapping between distant commands.
             current = self.data.ctrl[arm.actuator_ids]
             self.data.ctrl[arm.actuator_ids] = current + np.clip(target - current, -0.10, 0.10)
-            self.data.ctrl[arm.gripper_actuator] = (1 - row[-1]) * 255
+            low, high = self.model.actuator_ctrlrange[arm.gripper_actuator]
+            self.data.ctrl[arm.gripper_actuator] = low + (row[-1] / 100 if self.control_mode == "joint" else row[-1]) * (high - low)
         for _ in range(self._substeps):
             mujoco.mj_step(self.model, self.data)
         mujoco.mj_forward(self.model, self.data)
@@ -252,7 +266,7 @@ class RobotEnv(gym.Env):
             hand_distance = np.linalg.norm(self.robot["left"].position - cube)
             released = all(a.gripper_opening > 0.7 for a in self.robot.values())
             slow = np.linalg.norm(self.data.joint("cube_joint").qvel[:3]) < 0.05
-            candidate = distance < 0.045 and abs(cube[2] - 0.02) < 0.01 and released and slow
+            candidate = distance < 0.045 and abs(cube[2] - 0.015) < 0.01 and released and slow
             reward = 0.25 * (1 - np.tanh(8 * hand_distance)) + 0.25 * float(cube[2] > 0.06) + 0.5 * (1 - np.tanh(5 * distance))
         self._success_steps = self._success_steps + 1 if candidate else 0
         success = self._success_steps >= 5
@@ -278,8 +292,8 @@ class RobotEnv(gym.Env):
     def _observation(self):
         arms = list(self.robot.values())
         obs = {
-            "state": np.concatenate([np.r_[a.joint_positions, a.gripper_opening] for a in arms]).astype(np.float32),
-            "joint_velocity": np.concatenate([a.joint_velocities for a in arms]).astype(np.float32),
+            "state": np.concatenate([np.r_[np.rad2deg(a.joint_positions), a.gripper_opening * 100] for a in arms]).astype(np.float32),
+            "joint_velocity": np.rad2deg(np.concatenate([a.joint_velocities for a in arms])).astype(np.float32),
             "ee_pose": np.concatenate([np.r_[a.position, a.quaternion] for a in arms]).astype(np.float32),
             "cube_position": self.data.body("cube").xpos.copy().astype(np.float32),
             "goal_position": self.goal_position.astype(np.float32),
@@ -291,7 +305,7 @@ class RobotEnv(gym.Env):
     def _info(self, success, failed=False):
         return {"is_success": bool(success), "failure": "cube_fell" if failed else None,
                 "task": self.task, "control_mode": self.control_mode,
-                "instruction": "Move the left gripper to the green sphere." if self.task == "reach" else "Place the red block on the green disk.",
+                "instruction": "Move the left gripper to the green sphere." if self.task == "reach" else f"Place the {self.object_color} {self.object_shape} on the green disk.",
                 "ik_position_error": self._ik_errors.copy(), "elapsed_steps": self._steps}
 
     def render_camera(self, camera="front"):

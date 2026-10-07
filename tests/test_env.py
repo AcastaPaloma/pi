@@ -49,7 +49,7 @@ class EnvironmentTests(unittest.TestCase):
                                 break
                         self.assertTrue(info["is_success"], (task, mode, seed, demo.stage))
                         if task == "pick_place":
-                            self.assertGreater(peak_height, 0.10)
+                            self.assertGreater(peak_height, 0.06)
                             self.assertLess(np.linalg.norm(obs["cube_position"] - obs["goal_position"]), 0.045)
                         with self.assertRaises(RuntimeError):
                             env.step(env.hold_action())
@@ -59,9 +59,9 @@ class EnvironmentTests(unittest.TestCase):
             env.reset(seed=0)
             before = {side: arm.joint_positions for side, arm in env.robot.items()}
             action = env.hold_action()
-            action[0] += 0.15
-            action[7] -= 0.15
-            action[6] = action[13] = 0
+            action[0] += 15
+            action[6] -= 15
+            action[5] = action[11] = 0
             for _ in range(30):
                 env.step(action)
             self.assertGreater(env.robot["left"].joint_positions[0] - before["left"][0], 0.10)

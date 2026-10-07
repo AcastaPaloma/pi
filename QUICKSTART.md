@@ -30,7 +30,7 @@ python -m pi_data sample --episode 0 --frame 100 --goal-seconds 2
 python -m pi_data serve
 ```
 
-Open http://127.0.0.1:8000/docs. The [encoder guide](docs/ENCODER_DATA.md) explains the selected real folding dataset, all observation/action endpoints, and H100 sizing. The sample is saved to `outputs/encoder_sample.npz`.
+Open http://127.0.0.1:8000/docs. The [manipulation guide](docs/SO101_MANIPULATION.md) explains the selected real SO-101 dataset, API, camera placement and printed objects. The sample is saved to `outputs/encoder_sample.npz`.
 
 **Watch the robot pick up the block:**
 
@@ -56,3 +56,5 @@ python examples/tap_in.py
 Edit the `action = ...` line in that example to plug in your controller. The core API is `env.reset()` and `env.step(action)`. Read joint positions through `env.robot["left"].joint_positions`; get images through `env.render_camera("front")`; access raw MuJoCo through `env.model` and `env.data`.
 
 The [full guide](README.md) explains actions, cameras, recording demonstrations, and a fresh installation. The [paper mapping](docs/PAPER_MAPPING.md) explains which π₀.₇ robot details are reproduced and which are approximated. No training model is included.
+
+For colored printed objects, public manipulation datasets and the four-camera mounting layout, see [the SO-101 plan](docs/SO101_MANIPULATION.md). Try `./play.sh --demo --task pick_place --object-shape cylinder --object-color blue`.

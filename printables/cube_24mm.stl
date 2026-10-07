@@ -1,0 +1,86 @@
+solid cube_24mm
+  facet normal 0 0 -1
+    outer loop
+      vertex -12 -12 0
+      vertex -12 12 0
+      vertex 12 12 0
+    endloop
+  endfacet
+  facet normal 0 0 1
+    outer loop
+      vertex -12 -12 24
+      vertex 12 -12 24
+      vertex 12 12 24
+    endloop
+  endfacet
+  facet normal 0 -1 0
+    outer loop
+      vertex -12 -12 0
+      vertex 12 -12 0
+      vertex 12 -12 24
+    endloop
+  endfacet
+  facet normal 0 1 0
+    outer loop
+      vertex -12 12 0
+      vertex -12 12 24
+      vertex 12 12 24
+    endloop
+  endfacet
+  facet normal -1 0 0
+    outer loop
+      vertex -12 -12 0
+      vertex -12 -12 24
+      vertex -12 12 24
+    endloop
+  endfacet
+  facet normal 1 0 0
+    outer loop
+      vertex 12 -12 0
+      vertex 12 12 0
+      vertex 12 12 24
+    endloop
+  endfacet
+  facet normal 0 0 -1
+    outer loop
+      vertex -12 -12 0
+      vertex 12 12 0
+      vertex 12 -12 0
+    endloop
+  endfacet
+  facet normal 0 0 1
+    outer loop
+      vertex -12 -12 24
+      vertex 12 12 24
+      vertex -12 12 24
+    endloop
+  endfacet
+  facet normal 0 -1 0
+    outer loop
+      vertex -12 -12 0
+      vertex 12 -12 24
+      vertex -12 -12 24
+    endloop
+  endfacet
+  facet normal 0 1 0
+    outer loop
+      vertex -12 12 0
+      vertex 12 12 24
+      vertex 12 12 0
+    endloop
+  endfacet
+  facet normal -1 0 0
+    outer loop
+      vertex -12 -12 0
+      vertex -12 12 24
+      vertex -12 12 0
+    endloop
+  endfacet
+  facet normal 1 0 0
+    outer loop
+      vertex 12 -12 0
+      vertex 12 12 24
+      vertex 12 -12 24
+    endloop
+  endfacet
+endsolid cube_24mm

@@ -32,7 +32,7 @@ with RobotEnv(control_mode="joint") as env:
         obs = observer.read()
         x = obs.inputs
         images = x["images"]                 # [3,448,448,3], RGB uint8
-        state = x["proprioception"]          # [14] for this UR5e simulation
+        state = x["proprioception"]          # [12] for this two-SO-101 simulation
         prompt = str(x["task"])
         native_front = obs.images["front"]
         # Your encoder consumes x here.
@@ -56,7 +56,7 @@ There were no SO-101 serial devices visible on this Mac during implementation. T
    python -m pi_observe devices
    ```
 
-2. Copy `configs/so101_observe.example.json` to `configs/so101_observe.local.json`. Set the two serial ports, the two existing LeRobot calibration JSON paths, and the three camera device IDs or paths. Linux `/dev/video*` paths are supported; macOS cameras usually use integer indices. Relative calibration/goal file paths are resolved relative to the config file. Device listing only lists serial devices and does not probe cameras.
+2. Copy `configs/so101_observe.example.json` to `configs/so101_observe.local.json`. Set the two serial ports, the two existing LeRobot calibration JSON paths, and the four camera device IDs or paths. Linux `/dev/video*` paths are supported; macOS cameras usually use integer indices. Relative calibration/goal file paths are resolved relative to the config file. Device listing only lists serial devices and does not probe cameras.
 
 3. Run:
 
@@ -64,7 +64,7 @@ There were no SO-101 serial devices visible on this Mac during implementation. T
    python -m pi_observe robot --config configs/so101_observe.local.json
    ```
 
-The config's default camera order matches the folding dataset: `left_wrist`, `right_wrist`, `right_front`. Additional named cameras are supported and all configured cameras are included in the returned arrays. Check the first saved images to confirm the camera identities. Optional camera `rotation` is 0, 90, 180, or 270 degrees counterclockwise. Camera size/FPS requests are best-effort; metadata records actual image dimensions.
+The config's default camera order matches the new simulation: `left_wrist`, `right_wrist`, `front`, `overhead`. See the [mounting plan](SO101_MANIPULATION.md#where-the-four-cameras-go). Public dataset views retain their original names and count. Additional named cameras are supported and all configured cameras are included in the returned arrays. Check the first saved images to confirm the camera identities. Optional camera `rotation` is 0, 90, 180, or 270 degrees counterclockwise. Camera size/FPS requests are best-effort; metadata records actual image dimensions.
 
 For your own live loop:
 
@@ -93,7 +93,7 @@ On this Mac, importing the installed PyAV and OpenCV wheels in the same process 
 
 ## What goes into the encoder
 
-`obs.inputs` contains NumPy arrays, matching the core keys of `FoldingDataset.arrays(...)`:
+`obs.inputs` contains NumPy arrays, matching the core keys of `ManipulationDataset.arrays(...)`:
 
 | Field | Meaning |
 | --- | --- |
@@ -114,7 +114,7 @@ Use your vision model's preprocessing after reading these arrays. No hidden stan
 
 `history=1` means current only. Values up to 6 give approximately 1-second spacing in host time. The observer retains a bounded, downsampled buffer and masks slots without a sample within 250ms of their target time. The current image appears both in `images` and at the end of `history_images`; consume it once. This supplies temporal data but does not implement π0.7's MEM compression.
 
-**The existing MuJoCo robot is UR5e:** its state has 14 values, arm angles in radians, and grippers in 0–1. The physical SO-101 and LeHome dataset have 12 values, arm angles in degrees, and grippers in 0–100. The simulation's external camera is named `front`; the dataset's is `right_front`. These differences are explicit, not silently remapped. A 12D SO-101 encoder needs the corresponding robot data or an explicit embodiment adapter.
+**Simulation and physical capture now target two SO-101s:** both encoder snapshots have 12 values (five arm angles in degrees plus gripper 0–100 per arm). Simulation uses Menagerie joint origins; hardware uses your calibrated servo origin. Equal dimensions do not establish equal zeros/signs. Public manipulation datasets are single-arm 6D sources with dataset-native camera layouts and unverified motor units; use an explicit adapter, source normalization and missing-view/arm masks.
 
 ## Prompts and visual subgoals
 
@@ -125,10 +125,10 @@ import numpy as np
 from PIL import Image
 
 observer.set_context(
-    task="Fold the sheet of paper in half",
+    task="Place the red cube on the green disk",
     subtask="Bring the left edge to the right edge",
     goal_images={
-        "right_front": np.asarray(Image.open("desired_fold.png").convert("RGB"))
+        "front": np.asarray(Image.open("desired_placement.png").convert("RGB"))
     },
 )
 ```

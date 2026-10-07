@@ -9,13 +9,14 @@ from fastapi.responses import JSONResponse, Response
 import numpy as np
 from PIL import Image
 
-from .dataset import CAMERAS, REPO, REVISION, SUBSET, FoldingDataset
+from .dataset import FoldingDataset
+from .manipulation import ManipulationDataset
 
 
 def create_app(dataset: FoldingDataset | None = None) -> FastAPI:
-    ds = dataset if dataset is not None else FoldingDataset()
-    app = FastAPI(title="Folding encoder data", version="1.0.0",
-                  description="Read-only LeHome replay. Future subgoals and actions are training labels, not live robot observations.")
+    ds = dataset if dataset is not None else ManipulationDataset()
+    app = FastAPI(title="SO-101 manipulation encoder data", version="1.0.0",
+                  description="Read-only LeRobot replay. Future subgoals and actions are training labels, not live robot observations.")
 
     @app.exception_handler(KeyError)
     @app.exception_handler(IndexError)
@@ -27,7 +28,7 @@ def create_app(dataset: FoldingDataset | None = None) -> FastAPI:
         return JSONResponse(status_code=503, content={"detail": str(exc)})
 
     def cameras(episode: int, frame: int, size: int = 448) -> dict[str, str]:
-        return {cam: f"/v1/episodes/{episode}/frames/{frame}/cameras/{cam}.png?size={size}" for cam in CAMERAS}
+        return {cam: f"/v1/episodes/{episode}/frames/{frame}/cameras/{cam}.png?size={size}" for cam in ds.cameras}
 
     def with_images(sample: dict) -> dict:
         ep = sample["episode"]
@@ -38,11 +39,12 @@ def create_app(dataset: FoldingDataset | None = None) -> FastAPI:
 
     @app.get("/v1/dataset")
     def dataset_info():
-        return {"repo": REPO, "revision": REVISION, "subset": SUBSET, "fps": ds.fps,
+        return {"repo": ds.repo, "revision": ds.revision, "subset": ds.subset, "fps": ds.fps,
+                "excluded_episodes": list(ds.excluded_episodes),
                 "episodes": len(ds.episodes), "frames": sum(ep["length"] for ep in ds.episodes.values()),
-                "camera_order": CAMERAS, "features": ds.info["features"],
+                "camera_order": ds.cameras, "features": ds.info["features"],
                 "splits": {name: len(ds.episode_ids(name)) for name in ("train", "validation")},
-                "split_policy": "lehome-v1 SHA256 rank, 10% held-out episodes",
+                "split_policy": ds.split_policy,
                 "missing_annotations": ["subtask", "subtask_boundaries", "quality", "mistake", "speed"],
                 "mode": "dataset_replay"}
 
@@ -66,7 +68,7 @@ def create_app(dataset: FoldingDataset | None = None) -> FastAPI:
     def observations(episode: int, frame: int):
         s = ds.sample(episode, frame)
         return {"episode": episode, "frame": frame, "timestamp_seconds": s["timestamp_seconds"],
-                "camera_order": CAMERAS, "cameras": cameras(episode, frame), "proprioception": s["proprioception"]}
+                "camera_order": ds.cameras, "cameras": cameras(episode, frame), "proprioception": s["proprioception"]}
 
     @app.get("/v1/episodes/{episode}/frames/{frame}/proprioception")
     def proprioception(episode: int, frame: int):

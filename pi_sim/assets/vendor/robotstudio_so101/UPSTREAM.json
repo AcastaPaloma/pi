@@ -1,0 +1,32 @@
+{
+  "repository": "https://github.com/google-deepmind/mujoco_menagerie",
+  "revision": "f054586a8e90465d49ee5be15335c4a0c7f57caf",
+  "path": "robotstudio_so101",
+  "files": [
+    "robotstudio_so101/CHANGELOG.md",
+    "robotstudio_so101/LICENSE",
+    "robotstudio_so101/README.md",
+    "robotstudio_so101/assets/base_motor_holder_so101_v1.stl",
+    "robotstudio_so101/assets/base_so101_v2.stl",
+    "robotstudio_so101/assets/motor_holder_so101_base_v1.stl",
+    "robotstudio_so101/assets/motor_holder_so101_wrist_v1.stl",
+    "robotstudio_so101/assets/moving_jaw_so101_gripper_part0_v1.stl",
+    "robotstudio_so101/assets/moving_jaw_so101_gripper_part1_v1.stl",
+    "robotstudio_so101/assets/moving_jaw_so101_gripper_v1.stl",
+    "robotstudio_so101/assets/moving_jaw_so101_v1.stl",
+    "robotstudio_so101/assets/rotation_pitch_so101_v1.stl",
+    "robotstudio_so101/assets/sts3215_03a_no_horn_v1.stl",
+    "robotstudio_so101/assets/sts3215_03a_v1.stl",
+    "robotstudio_so101/assets/under_arm_so101_v1.stl",
+    "robotstudio_so101/assets/upper_arm_so101_v1.stl",
+    "robotstudio_so101/assets/waveshare_mounting_plate_so101_v2.stl",
+    "robotstudio_so101/assets/wrist_roll_follower_so101_camera_mount.stl",
+    "robotstudio_so101/assets/wrist_roll_follower_so101_gripper_part0_v1.stl",
+    "robotstudio_so101/assets/wrist_roll_follower_so101_gripper_v1.stl",
+    "robotstudio_so101/assets/wrist_roll_follower_so101_v1.stl",
+    "robotstudio_so101/assets/wrist_roll_pitch_so101_v2.stl",
+    "robotstudio_so101/scene.xml",
+    "robotstudio_so101/scene_box.xml",
+    "robotstudio_so101/so101.xml"
+  ]
+}

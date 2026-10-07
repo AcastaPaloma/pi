@@ -76,13 +76,14 @@ class SpatialSemanticEncoder(nn.Module):
 
         ### Rearrange for spatial transformer
         o4 = rearrange(o3, "b v k p d -> (b v k) p d")
-
+        
         ### Spatial & Temporal transformer (bad naming o4 lol)
         for layer_index, spatial_transformer in enumerate(self.spatial_transformers, start=1):
             o4 = spatial_transformer(o4)
             if layer_index % 4 == 0:
                 o4 = self.temporal_transformers[layer_index // 4 - 1](o4)
 
+        ### Group shi for transformer intake
         o4 = rearrange(o4, '(b v k) p d -> b v k p d',
                        b=full_observation.shape[0], v=full_observation.shape[1],
                        k=full_observation.shape[2])
@@ -94,7 +95,11 @@ class SpatialSemanticEncoder(nn.Module):
         o6 = reduce(o5, 'b v k (h p1 w p2) d -> b v k (h w) d', 'mean', h=16, w=16, p1=2, p2=2)
         o7 = self.o6_to_o7(o6)
 
-        return o7.shape
+        ### Group more shi
+        o8 = o7.squeeze()
+        o9 = rearrange(o8, "b v p d -> b (v p) d")
+
+        return o9.shape
 
 SSEnc = SpatialSemanticEncoder()
 print(SSEnc.forward(full_observation=full_observation, raw_text="", visual_subgoals=None, proprioception=None))

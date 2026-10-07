@@ -22,22 +22,22 @@ class SimBatchTest(unittest.TestCase):
                 self.assertNotIn("images", state)
                 self.assertEqual(render.call_count, 0)
                 batch = robot.observations()
-                self.assertEqual(batch["images"].shape, (4, 3, 32, 32, 3))
-                self.assertEqual(batch["proprioception"].shape, (4, 14))
-                self.assertEqual(render.call_count, 12)
+                self.assertEqual(batch["images"].shape, (4, 4, 32, 32, 3))
+                self.assertEqual(batch["proprioception"].shape, (4, 12))
+                self.assertEqual(render.call_count, 16)
                 first_state = batch["proprioception"].copy()
                 first_images = batch["images"].copy()
                 batch["proprioception"][:] = 99
                 batch["images"][:] = 0
                 newer = robot.observations()
-                self.assertEqual(render.call_count, 12)
+                self.assertEqual(render.call_count, 16)
                 np.testing.assert_array_equal(newer["images"], first_images)
                 np.testing.assert_array_equal(newer["proprioception"], first_state)
                 with self.assertRaises(ValueError):
                     robot.observations(copy=False)["images"][0] = 0
                 robot.resample(seed=2)
                 changed = robot.observations()
-                self.assertEqual(render.call_count, 24)
+                self.assertEqual(render.call_count, 32)
                 self.assertFalse(np.array_equal(changed["proprioception"], first_state))
                 self.assertFalse(np.array_equal(changed["images"], first_images))
                 self.assertEqual(robot._env.data.time, start_time)

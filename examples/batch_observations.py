@@ -25,10 +25,10 @@ def main():
         from pi_sim import RobotBatch
         robot = RobotBatch(batch_size=args.batch_size, image_size=args.size, seed=0)
     else:
-        from pi_data import FoldingDataset, FoldingBatch, prepare_observation_cache
-        cache = args.cache or output / f"folding_encoder_demo_{args.size}"
+        from pi_data import ManipulationDataset, FoldingBatch, prepare_observation_cache
+        cache = args.cache or output / f"manipulation_encoder_demo_{args.size}"
         if args.prepare_demo and not cache.exists():
-            ds = FoldingDataset()
+            ds = ManipulationDataset()
             prepare_observation_cache(cache, dataset=ds, episodes=ds.episode_ids("train")[:2],
                                       image_size=args.size, stride=10, progress=print)
         robot = FoldingBatch(cache, batch_size=args.batch_size, seed=0)

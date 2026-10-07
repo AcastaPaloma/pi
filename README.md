@@ -1,14 +1,14 @@
-# A small MuJoCo robot playground
+# A small SO-101 manipulation playground
 
-**For your encoder: [128 observations directly in Python](docs/BATCH_ENCODER.md).** Use `RobotBatch(...).observations()` for static simulated scenes or `FoldingBatch(...).observations()` for fast cached real SO-101 samples. Both return batched RGB images, proprioception, and text; neither includes a model or policy. A 128-scene preview and a small real-data cache are ready in `outputs/`.
+**For your encoder: [128 observations directly in Python](docs/BATCH_ENCODER.md).** Use `RobotBatch(...).observations()` for static simulated scenes or `ObservationBatch(...).observations()` for fast cached real SO-101 samples. Both return batched RGB images, proprioception, and text; neither includes a model or policy. The examples generate previews and small real-data caches in `outputs/`.
 
-Two UR5e arms with Robotiq grippers, a table, a red block, and three cameras. Start by reaching a green target; then try picking up the block. Everything runs locally without a learned model.
+Two SO-101 follower arms, a table, colored cubes/cylinders, and four cameras. Start by reaching a green target; then try picking up the block. Everything runs locally without a learned model.
 
 **Already installed in your `mini-vla` conda environment.** Its existing PyTorch installation was left as-is. This project uses MuJoCo, NumPy and Gymnasium, with no PyTorch code.
 
 **Read and capture robot observations:** run `python -m pi_observe sim` or use `Observer.read()` directly. The [observation guide](docs/OBSERVATIONS.md) covers RGB cameras, proprioception, timing, saved captures, optional goals/history, and the read-only physical SO-101 configuration.
 
-**Building the low-level VLA encoder?** Start with the [folding dataset and API guide](docs/ENCODER_DATA.md). It covers real SO-101 garment-folding demonstrations, camera/state/text/goal/action endpoints, NumPy inputs, and an H100 budget. Run `python -m pi_data serve` in `mini-vla`, then open http://127.0.0.1:8000/docs.
+**Training for printed-object manipulation?** Start with the [dataset, printable-object and camera guide](docs/SO101_MANIPULATION.md). It covers pinned real SO-101 manipulation datasets, generalization experiments, and the four-camera rig. Run `python -m pi_data serve` in `mini-vla`, then open http://127.0.0.1:8000/docs.
 
 ## 1. Watch it work
 
@@ -70,15 +70,15 @@ with RobotEnv(task="reach") as env:
 
 ### Actions
 
-`RobotEnv(control_mode=...)` supports three interfaces. Every action lists **left arm first, then right arm**. Gripper commands always use **0 = closed, 1 = open**. Finite out-of-range actions are clipped; wrong shapes and NaNs raise an error.
+`RobotEnv(control_mode=...)` supports three interfaces. Every action lists **left arm first, then right arm**. Cartesian gripper commands use **0 = closed, 1 = open**; joint mode uses **0–100**. Finite out-of-range actions are clipped; wrong shapes and NaNs raise an error.
 
 | Mode | Action per arm | Total shape |
 | --- | --- | --- |
-| `ee_delta` (default, easiest) | `[dx, dy, dz, opening]`; XYZ in [-1, 1], scaled to ±2 cm per step; orientation stays fixed | `(8,)` |
+| `ee_delta` (default, easiest) | `[dx, dy, dz, opening]`; XYZ in [-1, 1], scaled to ±2 cm per step; approach direction stays downward | `(8,)` |
 | `ee` | `[x, y, z, rx, ry, rz, opening]`; absolute world position in meters and absolute orientation as a rotation vector in radians | `(14,)` |
-| `joint` | `[q1, q2, q3, q4, q5, q6, opening]`; absolute joint angles in radians | `(14,)` |
+| `joint` | `[q1, q2, q3, q4, q5, opening]`; absolute joint angles in degrees, gripper 0–100 | `(12,)` |
 
-Joint order: shoulder pan, shoulder lift, elbow, wrist 1, wrist 2, wrist 3. Rotation vectors are axis × angle, **not Euler angles**. The table surface is world Z = 0. The end-effector point is the pinch center between the fingers. `ee_delta` accumulates movements in the target position, rather than teleporting the robot.
+Joint order: shoulder pan, shoulder lift, elbow flex, wrist flex, wrist roll. SO-101 has five arm axes: a full six-axis `ee` pose may be infeasible; inspect the IK residual. Rotation vectors are axis × angle, **not Euler angles**. The table surface is world Z = 0. The end-effector point is the pinch center between the fingers. `ee_delta` accumulates movements in the target position, rather than teleporting the robot.
 
 For example, move only the left arm upward:
 
@@ -94,8 +94,8 @@ obs, reward, terminated, truncated, info = env.step(action)
 
 | Entry | Contents |
 | --- | --- |
-| `obs["state"]` | 14 floats: left joint angles + measured gripper opening, then right; opening is a normalized linkage angle |
-| `obs["joint_velocity"]` | 12 joint velocities, radians/second |
+| `obs["state"]` | 12 floats: five arm angles in degrees + measured 0–100 gripper opening, left then right |
+| `obs["joint_velocity"]` | 10 arm joint velocities, degrees/second |
 | `obs["ee_pose"]` | 14 floats: left `[x,y,z,qw,qx,qy,qz]`, then right; quaternion is scalar-first |
 | `obs["cube_position"]` | Block center, world meters |
 | `obs["goal_position"]` | Reach target or desired block center, world meters |
@@ -108,11 +108,11 @@ Observations are copies, so you can safely store them. Object/goal positions are
 with RobotEnv(images=True) as env:
     obs, info = env.reset(seed=0)
     front = obs["images"]["front"]           # uint8 RGB, (448, 448, 3)
-    wrist = obs["images"]["left_wrist"]      # Also: "right_wrist"
+    wrist = obs["images"]["left_wrist"]      # Also: "right_wrist", "overhead"
     frame = env.render_camera("front")      # Works even with images=False.
 
     left = env.robot["left"]
-    print(left.joint_positions, left.position, left.gripper_opening)
+    print(left.joint_positions, left.position, left.gripper_opening)  # raw radians, meters, 0–1
     model, data = env.model, env.data        # Native mujoco.MjModel / MjData
 ```
 
@@ -172,4 +172,4 @@ python -m unittest discover -s tests -v
 
 ## Relationship to π₀.₇
 
-The supplied paper describes real robots. This is a practical simulation approximation of its bimanual UR5e platform, using 20 Hz PD control, numerical IK, and front/wrist cameras. The beginner tasks, scene dimensions, controllers and camera calibration are local choices. See [the paper mapping](docs/PAPER_MAPPING.md) for the exact matches and differences, and [asset sources and licenses](pi_sim/assets/README.md) for the pinned Menagerie models.
+The simulator uses a pinned Menagerie SO-101 model and local tabletop tasks. The public manipulation datasets are single-arm recordings; they require explicit view/state adaptation and local bimanual demonstrations for a two-arm policy. See [the experiment plan](docs/SO101_MANIPULATION.md), [paper relationship](docs/PAPER_MAPPING.md), and [asset sources and licenses](pi_sim/assets/README.md).

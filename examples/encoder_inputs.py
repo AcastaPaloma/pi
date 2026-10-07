@@ -2,9 +2,9 @@
 
     conda run -n mini-vla python examples/encoder_inputs.py
 """
-from pi_data import FoldingDataset
+from pi_data import ManipulationDataset
 
-ds = FoldingDataset()
+ds = ManipulationDataset()
 episode = ds.episode_ids("train")[0]
 batch_item = ds.arrays(episode, 100, history=1, goal_seconds=2)
 for key, value in batch_item.items():
@@ -13,6 +13,6 @@ for key, value in batch_item.items():
 
 # Encoder inputs: images, proprioception, task, control_mode, optional
 # subgoal_images and history. The camera order is stable and explicit.
-# Supervision: actions [50,12], with action_valid [50] masking padding.
+# Supervision: actions [50,6], with action_valid [50] masking padding.
 # Do not concatenate action labels or goal timestamps into the encoder inputs.
 # Fit normalization on ds.train_statistics(), not all dataset episodes.

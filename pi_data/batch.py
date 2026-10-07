@@ -11,7 +11,7 @@ import av
 import numpy as np
 from PIL import Image
 
-from .dataset import CAMERAS, REPO, REVISION, SUBSET, UNITS, FoldingDataset
+from .manipulation import ManipulationDataset
 
 
 def _decode_selected(path, selected, output, camera_index, size, fps):
@@ -50,7 +50,7 @@ def prepare_observation_cache(directory, *, dataset=None, split="train", episode
         raise ValueError("image_size must be 16..1024")
     if not isinstance(stride, int) or stride < 1 or (limit is not None and (not isinstance(limit, int) or limit < 1)):
         raise ValueError("stride and optional limit must be positive integers")
-    ds = dataset if dataset is not None else FoldingDataset()
+    ds = dataset if dataset is not None else ManipulationDataset()
     allowed = ds.episode_ids(split)
     episode_ids = allowed if episodes is None else list(episodes)
     if not episode_ids or len(set(episode_ids)) != len(episode_ids) or set(episode_ids) - set(allowed):
@@ -59,7 +59,8 @@ def prepare_observation_cache(directory, *, dataset=None, split="train", episode
     if limit is not None:
         pairs = pairs[:limit]
     count = len(pairs)
-    required = count * len(CAMERAS) * image_size ** 2 * 3
+    cameras = ds.cameras
+    required = count * len(cameras) * image_size ** 2 * 3
     directory.parent.mkdir(parents=True, exist_ok=True)
     if shutil.disk_usage(directory.parent).free < required * 1.02 + 10_000_000:
         raise OSError(f"Cache needs approximately {required / 1e9:.2f} GB of free disk")
@@ -68,7 +69,7 @@ def prepare_observation_cache(directory, *, dataset=None, split="train", episode
     rgb = None
     try:
         rgb = np.lib.format.open_memmap(staging / "images.npy", mode="w+", dtype=np.uint8,
-                                       shape=(count, len(CAMERAS), image_size, image_size, 3))
+                                       shape=(count, len(cameras), image_size, image_size, 3))
         state = np.empty((count, len(ds.names)), dtype=np.float32)
         timestamps = np.empty(count, dtype=np.float32)
         prompts = []
@@ -78,13 +79,13 @@ def prepare_observation_cache(directory, *, dataset=None, split="train", episode
             state[row] = values["observation.state"][frame]
             timestamps[row] = values["timestamp"][frame]
             prompts.append(ds.tasks[int(values["task_index"][frame])])
-            for c, camera in enumerate(CAMERAS):
+            for c, camera in enumerate(cameras):
                 path, start = ds._video(episode, camera)
                 jobs[(path, c)].append((start + float(timestamps[row]), row))
         for done, ((path, c), selected) in enumerate(jobs.items(), 1):
             _decode_selected(path, selected, rgb, c, image_size, ds.fps)
             if progress is not None:
-                progress(f"Decoded video {done}/{len(jobs)} ({CAMERAS[c]})")
+                progress(f"Decoded video {done}/{len(jobs)} ({cameras[c]})")
         rgb.flush()
         del rgb
         rgb = None
@@ -92,10 +93,11 @@ def prepare_observation_cache(directory, *, dataset=None, split="train", episode
         np.save(staging / "index.npy", np.asarray(pairs, dtype=np.int64), allow_pickle=False)
         np.save(staging / "timestamp.npy", timestamps, allow_pickle=False)
         np.save(staging / "task.npy", np.asarray(prompts), allow_pickle=False)
-        metadata = {"format_version": 1, "repo": REPO, "revision": REVISION, "subset": SUBSET,
+        metadata = {"format_version": 1, "repo": ds.repo, "revision": ds.revision, "subset": ds.subset,
+                    "excluded_episodes": list(ds.excluded_episodes),
                     "split": split, "count": count, "image_size": image_size, "stride": stride,
-                    "episode_ids": sorted(set(ep for ep, _ in pairs)), "camera_names": list(CAMERAS),
-                    "state_names": ds.names, "state_units": UNITS, "fps": ds.fps,
+                    "episode_ids": sorted(set(ep for ep, _ in pairs)), "camera_names": list(cameras),
+                    "state_names": ds.names, "state_units": ds.units, "fps": ds.fps,
                     "rgb_bytes": required}
         (staging / "metadata.json").write_text(json.dumps(metadata, indent=2) + "\n")
         # Publish only a fully written cache. No partial cache is loadable.
@@ -162,3 +164,7 @@ class FoldingBatch:
     def grid(self, batch=None, **kwargs):
         from pi_observe.grid import observation_grid
         return observation_grid(self.observations() if batch is None else batch, **kwargs)
+
+
+# General name for the cache reader; retained legacy alias above.
+ObservationBatch = FoldingBatch

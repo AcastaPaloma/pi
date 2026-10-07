@@ -1,3 +1,5 @@
+> Legacy folding experiment. For the new default manipulation source, see [SO-101 manipulation](SO101_MANIPULATION.md). Select `--dataset folding` for this guide's CLI examples.
+
 # Start the low-level encoder here
 
 Use **LeHome real garment folding**, specifically [`lehome/dataset_challenge_real/four_types_merged`](https://huggingface.co/datasets/lehome/dataset_challenge_real/tree/main/four_types_merged). It gives you real bimanual SO-ARM101 folding experience with camera, state, and action records. Cloth folding is related to origami through grasping, aligning edges, and coordinated folding; it does not teach paper creasing or establish origami performance.
@@ -10,7 +12,7 @@ The data dependencies and first episode's three video files are already installe
 
 ```bash
 conda activate mini-vla
-python -m pi_data sample --episode 0 --frame 100 --goal-seconds 2
+python -m pi_data --dataset folding sample --episode 0 --frame 100 --goal-seconds 2
 python examples/encoder_inputs.py
 ```
 
@@ -20,16 +22,16 @@ For a fresh machine, install the data extra. This does not install PyTorch:
 
 ```bash
 python -m pip install -e '.[data]'
-python -m pi_data prepare           # metadata, actions, three episode-0 video files; ~450 MB
-python -m pi_data prepare --all     # complete selected subset; ~4.48 GB
+python -m pi_data --dataset folding prepare           # metadata, actions, three episode-0 video files; ~450 MB
+python -m pi_data --dataset folding prepare --all     # complete selected subset; ~4.48 GB
 ```
 
-Downloads use the normal Hugging Face cache (`HF_HOME` can relocate it), pinned to revision `5a28286fb60db8bf9fab9a552a001645722752cd`. Files are fetched lazily unless prepared. The repository contains duplicate garment-specific folders; only download `four_types_merged/`. For an offline extracted copy: `python -m pi_data --root /path/to/four_types_merged serve`.
+Downloads use the normal Hugging Face cache (`HF_HOME` can relocate it), pinned to revision `5a28286fb60db8bf9fab9a552a001645722752cd`. Files are fetched lazily unless prepared. The repository contains duplicate garment-specific folders; only download `four_types_merged/`. For an offline extracted copy: `python -m pi_data --dataset folding --root /path/to/four_types_merged serve`.
 
 ## 2. Start the API
 
 ```bash
-python -m pi_data serve
+python -m pi_data --dataset folding serve
 ```
 
 Open **http://127.0.0.1:8000/docs** for interactive endpoints. Use `--port 8001` if needed. These endpoints replay recorded observations; they do not read your physical robot or the existing MuJoCo scene.
@@ -143,7 +145,7 @@ If selecting Gemma 3 for paper similarity, its [stock Transformers preprocessing
 
 The [LeHome reference system](https://github.com/IliaLarchenko/lehome_solution) uses bimanual SO-ARM101 hardware. That is a much closer action schema than a dexterous-hand origami dataset. Start with one wrist camera per arm plus a fixed external camera and preserve this same observation/label contract. Match joint order, calibration, units, timestamps, camera identity, and action semantics when recording your own paper-folding demonstrations. Fine-tune on those demonstrations before expecting origami behavior.
 
-The existing `pi_sim` scene uses UR5e arms and a different 14D joint schema. **LeHome's 12D action labels cannot be sent directly to it.** For direct simulation/physical observations, use the separate [observation interface](OBSERVATIONS.md). It now includes a read-only SO-101 capture path; hardware validation remains pending connection of your robot.
+The `pi_sim` scene now uses two SO-101s and a 12D degree/percent state. **LeHome action labels still require a calibration/origin audit before simulation or hardware replay.** For direct simulation/physical observations, use the separate [observation interface](OBSERVATIONS.md). It now includes a read-only SO-101 capture path; hardware validation remains pending connection of your robot.
 
 ## Verified source and checks
 
