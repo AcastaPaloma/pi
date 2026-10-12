@@ -21,7 +21,7 @@ class SimSource:
             names.extend([f"{side}_{name}.pos" for name in JOINTS] + [f"{side}_gripper.pos"])
             units.extend(["degree"] * 5 + ["gripper_percent_0_closed_100_open"])
             position.extend([*np.rad2deg(arm.joint_positions), arm.gripper_opening * 100])
-        images = {cam: self.env.render_camera(cam) for cam in self.env.camera_names}
+        images = {cam: self.env.render_camera(cam, native=True) for cam in self.env.camera_names}
         # Rendering is sequential, but the simulation state is unchanged for all
         # images. Use a common capture timestamp, with simulation time explicit.
         captured = time.monotonic_ns()
@@ -31,6 +31,7 @@ class SimSource:
                               "timestamp_basis": "same frozen simulation state; host render completion",
                               "control_mode": {"joint": "joint_position", "ee": "end_effector_pose", "ee_delta": "end_effector_delta"}[self.env.control_mode],
                               "render_duration_ms": (captured - started) / 1e6,
+                              "cameras": {cam: self.env.camera_calibration(cam) for cam in images},
                               "joint_velocity": np.rad2deg(np.concatenate([a.joint_velocities for a in arms.values()])).tolist(),
                               "joint_velocity_units": "degree_per_second",
                               "ee_pose_xyz_wxyz": np.concatenate([np.r_[a.position, a.quaternion] for a in arms.values()]).tolist()})

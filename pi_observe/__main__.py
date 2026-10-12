@@ -26,6 +26,7 @@ def main():
             cmd.add_argument("--config", type=Path, required=True)
         else:
             cmd.add_argument("--task", choices=("reach", "pick_place"), default="reach")
+            cmd.add_argument("--camera-rig", type=Path, help="Camera optics/poses JSON; uses the nominal four-camera rig by default")
     commands.add_parser("devices", help="List serial devices only; never opens cameras or changes motor settings")
     args = parser.parse_args()
     if args.command == "devices":
@@ -43,6 +44,7 @@ def main():
         if args.command == "sim":
             from pi_sim import RobotEnv
             env = stack.enter_context(RobotEnv(task=args.task, image_size=args.size, control_mode="joint",
+                                               camera_rig=args.camera_rig,
                                                max_episode_steps=max(args.frames + 1, 400)))
             _, info = env.reset(seed=0)
             observer = Observer(SimSource(env), task=info["instruction"], size=args.size, history=args.history)
@@ -54,6 +56,8 @@ def main():
                 return p if p.is_absolute() else args.config.parent / p
             for arm in config["arms"].values():
                 arm["calibration"] = str(path(arm["calibration"]))
+            if config.get("camera_rig"):
+                config["camera_rig"] = str(path(config["camera_rig"]))
             goals = {cam: np.asarray(Image.open(path(p)).convert("RGB")) for cam, p in config.get("goal_images", {}).items()}
             source = SO101Source(config)
             observer = Observer(source, task=config["task"], subtask=config.get("subtask"), goal_images=goals,

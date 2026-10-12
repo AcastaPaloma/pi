@@ -4,6 +4,8 @@
 
 Two SO-101 follower arms, a table, colored cubes/cylinders, and four cameras. Start by reaching a green target; then try picking up the block. Everything runs locally without a learned model.
 
+**Match your real camera rig:** the [camera guide](docs/CAMERA_RIG.md) records the recommended InnoMaker U20CAM-1080P modules and covers native 640×480 feeds, wrist attachment, a shared optics/pose profile, lens calibration and remaining transfer differences. Press **V** in the viewer to cycle all four views, or launch `./play.sh --view overhead`. The shipped wide-angle optics remain nominal until each real camera is calibrated.
+
 **Already installed in your `mini-vla` conda environment.** Its existing PyTorch installation was left as-is. This project uses MuJoCo, NumPy and Gymnasium, with no PyTorch code.
 
 **Read and capture robot observations:** run `python -m pi_observe sim` or use `Observer.read()` directly. The [observation guide](docs/OBSERVATIONS.md) covers RGB cameras, proprioception, timing, saved captures, optional goals/history, and the read-only physical SO-101 configuration.
@@ -38,6 +40,7 @@ Click the simulation window. Move the **left gripper to the green sphere** to fi
 | R | Reset the task |
 | P | Pause / resume |
 | B | Switch between demo and manual mode; resets the task |
+| V | Cycle scene, left wrist, right wrist, front, overhead |
 
 Each key press moves the target **2 cm**; key repeat also works. A slow hand after a large command is normal: the joint targets are rate-limited. The default task only scores the left arm. An episode freezes after success or its 100-second simulation timeout; press R to reset. The Python environment defaults to 20-second episodes; the interactive launcher allows more practice time.
 
@@ -110,6 +113,7 @@ with RobotEnv(images=True) as env:
     front = obs["images"]["front"]           # uint8 RGB, (448, 448, 3)
     wrist = obs["images"]["left_wrist"]      # Also: "right_wrist", "overhead"
     frame = env.render_camera("front")      # Works even with images=False.
+    native = env.render_camera("front", native=True)  # Native lens image, initially 640×480.
 
     left = env.robot["left"]
     print(left.joint_positions, left.position, left.gripper_opening)  # raw radians, meters, 0–1

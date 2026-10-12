@@ -18,7 +18,7 @@ class RobotBatch:
     """
 
     def __init__(self, batch_size=128, image_size=224, seed=0,
-                 cameras=CAMERAS):
+                 cameras=CAMERAS, camera_rig=None):
         if not isinstance(batch_size, int) or not 1 <= batch_size <= 4096:
             raise ValueError("batch_size must be 1..4096")
         if not cameras or len(set(cameras)) != len(cameras) or set(cameras) - set(RobotEnv.camera_names):
@@ -26,7 +26,7 @@ class RobotBatch:
         self.batch_size, self.image_size, self.cameras = batch_size, image_size, tuple(cameras)
         # One environment to compile assets and settle the home grippers once.
         # Its MjData is scratch space for rendering independent stored poses.
-        self._env = RobotEnv(image_size=image_size, control_mode="joint")
+        self._env = RobotEnv(image_size=image_size, control_mode="joint", camera_rig=camera_rig)
         self._env.reset(seed=seed)
         self._home = self._env.data.qpos.copy()
         self._home_mocap = self._env.data.mocap_pos.copy()

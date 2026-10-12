@@ -1,0 +1,156 @@
+{
+  "schema_version": 1,
+  "note": "Four identical InnoMaker U20CAM-1080P-S1 130-degree lens modules from the final purchase recommendation, installed as two wrists plus front and overhead. Native capture 640x480/30. Intrinsics are a nominal pinhole approximation from the manual technical table horizontal FOV=106 degrees; actual mode crop, distortion, focus and mount poses require calibration.",
+  "cameras": {
+    "left_wrist": {
+      "hardware_model": "InnoMaker U20CAM-1080P-S1 (130-degree M12 lens, B0CNCSFQC1)",
+      "calibration_status": "nominal",
+      "width": 640,
+      "height": 480,
+      "fps": 30,
+      "rotation": 0,
+      "intrinsics": {
+        "fx": 241.13729603289417,
+        "fy": 241.13729603289417,
+        "cx": 320,
+        "cy": 240
+      },
+      "distortion": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "pose": {
+        "parent_body": "left_camera_mount",
+        "pos": [
+          -0.00296,
+          0.05436,
+          -0.0531
+        ],
+        "quat_wxyz": [
+          0.95828,
+          -0.285792,
+          -0.001556,
+          0.004547
+        ]
+      },
+      "optics_note": "Manufacturer manual v1.1: 130-degree diagonal; technical table 106-degree horizontal (feature list says 103). Nominal pinhole uses 106 horizontal at 640x480. Distortion coefficients are unmeasured zero placeholders; the advertised diagonal angle is not reproduced by this pinhole estimate.",
+      "reference_url": "https://github.com/INNO-MAKER/U20CAM-1080P-S1/blob/main/U20CAM-1080P-S1%20UserManual-v1.1.pdf"
+    },
+    "right_wrist": {
+      "hardware_model": "InnoMaker U20CAM-1080P-S1 (130-degree M12 lens, B0CNCSFQC1)",
+      "calibration_status": "nominal",
+      "width": 640,
+      "height": 480,
+      "fps": 30,
+      "rotation": 0,
+      "intrinsics": {
+        "fx": 241.13729603289417,
+        "fy": 241.13729603289417,
+        "cx": 320,
+        "cy": 240
+      },
+      "distortion": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "pose": {
+        "parent_body": "right_camera_mount",
+        "pos": [
+          -0.00296,
+          0.05436,
+          -0.0531
+        ],
+        "quat_wxyz": [
+          0.95828,
+          -0.285792,
+          -0.001556,
+          0.004547
+        ]
+      },
+      "optics_note": "Manufacturer manual v1.1: 130-degree diagonal; technical table 106-degree horizontal (feature list says 103). Nominal pinhole uses 106 horizontal at 640x480. Distortion coefficients are unmeasured zero placeholders; the advertised diagonal angle is not reproduced by this pinhole estimate.",
+      "reference_url": "https://github.com/INNO-MAKER/U20CAM-1080P-S1/blob/main/U20CAM-1080P-S1%20UserManual-v1.1.pdf"
+    },
+    "front": {
+      "hardware_model": "InnoMaker U20CAM-1080P-S1 (130-degree M12 lens, B0CNCSFQC1)",
+      "calibration_status": "nominal",
+      "width": 640,
+      "height": 480,
+      "fps": 30,
+      "rotation": 0,
+      "intrinsics": {
+        "fx": 241.13729603289417,
+        "fy": 241.13729603289417,
+        "cx": 320,
+        "cy": 240
+      },
+      "distortion": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "pose": {
+        "parent_body": "world",
+        "pos": [
+          0.65,
+          -0.85,
+          0.45
+        ],
+        "xyaxes": [
+          0.7943578329771962,
+          0.6074501075707971,
+          0,
+          -0.22422766810421546,
+          0.29322079675166635,
+          0.9293780270744858
+        ]
+      },
+      "optics_note": "Manufacturer manual v1.1: 130-degree diagonal; technical table 106-degree horizontal (feature list says 103). Nominal pinhole uses 106 horizontal at 640x480. Distortion coefficients are unmeasured zero placeholders; the advertised diagonal angle is not reproduced by this pinhole estimate.",
+      "reference_url": "https://github.com/INNO-MAKER/U20CAM-1080P-S1/blob/main/U20CAM-1080P-S1%20UserManual-v1.1.pdf"
+    },
+    "overhead": {
+      "hardware_model": "InnoMaker U20CAM-1080P-S1 (130-degree M12 lens, B0CNCSFQC1)",
+      "calibration_status": "nominal",
+      "width": 640,
+      "height": 480,
+      "fps": 30,
+      "rotation": 0,
+      "intrinsics": {
+        "fx": 241.13729603289417,
+        "fy": 241.13729603289417,
+        "cx": 320,
+        "cy": 240
+      },
+      "distortion": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "pose": {
+        "parent_body": "world",
+        "pos": [
+          0,
+          0,
+          0.85
+        ],
+        "quat_wxyz": [
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "optics_note": "Manufacturer manual v1.1: 130-degree diagonal; technical table 106-degree horizontal (feature list says 103). Nominal pinhole uses 106 horizontal at 640x480. Distortion coefficients are unmeasured zero placeholders; the advertised diagonal angle is not reproduced by this pinhole estimate.",
+      "reference_url": "https://github.com/INNO-MAKER/U20CAM-1080P-S1/blob/main/U20CAM-1080P-S1%20UserManual-v1.1.pdf"
+    }
+  }
+}

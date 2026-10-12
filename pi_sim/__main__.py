@@ -22,6 +22,9 @@ def main():
     parser.add_argument("--screenshot", type=Path, help="Save the final front-camera image")
     parser.add_argument("--object-shape", choices=("cube", "cylinder"), default="cube")
     parser.add_argument("--object-color", choices=("red", "green", "blue", "yellow"), default="red")
+    parser.add_argument("--camera-rig", type=Path, help="Camera optics/poses JSON; defaults to the nominal four-camera rig")
+    parser.add_argument("--view", choices=("scene", *RobotEnv.camera_names), default="scene",
+                        help="Initial viewer camera; press V to cycle the scene and four sensor views")
     args = parser.parse_args()
     episodes = args.episodes if args.episodes is not None else (1 if args.headless else 0)
     if episodes < 0 or args.steps < 1 or (args.headless and episodes == 0):
@@ -30,7 +33,7 @@ def main():
         launcher = Path(sys.executable).with_name("mjpython")
         os.execv(str(launcher), [str(launcher), "-m", "pi_sim", *sys.argv[1:]])
     with RobotEnv(task=args.task, max_episode_steps=args.steps,
-                  object_shape=args.object_shape, object_color=args.object_color) as env:
+                  object_shape=args.object_shape, object_color=args.object_color, camera_rig=args.camera_rig) as env:
         obs, _ = env.reset(seed=args.seed)
         demo = ScriptedDemo(env)
         automatic = args.demo or args.headless
@@ -54,14 +57,23 @@ def main():
             active_arm, paused, done = 0, False, False
             finished_at = None
             print("Click the simulation window. W/S: +/-Y, A/D: -/+X, Q/E: up/down")
-            print("G: open/close, 1/2: select arm, R: reset, P: pause, B: demo on/off")
+            print("G: open/close, 1/2: select arm, R: reset, P: pause, B: demo on/off, V: cycle cameras")
             print("Each key press moves the target by 2 cm. Close the window to quit.")
             with mujoco.viewer.launch_passive(env.model, env.data, key_callback=events.append,
                                              show_left_ui=False, show_right_ui=False) as viewer:
-                viewer.cam.lookat[:] = [0, 0, 0.10]
-                viewer.cam.distance = 1.2
+                viewer.cam.lookat[:] = [0.05, -0.18, 0.27]
+                viewer.cam.distance = 2.2
                 viewer.cam.azimuth = 125
                 viewer.cam.elevation = -28
+                views = ("scene", *env.camera_names)
+                view_index = views.index(args.view)
+                def select_view():
+                    name = views[view_index]
+                    with viewer.lock():
+                        viewer.cam.type = mujoco.mjtCamera.mjCAMERA_FREE if name == "scene" else mujoco.mjtCamera.mjCAMERA_FIXED
+                        viewer.cam.fixedcamid = -1 if name == "scene" else env.model.camera(name).id
+                    print(f"View: {name}")
+                select_view()
                 visual_flags = viewer.opt.flags.copy()
                 render_flags = viewer.user_scn.flags.copy()
                 geom_groups = viewer.opt.geomgroup.copy()
@@ -73,6 +85,9 @@ def main():
                         if key in (49, 50):
                             active_arm = key - 49
                             print("Selected", ("left", "right")[active_arm], "arm")
+                        elif key == ord("V"):
+                            view_index = (view_index + 1) % len(views)
+                            select_view()
                         elif key == ord("R"):
                             obs, _ = env.reset(seed=args.seed)
                             demo, done = ScriptedDemo(env), False

@@ -22,6 +22,8 @@ python examples/observe_robot.py
 
 Captures are saved under `outputs/observations/`. The [observation guide](docs/OBSERVATIONS.md) also explains reading your physical SO-101 pair after configuring its serial ports, calibration files, and cameras.
 
+All four camera PNGs now preserve the native lens image (initially 640×480). See [camera rig matching](docs/CAMERA_RIG.md) to share measured optics/poses with hardware. In the sim window, press **V** to cycle the camera views, or start with `./play.sh --view overhead`.
+
 **Get data for your low-level encoder:**
 
 ```bash

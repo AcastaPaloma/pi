@@ -64,7 +64,9 @@ There were no SO-101 serial devices visible on this Mac during implementation. T
    python -m pi_observe robot --config configs/so101_observe.local.json
    ```
 
-The config's default camera order matches the new simulation: `left_wrist`, `right_wrist`, `front`, `overhead`. See the [mounting plan](SO101_MANIPULATION.md#where-the-four-cameras-go). Public dataset views retain their original names and count. Additional named cameras are supported and all configured cameras are included in the returned arrays. Check the first saved images to confirm the camera identities. Optional camera `rotation` is 0, 90, 180, or 270 degrees counterclockwise. Camera size/FPS requests are best-effort; metadata records actual image dimensions.
+The config's default camera order matches simulation: `left_wrist`, `right_wrist`, `front`, `overhead`. See the [mounting plan](SO101_MANIPULATION.md#where-the-four-cameras-go) and [shared camera calibration guide](CAMERA_RIG.md). The example uses a `camera_rig` profile for native resolution, FPS and rotation. With a shared rig, conflicts and fallback image dimensions are rejected; without one, requests are best-effort. Public dataset views retain their original names and count. Additional named cameras remain supported in configs without `camera_rig`. Check the first saved images to confirm identities. Optional `rotation` is 0, 90, 180, or 270 degrees counterclockwise.
+
+Simulation captures now preserve each lens's native aspect ratio/resolution, then use the same bilinear encoder resize as hardware. `python -m pi_observe sim --camera-rig configs/so101_camera_rig.local.json` selects your measured optics and poses. Sim metadata includes native intrinsics, distortion and current world poses. The shipped profile identifies the recommended InnoMaker U20CAM-1080P modules; its optics and poses remain nominal until the assembled rig is calibrated.
 
 For your own live loop:
 

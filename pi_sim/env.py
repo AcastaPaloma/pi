@@ -6,7 +6,9 @@ import gymnasium as gym
 import mujoco
 import numpy as np
 from gymnasium import spaces
+from PIL import Image
 
+from .cameras import camera_metadata, load_camera_rig
 from .scene import ARMS, CAMERAS, JOINTS, build_model
 
 
@@ -80,7 +82,7 @@ class RobotEnv(gym.Env):
 
     def __init__(self, task="reach", control_mode="ee_delta", images=False,
                  image_size=448, max_episode_steps=400, render_mode=None,
-                 object_shape="cube", object_color="red"):
+                 object_shape="cube", object_color="red", camera_rig=None):
         if task not in ("reach", "pick_place"):
             raise ValueError("task must be 'reach' or 'pick_place'")
         if control_mode not in ("ee_delta", "ee", "joint"):
@@ -95,12 +97,14 @@ class RobotEnv(gym.Env):
         self.images, self.image_size = images, image_size
         self.max_episode_steps, self.render_mode = max_episode_steps, render_mode
         self.object_shape, self.object_color = object_shape, object_color
-        self.model = build_model(object_shape, object_color)
+        self.camera_specs = load_camera_rig(camera_rig)
+        self.model = build_model(object_shape, object_color, camera_rig)
         self.data = mujoco.MjData(self.model)
         self._ik_data = mujoco.MjData(self.model)
         self.robot = {side: Arm(self, side) for side in ARMS}
         self._substeps = round(self.control_dt / self.model.opt.timestep)
-        self._renderer = None
+        self._renderers = {}
+        self._camera_plans = {}
         self._ready = False
         self._done = False
         self._workspace_low = np.array([[-0.30, -0.08, 0.016], [0.05, -0.08, 0.016]])
@@ -308,18 +312,55 @@ class RobotEnv(gym.Env):
                 "instruction": "Move the left gripper to the green sphere." if self.task == "reach" else f"Place the {self.object_color} {self.object_shape} on the green disk.",
                 "ik_position_error": self._ik_errors.copy(), "elapsed_steps": self._steps}
 
-    def render_camera(self, camera="front"):
+    def camera_calibration(self, camera):
+        """Native optics and current world pose (OpenCV axes, before rotation)."""
         if camera not in self.camera_names:
             raise ValueError(f"Unknown camera {camera!r}; choose {self.camera_names}")
-        if self._renderer is None:
-            self._renderer = mujoco.Renderer(self.model, height=self.image_size, width=self.image_size)
-        self._renderer.update_scene(self.data, camera=camera)
-        return self._renderer.render().copy()
+        return camera_metadata(self.camera_specs[camera], self.model, self.data, camera)
+
+    def render_camera(self, camera="front", *, native=False):
+        """RGB from the configured lens; native=True matches physical frame size.
+
+        Encoder views resize the native image using the physical Observer's
+        bilinear preprocessing, rather than changing the camera's projection.
+        Camera FPS describes the hardware profile; reads do not step physics.
+        """
+        if camera not in self.camera_names:
+            raise ValueError(f"Unknown camera {camera!r}; choose {self.camera_names}")
+        spec = self.camera_specs[camera]
+        if camera not in self._camera_plans:
+            self._camera_plans[camera] = spec.render_plan()
+        width, height, K, mapping = self._camera_plans[camera]
+        size = (width, height)
+        if size not in self._renderers:
+            self.model.vis.global_.offwidth = max(width, self.model.vis.global_.offwidth)
+            self.model.vis.global_.offheight = max(height, self.model.vis.global_.offheight)
+            self._renderers[size] = mujoco.Renderer(self.model, height=height, width=width)
+        renderer = self._renderers[size]
+        renderer.update_scene(self.data, camera=camera)
+        # Explicit bounds also support unequal fx/fy and an overscanned lens.
+        # MuJoCo's render target size is independent of camera.resolution.
+        for view in renderer.scene.camera:
+            near = view.frustum_near
+            view.frustum_width = near * width / (2 * K[0, 0])
+            view.frustum_center = near * (width / 2 - K[0, 2]) / K[0, 0]
+            view.frustum_top = near * K[1, 2] / K[1, 1]
+            view.frustum_bottom = -near * (height - K[1, 2]) / K[1, 1]
+        rgb = renderer.render().copy()
+        if mapping is not None:
+            import cv2
+            rgb = cv2.remap(rgb, mapping[..., 0], mapping[..., 1], cv2.INTER_LINEAR)
+        if spec.rotation:
+            rgb = np.rot90(rgb, spec.rotation // 90).copy()
+        if not native:
+            rgb = np.asarray(Image.fromarray(rgb).resize((self.image_size, self.image_size),
+                                                       Image.Resampling.BILINEAR)).copy()
+        return rgb
 
     def render(self):
         return self.render_camera("front")
 
     def close(self):
-        if self._renderer is not None:
-            self._renderer.close()
-            self._renderer = None
+        for renderer in self._renderers.values():
+            renderer.close()
+        self._renderers.clear()

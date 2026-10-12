@@ -217,6 +217,21 @@ class SO101Source:
         cameras = config["cameras"]
         if not cameras or len(set(str(cam["device"]) for cam in cameras.values())) != len(cameras):
             raise ValueError("Configure distinct camera devices")
+        self.camera_specs = {}
+        if config.get("camera_rig") is not None:
+            from pi_sim.cameras import load_camera_rig
+            self.camera_specs = load_camera_rig(config["camera_rig"])
+            if set(cameras) != set(self.camera_specs):
+                raise ValueError("Hardware camera names must match the shared camera rig")
+            configured = {}
+            for name, spec in self.camera_specs.items():
+                settings = {"width": spec.width, "height": spec.height,
+                            "fps": spec.fps, "rotation": spec.rotation}
+                for key, value in settings.items():
+                    if key in cameras[name] and cameras[name][key] != value:
+                        raise ValueError(f"{name}: {key} conflicts with camera_rig; edit the shared profile")
+                configured[name] = {**settings, **cameras[name]}
+            cameras = configured
         self.arms = {side: ReadOnlyArm(**arms[side]) for side in ("left", "right")}
         self.cameras = {name: LatestCamera(cam) for name, cam in cameras.items()}
         self.executor = None
@@ -261,6 +276,14 @@ class SO101Source:
             details["arms"][side] = detail
         for name, camera in self.cameras.items():
             images[name], timestamps[f"camera/{name}"], details["cameras"][name] = camera.latest()
+            if name in self.camera_specs:
+                spec = self.camera_specs[name]
+                expected = (spec.height, spec.width, 3)
+                if spec.rotation in (90, 270):
+                    expected = (spec.width, spec.height, 3)
+                if images[name].shape != expected:
+                    raise ValueError(f"{name}: actual image shape {images[name].shape} differs from camera_rig {expected}; update the profile/camera mode")
+                details["cameras"][name]["profile"] = spec.metadata()
         names = [f"{side}_{joint}.pos" for side in self.arms for joint in JOINTS]
         units = (["degree"] * 5 + ["gripper_percent_0_closed_100_open"]) * 2
         return SensorSnapshot(images, np.concatenate([results[side][0] for side in self.arms]), names, units,

@@ -4,6 +4,6 @@
 
 The Robot Studio SO-101 model is Apache-2.0; its original `LICENSE`, `README.md` and `CHANGELOG.md` are included. `UPSTREAM.json` records the exact repository revision and copied paths. The gallery PNG is omitted.
 
-`pi_sim/scene.py` composes two copies by prefixing names and resolving mesh paths, then adds a tabletop, colored primitive object, target pad, fixed front/overhead cameras, and base placements. Wrist camera position and robot contact/inertial/servo definitions come from the upstream model. No claim is made that this model is a measured calibration of your physical arms.
+`pi_sim/scene.py` composes two copies by prefixing names and resolving mesh paths, then adds a tabletop, colored primitive object, target pad, fixed front/overhead 32×32 mm camera proxies with visible supports, and base placements. `so101_camera_rig.json` identifies the recommended InnoMaker U20CAM-1080P-S1 130° M12 modules and specifies all four cameras' native resolution, intrinsics, distortion and mounting poses. Its wrist poses start from upstream; optics use a nominal pinhole estimate from the manufacturer's horizontal FOV, with unmeasured distortion. Robot contact/inertial/servo definitions remain upstream. See [camera calibration](../../docs/CAMERA_RIG.md). No claim is made that this model is a measured calibration of your physical arms.
 
 The previous UR5e and Robotiq assets have been replaced by this SO-101 model.

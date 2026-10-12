@@ -1,6 +1,7 @@
 {
   "task": "Place the red cube on the green disk",
   "subtask": null,
+  "camera_rig": "../pi_sim/assets/so101_camera_rig.json",
   "arms": {
     "left": {
       "port": "/dev/ttyACM0",
@@ -13,28 +14,16 @@
   },
   "cameras": {
     "left_wrist": {
-      "device": 0,
-      "width": 640,
-      "height": 480,
-      "fps": 30
+      "device": 0
     },
     "right_wrist": {
-      "device": 1,
-      "width": 640,
-      "height": 480,
-      "fps": 30
+      "device": 1
     },
     "front": {
-      "device": 2,
-      "width": 640,
-      "height": 480,
-      "fps": 30
+      "device": 2
     },
     "overhead": {
-      "device": 3,
-      "width": 640,
-      "height": 480,
-      "fps": 30
+      "device": 3
     }
   },
   "goal_images": {},
