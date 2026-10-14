@@ -1,11 +1,43 @@
-// Navigation and geometry only. Author commentary is intentionally empty.
-// Bounds use a 2048-wide logical canvas, mapped from the supplied SVG viewBox.
+// Each supplied drawing is segmented into named stops and optional components.
+// Coordinates are logical; source layers retain their native SVG coordinates.
 export const artwork = {
   "src": "./assets/full-backbone.svg",
   "width": 2048,
-  "height": 1122.5187033283646,
+  "height": 1591.4394510756329,
   "nativeWidth": 4118.032888760241,
-  "nativeHeight": 2257.1137395286646
+  "nativeHeight": 3200,
+  "layers": [
+    {
+      "id": "base",
+      "src": "./assets/full-backbone.svg",
+      "x": 0,
+      "y": 0,
+      "scale": 1,
+      "clip": "M0 0H4118.033V571.427H2670.249V2257.114H0Z"
+    },
+    {
+      "id": "decision",
+      "src": "./assets/decision-model.svg",
+      "x": 2670.249,
+      "y": 571.427,
+      "scale": 1
+    },
+    {
+      "id": "vlm-loss",
+      "src": "./assets/loss-vlm.svg",
+      "x": 2670,
+      "y": 2320,
+      "scale": 0.64
+    },
+    {
+      "id": "eam-loss",
+      "src": "./assets/loss-eam.svg",
+      "x": 3420,
+      "y": 2320,
+      "scale": 0.63,
+      "clip": "M0 0H1105V630H0Z"
+    }
+  ]
 };
 
 export const macros = [
@@ -249,13 +281,146 @@ export const steps = [
       646.025
     ],
     "details": [
+      "transformer-fast-input",
       "context-qkv",
       "action-qkv",
+      "rope",
       "concatenate",
       "attention-mask",
+      "context-attention",
+      "fast-attention",
+      "action-attention",
       "attention-output",
       "context-residual",
-      "action-residual"
+      "action-residual",
+      "adaptive-rmsnorm",
+      "ff-activation",
+      "transformer-vlm-output",
+      "transformer-eam-output"
+    ]
+  },
+  {
+    "id": "eam-loss",
+    "title": "EAM Loss",
+    "macro": "decision",
+    "bounds": [
+      1700.851,
+      1153.794,
+      346.213,
+      197.388
+    ],
+    "details": []
+  },
+  {
+    "id": "eam-projection",
+    "title": "Linear(D, d)",
+    "macro": "decision",
+    "bounds": [
+      1823.044,
+      1191.391,
+      104.96,
+      61.41
+    ],
+    "details": [
+      "eam-output",
+      "eam-linear",
+      "eam-prediction"
+    ]
+  },
+  {
+    "id": "flow-loss",
+    "title": "Flow loss",
+    "macro": "decision",
+    "bounds": [
+      1713.383,
+      1255.308,
+      327.414,
+      76.762
+    ],
+    "details": [
+      "eam-target",
+      "eam-squared-error",
+      "eam-mean"
+    ]
+  },
+  {
+    "id": "vlm-loss",
+    "title": "VLM Loss",
+    "macro": "decision",
+    "bounds": [
+      1327.857,
+      1153.794,
+      353.936,
+      417.594
+    ],
+    "details": []
+  },
+  {
+    "id": "fast-input",
+    "title": "FAST tokens → Gemma input",
+    "macro": "decision",
+    "bounds": [
+      1484.455,
+      1215.223,
+      148.004,
+      93.258
+    ],
+    "details": [
+      "loss-context",
+      "fast-tokenizer",
+      "fast-embedding",
+      "fast-concatenate"
+    ]
+  },
+  {
+    "id": "fast-transformer",
+    "title": "34 transformer layers",
+    "macro": "decision",
+    "bounds": [
+      1483.818,
+      1310.71,
+      188.745,
+      42.014
+    ],
+    "details": [
+      "fast-mask",
+      "fast-positions",
+      "fast-meaning"
+    ]
+  },
+  {
+    "id": "token-probabilities",
+    "title": "Logits → probabilities",
+    "macro": "decision",
+    "bounds": [
+      1495.277,
+      1352.724,
+      127.633,
+      53.154
+    ],
+    "details": [
+      "vocabulary-projection",
+      "fast-logits",
+      "fast-log-softmax",
+      "fast-probabilities"
+    ]
+  },
+  {
+    "id": "cross-entropy",
+    "title": "Cross-entropy",
+    "macro": "decision",
+    "bounds": [
+      1494.004,
+      1410.015,
+      183.016,
+      133.363
+    ],
+    "details": [
+      "target-probability",
+      "negative-log-likelihood",
+      "zero-loss",
+      "token-confidence",
+      "mean-cross-entropy"
     ]
   }
 ];
@@ -568,8 +733,450 @@ export const details = [
       185,
       192
     ]
+  },
+  {
+    "id": "eam-output",
+    "step": "eam-projection",
+    "title": "[B, 50, D]",
+    "bounds": [
+      1826.177,
+      1192.018,
+      60.783,
+      20.052
+    ]
+  },
+  {
+    "id": "eam-linear",
+    "step": "eam-projection",
+    "title": "Linear(D, d)",
+    "bounds": [
+      1849.049,
+      1211.443,
+      80.835,
+      20.365
+    ]
+  },
+  {
+    "id": "eam-prediction",
+    "step": "eam-projection",
+    "title": "[B, 50, d]",
+    "bounds": [
+      1825.863,
+      1232.436,
+      62.036,
+      21.305
+    ]
+  },
+  {
+    "id": "eam-target",
+    "step": "flow-loss",
+    "title": "Target Velocity: V* = ε − A*",
+    "bounds": [
+      1779.18,
+      1255.308,
+      154.464,
+      15.352
+    ]
+  },
+  {
+    "id": "eam-squared-error",
+    "step": "flow-loss",
+    "title": "Squared error",
+    "bounds": [
+      1866.908,
+      1274.42,
+      166.057,
+      38.851
+    ]
+  },
+  {
+    "id": "eam-mean",
+    "step": "flow-loss",
+    "title": "Average across B × 50 × d",
+    "bounds": [
+      1716.203,
+      1315.151,
+      324.281,
+      19.739
+    ]
+  },
+  {
+    "id": "loss-context",
+    "step": "fast-input",
+    "title": "X context",
+    "bounds": [
+      1416.978,
+      1192.306,
+      117.448,
+      36.285
+    ]
+  },
+  {
+    "id": "fast-tokenizer",
+    "step": "fast-input",
+    "title": "FAST tokenizer",
+    "bounds": [
+      1488.593,
+      1229.546,
+      142.593,
+      26.1
+    ]
+  },
+  {
+    "id": "fast-embedding",
+    "step": "fast-input",
+    "title": "Gemma embedding lookup",
+    "bounds": [
+      1493.367,
+      1255.964,
+      127.633,
+      26.1
+    ]
+  },
+  {
+    "id": "fast-concatenate",
+    "step": "fast-input",
+    "title": "Concatenate with X context",
+    "bounds": [
+      1493.049,
+      1284.292,
+      116.812,
+      23.553
+    ]
+  },
+  {
+    "id": "fast-mask",
+    "step": "fast-transformer",
+    "title": "Causal attention mask",
+    "bounds": [
+      1374.964,
+      1306.89,
+      89.757,
+      59.52
+    ]
+  },
+  {
+    "id": "fast-positions",
+    "step": "fast-transformer",
+    "title": "F target FAST ID positions",
+    "bounds": [
+      1497.823,
+      1337.127,
+      171.875,
+      15.596
+    ]
+  },
+  {
+    "id": "fast-meaning",
+    "step": "fast-transformer",
+    "title": "The size of the tensor has not changed. The meaning has.",
+    "bounds": [
+      1355.23,
+      1403.65,
+      115.539,
+      71.615
+    ]
+  },
+  {
+    "id": "vocabulary-projection",
+    "step": "token-probabilities",
+    "title": "Linear(2560, 262208)",
+    "bounds": [
+      1508.008,
+      1352.405,
+      116.175,
+      14.96
+    ]
+  },
+  {
+    "id": "fast-logits",
+    "step": "token-probabilities",
+    "title": "[B, F, 262208] · logits",
+    "bounds": [
+      1501.961,
+      1367.683,
+      78.299,
+      10.504
+    ]
+  },
+  {
+    "id": "fast-log-softmax",
+    "step": "token-probabilities",
+    "title": "log-softmax",
+    "bounds": [
+      1510.555,
+      1381.369,
+      71.933,
+      12.732
+    ]
+  },
+  {
+    "id": "fast-probabilities",
+    "step": "token-probabilities",
+    "title": "[B, F, 262208] · probabilities",
+    "bounds": [
+      1501.642,
+      1395.056,
+      96.441,
+      11.458
+    ]
+  },
+  {
+    "id": "target-probability",
+    "step": "cross-entropy",
+    "title": "Correct target ID",
+    "bounds": [
+      1506.735,
+      1416.381,
+      122.541,
+      50.608
+    ]
+  },
+  {
+    "id": "negative-log-likelihood",
+    "step": "cross-entropy",
+    "title": "−log p(zⱼ | Xctx, z<ⱼ)",
+    "bounds": [
+      1508.645,
+      1469.535,
+      98.669,
+      14.323
+    ]
+  },
+  {
+    "id": "zero-loss",
+    "step": "cross-entropy",
+    "title": "p(zⱼ) = 1 → loss = 0",
+    "bounds": [
+      1508.963,
+      1484.495,
+      112.992,
+      21.644
+    ]
+  },
+  {
+    "id": "token-confidence",
+    "step": "cross-entropy",
+    "title": "0.80 · 0.60 · 0.75 · 0.65",
+    "bounds": [
+      1345.363,
+      1476.538,
+      143.23,
+      86.574
+    ]
+  },
+  {
+    "id": "mean-cross-entropy",
+    "step": "cross-entropy",
+    "title": "Mean loss",
+    "bounds": [
+      1494.004,
+      1522.053,
+      182.697,
+      20.689
+    ]
+  },
+  {
+    "id": "transformer-fast-input",
+    "step": "transformer",
+    "title": "FAST tokens / X context",
+    "bounds": [
+      1337.928,
+      491.072,
+      202.411,
+      56.695
+    ]
+  },
+  {
+    "id": "rope",
+    "step": "transformer",
+    "title": "RoPE",
+    "bounds": [
+      1548.793,
+      540.804,
+      112.395,
+      19.893
+    ]
+  },
+  {
+    "id": "context-attention",
+    "step": "transformer",
+    "title": "Context attention",
+    "bounds": [
+      1526.414,
+      700.446,
+      79.572,
+      56.198
+    ]
+  },
+  {
+    "id": "fast-attention",
+    "step": "transformer",
+    "title": "FAST causal attention",
+    "bounds": [
+      1526.414,
+      756.643,
+      143.727,
+      48.241
+    ]
+  },
+  {
+    "id": "action-attention",
+    "step": "transformer",
+    "title": "Action attention",
+    "bounds": [
+      1526.414,
+      804.884,
+      203.406,
+      38.294
+    ]
+  },
+  {
+    "id": "adaptive-rmsnorm",
+    "step": "transformer",
+    "title": "AdaptiveRMSNorm",
+    "bounds": [
+      1607.975,
+      928.22,
+      258.609,
+      148.203
+    ]
+  },
+  {
+    "id": "ff-activation",
+    "step": "transformer",
+    "title": "FF Activation",
+    "bounds": [
+      1349.863,
+      1002.819,
+      89.518,
+      95.984
+    ]
+  },
+  {
+    "id": "transformer-vlm-output",
+    "step": "transformer",
+    "title": "VLM output",
+    "bounds": [
+      1623.889,
+      1083.883,
+      107.422,
+      21.385
+    ]
+  },
+  {
+    "id": "transformer-eam-output",
+    "step": "transformer",
+    "title": "EAM output",
+    "bounds": [
+      1732.804,
+      1083.883,
+      54.706,
+      21.385
+    ]
   }
 ];
 
-// Populate later with the author's supplied text: { 'step-or-detail-id': ['Paragraph'] }.
-export const annotations = {};
+// Only verbatim author copy. Empty entries are ready for later writing.
+export const annotations = {
+  "vlm": [
+    "But it hasn't necessarily learned the detailed relationship between those observations and a robot's 50-step motor trajectory."
+  ],
+  "flow": [
+    "You attach an initially untrained 860M action expert."
+  ],
+  "flow-loss": [
+    "Now, suppose you only optimize:",
+    "\\[\\mathcal L_{\\rm flow}.\\]",
+    "You have two options:",
+    "Option A: Allow flow gradients into Gemma.",
+    "The randomly initialized action expert initially produces poor velocity predictions. Backpropagating those errors into Gemma can disrupt its useful pretrained representations.",
+    "Option B: Freeze Gemma against flow gradients.",
+    "Now its existing knowledge is protected, but there's no action-supervision signal directly teaching Gemma how observations and instructions relate to robot trajectories."
+  ],
+  "vlm-loss": [
+    "The answer is Knowledge Insulation: π0.7 wants the VLM to understand robot actions without letting the continuous flow-matching loss damage its pretrained vision-language knowledge."
+  ],
+  "fast-input": [
+    "FAST solves this problem.",
+    "The hope is that at the beginning, before any transformer layers, you literally have the FAST tokens in the input tensor."
+  ],
+  "token-probabilities": [
+    "After 34 transformer layers, at those same positions, you now have 262208-dimensional vectors carrying the probabilities for all next possible token IDs."
+  ],
+  "context": [],
+  "observation": [],
+  "subgoals": [],
+  "text": [],
+  "proprioception": [],
+  "together": [],
+  "decision": [],
+  "l1": [],
+  "l2": [],
+  "l33": [],
+  "l34": [],
+  "transformer": [],
+  "eam-loss": [],
+  "eam-projection": [],
+  "fast-transformer": [],
+  "cross-entropy": [],
+  "observation-input": [],
+  "patches": [],
+  "embeddings": [],
+  "vision-backbone": [],
+  "pooling": [],
+  "observation-output": [],
+  "goal-input": [],
+  "goal-patches": [],
+  "goal-backbone": [],
+  "goal-embeddings": [],
+  "goal-output": [],
+  "prompt-parts": [],
+  "tokenizer": [],
+  "text-output": [],
+  "state-history": [],
+  "state-output": [],
+  "context-output": [],
+  "vlm-context": [],
+  "action-chunk": [],
+  "noise-time": [],
+  "velocity": [],
+  "context-qkv": [],
+  "action-qkv": [],
+  "concatenate": [],
+  "attention-mask": [],
+  "attention-output": [],
+  "context-residual": [],
+  "action-residual": [],
+  "eam-output": [],
+  "eam-linear": [],
+  "eam-prediction": [],
+  "eam-target": [],
+  "eam-squared-error": [],
+  "eam-mean": [],
+  "loss-context": [],
+  "fast-tokenizer": [],
+  "fast-embedding": [],
+  "fast-concatenate": [],
+  "fast-mask": [],
+  "fast-positions": [],
+  "fast-meaning": [],
+  "vocabulary-projection": [],
+  "fast-logits": [],
+  "fast-log-softmax": [],
+  "fast-probabilities": [],
+  "target-probability": [],
+  "negative-log-likelihood": [],
+  "zero-loss": [],
+  "token-confidence": [],
+  "mean-cross-entropy": [],
+  "transformer-fast-input": [],
+  "rope": [],
+  "context-attention": [],
+  "fast-attention": [],
+  "action-attention": [],
+  "adaptive-rmsnorm": [],
+  "ff-activation": [],
+  "transformer-vlm-output": [],
+  "transformer-eam-output": []
+};

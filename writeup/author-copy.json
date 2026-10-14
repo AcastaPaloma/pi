@@ -1,0 +1,27 @@
+{
+  "vlm": [
+    "But it hasn't necessarily learned the detailed relationship between those observations and a robot's 50-step motor trajectory."
+  ],
+  "flow": [
+    "You attach an initially untrained 860M action expert."
+  ],
+  "flow-loss": [
+    "Now, suppose you only optimize:",
+    "\\[\\mathcal L_{\\rm flow}.\\]",
+    "You have two options:",
+    "Option A: Allow flow gradients into Gemma.",
+    "The randomly initialized action expert initially produces poor velocity predictions. Backpropagating those errors into Gemma can disrupt its useful pretrained representations.",
+    "Option B: Freeze Gemma against flow gradients.",
+    "Now its existing knowledge is protected, but there's no action-supervision signal directly teaching Gemma how observations and instructions relate to robot trajectories."
+  ],
+  "vlm-loss": [
+    "The answer is Knowledge Insulation: π0.7 wants the VLM to understand robot actions without letting the continuous flow-matching loss damage its pretrained vision-language knowledge."
+  ],
+  "fast-input": [
+    "FAST solves this problem.",
+    "The hope is that at the beginning, before any transformer layers, you literally have the FAST tokens in the input tensor."
+  ],
+  "token-probabilities": [
+    "After 34 transformer layers, at those same positions, you now have 262208-dimensional vectors carrying the probabilities for all next possible token IDs."
+  ]
+}

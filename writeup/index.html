@@ -7,8 +7,8 @@
   <meta name="description" content="An interactive visual canvas of Pi, from context ingestion to action.">
   <title>Pi · Kuan Yi Wang</title>
   <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./style.css">
-  <script type="module" src="./app.js"></script>
+  <link rel="stylesheet" href="./style.css?v=20261014-losses">
+  <script type="module" src="./app.js?v=20261014-losses"></script>
 </head>
 <body>
   <a class="skip-link" href="#contents">Skip to contents</a>
@@ -17,7 +17,7 @@
       <button class="start-button" id="start" type="button">Start walkthrough <span aria-hidden="true">→</span></button>
       <div class="viewport" id="viewport" tabindex="0" aria-label="Diagram canvas. Drag to pan; pinch or use plus and minus to zoom. Left and right arrows or Space move through the walkthrough. Escape returns to the whole canvas.">
         <div class="world" id="world">
-          <div id="artwork" role="img" aria-label="Pi architecture: spatial and semantic context ingestion, VLM backbone, flow-matching model, and expanded transformer layer."></div>
+          <div id="artwork" role="img" aria-label="Pi architecture: spatial and semantic context ingestion, VLM backbone, flow-matching model, expanded transformer layer, and VLM and EAM losses."></div>
           <div class="lifted-region" id="lifted" aria-hidden="true" hidden></div>
           <div id="hotspots" role="group" aria-label="Inspect diagram details"></div>
           <div class="detail-outline" id="detail-outline" aria-hidden="true" hidden></div>
@@ -28,9 +28,9 @@
     </section>
     <aside class="notes" id="contents" tabindex="-1" aria-label="Canvas contents">
       <nav class="macro-tabs" id="macro-tabs" aria-label="Major sections"></nav>
+      <div id="annotation" aria-label="Author commentary" tabindex="0" hidden></div>
       <div class="notes-scroll" id="notes-scroll">
         <nav id="toc" aria-label="Section contents"></nav>
-        <div id="annotation" hidden></div>
       </div>
     </aside>
   </main>

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { fitBounds, zoomAt, constrainCamera } from '../camera.mjs';
-import { artwork, steps, details } from '../content.js';
+import { artwork, steps, details, annotations } from '../content.js';
 
 test('every section fits desktop and phone viewports without being cut off', () => {
   for (const [width, height] of [[1080, 670], [620, 480], [390, 252], [320, 210]]) {
@@ -47,10 +47,34 @@ test('route and inspection references are unique, valid, and inside the artwork'
 
 test('decision walkthrough follows the authored macro-to-layer sequence', () => {
   assert.deepEqual(steps.filter(s => s.macro === 'decision').map(s => s.id),
-    ['decision', 'vlm', 'flow', 'l1', 'l2', 'l33', 'l34', 'transformer']);
+    ['decision', 'vlm', 'flow', 'l1', 'l2', 'l33', 'l34', 'transformer',
+      'eam-loss', 'eam-projection', 'flow-loss', 'vlm-loss', 'fast-input',
+      'fast-transformer', 'token-probabilities', 'cross-entropy']);
   const vlm = steps.find(s => s.id === 'vlm'), flow = steps.find(s => s.id === 'flow');
   assert.deepEqual(vlm.frame.slice(1), flow.frame.slice(1), 'upper panels share camera height and scale');
   for (const step of steps) for (const id of step.details) {
     assert.equal(details.find(d => d.id === id).step, step.id, 'TOC detail belongs to its stop');
+  }
+});
+
+
+test('every component has an authoring slot; populated text matches the supplied transcript', async () => {
+  const { readFile } = await import('node:fs/promises');
+  const supplied = JSON.parse(await readFile(new URL('../author-copy.json', import.meta.url), 'utf8'));
+  const populated = Object.fromEntries(Object.entries(annotations).filter(([, paragraphs]) => paragraphs.length));
+  assert.deepEqual(populated, supplied);
+  for (const item of [...steps, ...details]) assert.ok(Array.isArray(annotations[item.id]), item.id);
+  assert.equal(Object.keys(annotations).length, steps.length + details.length);
+});
+
+test('composed SVG layers and all component bounds fit the extended canvas', async () => {
+  const { readFile } = await import('node:fs/promises');
+  for (const layer of artwork.layers) {
+    const source = await readFile(new URL('../' + layer.src, import.meta.url), 'utf8');
+    assert.match(source, /<svg[\s>]/);
+    assert.doesNotMatch(source, /<script[\s>]/);
+  }
+  for (const step of steps) for (const id of step.details) {
+    assert.equal(details.find(item => item.id === id)?.step, step.id);
   }
 });

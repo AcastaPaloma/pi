@@ -1,4 +1,4 @@
-import { artwork, macros, steps, details, annotations } from './content.js';
+import { artwork, macros, steps, details, annotations } from './content.js?v=20261014-losses';
 import { clamp, fitBounds, zoomAt, constrainCamera } from './camera.mjs';
 
 const $ = id => document.getElementById(id);
@@ -72,6 +72,7 @@ function setRoute(index, detail = null, { historyMode = 'push', animate = true }
     if (url !== `${location.pathname}${location.search}${location.hash}`) history[historyMode === 'replace' ? 'replaceState' : 'pushState'](null, '', url);
   }
   render(); fit(animate);
+  $('annotation').scrollTop = 0;
   $('announcement').textContent = detailById.get(pinned)?.title ?? currentStep()?.title ?? 'Whole canvas';
 }
 function readRoute() {
@@ -137,7 +138,7 @@ function renderHotspots() {
 function renderSelection() {
   const selected = preview ?? pinned;
   for (const link of $('toc').querySelectorAll('button')) {
-    const active = pinned ? link.dataset.detail === pinned : link.dataset.step === currentStep()?.id;
+    const active = pinned ? link.dataset.detail === pinned : Boolean(currentStep() && link.dataset.step === currentStep().id);
     if (active) link.setAttribute('aria-current', 'location'); else link.removeAttribute('aria-current');
     link.classList.toggle('is-previewed', Boolean(preview && link.dataset.detail === preview));
   }
@@ -145,7 +146,19 @@ function renderSelection() {
   if (selected) position($('detail-outline'), detailById.get(selected).bounds);
   const paragraphs = annotations[selected ?? currentStep()?.id] ?? [];
   $('annotation').hidden = !paragraphs.length;
-  $('annotation').replaceChildren(...paragraphs.map(text => make('p', text)));
+  $('annotation').replaceChildren(...paragraphs.map(text => {
+    // Typeset the author's literal TeX expression without adding or rewriting prose.
+    if (text === String.raw`\[\mathcal L_{\rm flow}.\]`) {
+      const mathNS = 'http://www.w3.org/1998/Math/MathML';
+      const math = document.createElementNS(mathNS, 'math'); math.setAttribute('display', 'block');
+      const sub = document.createElementNS(mathNS, 'msub');
+      const letter = document.createElementNS(mathNS, 'mi'); letter.textContent = 'ℒ';
+      const label = document.createElementNS(mathNS, 'mtext'); label.textContent = 'flow';
+      const period = document.createElementNS(mathNS, 'mo'); period.textContent = '.';
+      sub.append(letter, label); math.append(sub, period); return math;
+    }
+    return make('p', text);
+  }));
 }
 function render() {
   const active = stepIndex >= 0;
@@ -159,6 +172,9 @@ function render() {
     $('lifted').querySelector('svg')?.setAttribute('viewBox', bounds.join(' '));
   }
   renderContents(); renderHotspots(); renderSelection();
+  revealCurrentEntry();
+}
+function revealCurrentEntry() {
   const current = $('toc').querySelector('[aria-current="location"]');
   if (current) {
     const scroller = $('notes-scroll'), a = current.getBoundingClientRect(), b = scroller.getBoundingClientRect();
@@ -249,25 +265,49 @@ viewport.addEventListener('dblclick', event => { if (!event.target.closest('butt
 viewport.addEventListener('scroll', () => {
   if (viewport.scrollTop || viewport.scrollLeft) viewport.scrollTo(0, 0);
 });
-new ResizeObserver(() => fit(false)).observe(viewport);
+new ResizeObserver(() => { fit(false); revealCurrentEntry(); }).observe(viewport);
 
 
 async function loadArtwork() {
   $('loading').hidden = false; $('asset-error').hidden = true;
   try {
-    const response = await fetch(artwork.src);
-    if (!response.ok) throw new Error(`Artwork: ${response.status}`);
-    const parsed = new DOMParser().parseFromString(await response.text(), 'image/svg+xml');
-    if (parsed.querySelector('parsererror')) throw new Error('Invalid SVG');
-    const source = parsed.documentElement;
+    const sources = await Promise.all(artwork.layers.map(async layer => {
+      const response = await fetch(layer.src);
+      if (!response.ok) throw new Error(`Artwork: ${response.status}`);
+      const parsed = new DOMParser().parseFromString(await response.text(), 'image/svg+xml');
+      if (parsed.querySelector('parsererror')) throw new Error('Invalid SVG');
+      return { layer, source: parsed.documentElement };
+    }));
     const svg = document.createElementNS(svgNS, 'svg');
     svg.setAttribute('viewBox', allBounds.join(' ')); svg.setAttribute('aria-hidden', 'true');
     const defs = document.createElementNS(svgNS, 'defs');
     const drawing = document.createElementNS(svgNS, 'g');
     drawing.id = 'pi-drawing'; drawing.setAttribute('transform', `scale(${artwork.width / artwork.nativeWidth})`);
-    for (const child of [...source.children]) {
-      if (child.localName === 'defs') for (const def of child.children) defs.append(document.importNode(def, true));
-      else drawing.append(document.importNode(child, true));
+    for (const { layer, source } of sources) {
+      // Excalidraw exports can reuse mask/image IDs. Scope each before combining them.
+      const ids = new Map([...source.querySelectorAll('[id]')].map(node => [node.id, `${layer.id}-${node.id}`]));
+      for (const node of source.querySelectorAll('*')) {
+        for (const attr of [...node.attributes]) {
+          let value = attr.value;
+          if (attr.name === 'id') value = ids.get(value);
+          else if (value.startsWith('#') && ids.has(value.slice(1))) value = `#${ids.get(value.slice(1))}`;
+          else value = value.replace(/url\(#([^)]*)\)/g, (match, id) => ids.has(id) ? `url(#${ids.get(id)})` : match);
+          node.setAttributeNS(attr.namespaceURI, attr.name, value);
+        }
+      }
+      const placed = document.createElementNS(svgNS, 'g');
+      placed.setAttribute('transform', `translate(${layer.x} ${layer.y}) scale(${layer.scale})`);
+      const content = document.createElementNS(svgNS, 'g');
+      if (layer.clip) {
+        const clip = document.createElementNS(svgNS, 'clipPath'); clip.id = `${layer.id}-crop`;
+        const path = document.createElementNS(svgNS, 'path'); path.setAttribute('d', layer.clip);
+        clip.append(path); defs.append(clip); content.setAttribute('clip-path', `url(#${clip.id})`);
+      }
+      for (const child of [...source.children]) {
+        if (child.localName === 'defs') for (const def of child.children) defs.append(document.importNode(def, true));
+        else content.append(document.importNode(child, true));
+      }
+      placed.append(content); drawing.append(placed);
     }
     defs.append(drawing); svg.append(defs);
     const use = document.createElementNS(svgNS, 'use'); use.setAttribute('href', '#pi-drawing'); svg.append(use);
