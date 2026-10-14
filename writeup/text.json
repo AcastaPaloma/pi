@@ -1,4 +1,15 @@
 {
   "version": 1,
-  "sections": {}
+  "sections": {
+    "vlm": [
+      {
+        "tag": "p",
+        "children": [
+          {
+            "text": "But it hasn't necessarily learned the detailed relationship between those observations and a robot's 50-step motor trajectory."
+          }
+        ]
+      }
+    ]
+  }
 }
