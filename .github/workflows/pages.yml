@@ -33,7 +33,7 @@ jobs:
       - name: Prepare static site
         run: |
           mkdir -p _site/assets
-          cp writeup/index.html writeup/style.css writeup/app.js writeup/content.js writeup/camera.mjs _site/
+          cp writeup/index.html writeup/style.css writeup/app.js writeup/content.js writeup/camera.mjs writeup/reading.mjs _site/
           cp writeup/assets/*.svg _site/assets/
           touch _site/.nojekyll
       - uses: actions/upload-pages-artifact@v4

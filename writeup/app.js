@@ -1,20 +1,23 @@
-import { artwork, macros, steps, details, annotations } from './content.js?v=20261014-losses';
+import { artwork, macros, steps, details, annotations } from './content.js?v=20261014-reading-r3';
 import { clamp, fitBounds, zoomAt, constrainCamera } from './camera.mjs';
+import { buildReadingEntries, readingIndex } from './reading.mjs?v=20261014-reading-r3';
 
 const $ = id => document.getElementById(id);
-const viewport = $('viewport'), world = $('world');
+const viewport = $('viewport'), world = $('world'), reader = $('reader');
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 const detailById = new Map(details.map(item => [item.id, item]));
+const entries = buildReadingEntries(steps, details, annotations);
+const entryById = new Map(entries.map(item => [item.id, item]));
 const allBounds = [0, 0, artwork.width, artwork.height];
 const svgNS = 'http://www.w3.org/2000/svg';
-let stepIndex = -1, pinned = null, preview = null, renderedMacro = null;
+let stepIndex = 0, pinned = null, preview = null, activeId = steps[0].id;
 let camera = { x: 0, y: 0, scale: 1 }, animation = 0, frame = 0;
 let hoverTimer = 0, leaveTimer = 0, suppressHoverUntil = 0, moved = false;
-let activeGesture = null;
+let activeGesture = null, detached = false, overview = false;
+let scrollFrame = 0, jumpTarget = null, jumpTimer = 0, tops = [];
 const pointers = new Map();
 world.style.width = `${artwork.width}px`;
 world.style.height = `${artwork.height}px`;
-
 function make(tag, text, className) {
   const element = document.createElement(tag);
   if (text !== undefined) element.textContent = text;
@@ -54,153 +57,209 @@ function fit(animate = true) {
   setCamera(fitted, animate);
 }
 function manuallyMoved() {
+  detached = true;
+  $('start').firstChild.textContent = 'Resume reading ';
   suppressHoverUntil = performance.now() + 180; clearTimers();
   if (preview) { preview = null; renderSelection(); }
 }
 function zoom(factor, point = { x: viewport.clientWidth / 2, y: viewport.clientHeight / 2 }, animate = false) {
   manuallyMoved(); setCamera(zoomAt(camera, point, clamp(camera.scale * factor, minScale(), 8)), animate);
 }
-function setRoute(index, detail = null, { historyMode = 'push', animate = true } = {}) {
-  clearTimers();
-  if (document.activeElement?.closest('#hotspots')) viewport.focus({ preventScroll: true });
-  stepIndex = index >= 0 && index < steps.length ? index : -1;
-  pinned = detail && currentStep()?.details.includes(detail) ? detail : null;
-  preview = null;
-  if (historyMode !== 'none') {
-    const hash = currentStep() ? `#${currentStep().id}${pinned ? `/${pinned}` : ''}` : '';
-    const url = `${location.pathname}${location.search}${hash}`;
-    if (url !== `${location.pathname}${location.search}${location.hash}`) history[historyMode === 'replace' ? 'replaceState' : 'pushState'](null, '', url);
-  }
+
+function writeRoute(mode = 'replace') {
+  const hash = `#${currentStep().id}${pinned ? `/${pinned}` : ''}`;
+  if (hash !== location.hash) history[mode === 'push' ? 'pushState' : 'replaceState'](null, '', `${location.pathname}${location.search}${hash}`);
+}
+function activate(id, { historyMode = 'replace', animate = true, force = false } = {}) {
+  const entry = entryById.get(id); if (!entry) return;
+  const changed = activeId !== id;
+  if (!changed && !detached && !overview && !force) return;
+  activeId = id; stepIndex = entry.stepIndex; pinned = entry.detail;
+  preview = null; detached = false; overview = false; clearTimers();
   render(); fit(animate);
-  $('annotation').scrollTop = 0;
-  $('announcement').textContent = detailById.get(pinned)?.title ?? currentStep()?.title ?? 'Whole canvas';
+  if (historyMode !== 'none') writeRoute(historyMode);
+  if (changed) $('announcement').textContent = entry.title;
+}
+function measureReading() {
+  const rect = reader.getBoundingClientRect();
+  tops = entries.map(entry => $(`title-${entry.id}`).getBoundingClientRect().top - rect.top + reader.scrollTop);
+}
+function readingAnchor() { return Math.min(150, reader.clientHeight * .24); }
+function syncReading() {
+  if (jumpTarget) return;
+  const entry = entries[readingIndex(tops, reader.scrollTop, readingAnchor())];
+  activate(entry.id);
+}
+function scheduleReading() {
+  if (!scrollFrame) scrollFrame = requestAnimationFrame(() => { scrollFrame = 0; syncReading(); });
+}
+function cancelJump() {
+  clearTimeout(jumpTimer); jumpTarget = null;
+}
+function finishJump() {
+  if (!jumpTarget) return;
+  cancelJump(); scheduleReading();
+}
+function jumpTo(id, { historyMode = 'push', animate = true } = {}) {
+  if (!entryById.has(id)) return;
+  closeContents(); cancelJump();
+  activate(id, { historyMode, animate, force: true });
+  measureReading();
+  const index = entries.findIndex(entry => entry.id === id);
+  // Align to the same line the scroll observer uses, so a click and the next
+  // wheel movement agree on which passage owns the camera.
+  const top = Math.max(0, tops[index] - readingAnchor() + 4);
+  jumpTarget = id;
+  reader.scrollTo({ top, behavior: animate && !reducedMotion.matches ? 'smooth' : 'instant' });
+  jumpTimer = setTimeout(finishJump, 850);
+  if (historyMode === 'push') reader.focus({ preventScroll: true });
+}
+function go(index, detail) {
+  const step = steps[clamp(index, 0, steps.length - 1)];
+  jumpTo(detail && step.details.includes(detail) ? detail : step.id);
 }
 function readRoute() {
   const [id, detail] = location.hash.slice(1).split('/');
-  setRoute(steps.findIndex(item => item.id === id), detail, { historyMode: 'none', animate: false });
+  const step = steps.find(item => item.id === id) ?? steps[0];
+  jumpTo(detail && step.details.includes(detail) ? detail : step.id, { historyMode: 'none', animate: false });
 }
-function advance(direction) {
-  if (stepIndex === steps.length - 1 && direction > 0) { setRoute(-1); return; }
-  setRoute(clamp(stepIndex + direction, 0, steps.length - 1));
+function paragraph(text) {
+  if (text !== String.raw`\[\mathcal L_{\rm flow}.\]`) return make('p', text);
+  const ns = 'http://www.w3.org/1998/Math/MathML';
+  const math = document.createElementNS(ns, 'math'); math.setAttribute('display', 'block');
+  const sub = document.createElementNS(ns, 'msub');
+  const letter = document.createElementNS(ns, 'mi'); letter.textContent = 'ℒ';
+  const label = document.createElementNS(ns, 'mtext'); label.textContent = 'flow';
+  const period = document.createElementNS(ns, 'mo'); period.textContent = '.';
+  sub.append(letter, label); math.append(sub, period); return math;
 }
-function go(index, detail) { setRoute(index, detail); viewport.focus({ preventScroll: true }); }
-function renderContents() {
-  const macro = currentStep()?.macro ?? 'ingestion';
-  for (const button of $('macro-tabs').children) button.setAttribute('aria-current', String(button.dataset.macro === macro));
-  if (renderedMacro === macro) return;
-  renderedMacro = macro;
+function buildArticle() {
   const fragment = document.createDocumentFragment();
-  steps.forEach((step, index) => {
-    if (step.macro !== macro) return;
-    const group = make('div', undefined, 'toc-group');
-    const button = make('button', undefined, 'toc-link toc-major');
-    button.type = 'button'; button.dataset.step = step.id;
-    button.append(make('span', String(index + 1).padStart(2, '0'), 'toc-number'), make('span', step.title));
-    button.addEventListener('click', () => go(index)); group.append(button);
-    for (const id of step.details) {
-      const item = detailById.get(id), link = make('button', item.title, 'toc-link toc-detail');
-      link.type = 'button'; link.dataset.detail = id;
-      link.addEventListener('click', () => go(index, id)); group.append(link);
-    }
-    fragment.append(group);
-  });
-  $('toc').replaceChildren(fragment); $('notes-scroll').scrollTop = 0;
-}
-function renderHotspots() {
-  const group = $('hotspots'); group.replaceChildren();
-  const indices = stepIndex < 0 ? [0, 6] : [];
-  for (const index of indices) {
-    const step = steps[index], button = make('button', undefined, 'hotspot');
-    button.type = 'button'; button.setAttribute('aria-label', `Explore ${step.title}`);
-    position(button, step.bounds);
-    button.addEventListener('click', () => { if (!moved) go(index); }); group.append(button);
+  for (const entry of entries) {
+    const block = make('section', undefined, `reading-block${entry.detail ? '' : ' is-major'}`);
+    block.id = `read-${entry.id}`; block.dataset.entry = entry.id;
+    block.dataset.placeholder = String(entry.isPlaceholder);
+    const heading = make(entry.detail ? 'h3' : 'h2', entry.title);
+    heading.id = `title-${entry.id}`; block.setAttribute('aria-labelledby', heading.id);
+    block.append(heading, ...entry.paragraphs.map(paragraph)); fragment.append(block);
   }
-  // Macro views expose every detail in that chunk, just like their contents list.
-  const items = currentStep()?.details.length ? currentStep().details.map(id => detailById.get(id)) :
-    details.filter(item => currentStep() && ['context', 'decision'].includes(currentStep().id) && steps.find(s => s.id === item.step)?.macro === currentStep().macro);
-  for (const item of items) {
-    const button = make('button', undefined, 'hotspot is-available');
-    button.type = 'button'; button.dataset.detail = item.id;
-    button.setAttribute('aria-label', item.title);
+  $('article').replaceChildren(fragment);
+}
+function buildContents() {
+  for (const macro of macros) {
+    $('toc').append(make('h2', macro.title, 'toc-macro'));
+    steps.forEach((step, index) => {
+      if (step.macro !== macro.id) return;
+      const group = make('div', undefined, 'toc-group');
+      for (const id of [step.id, ...step.details]) {
+        const entry = entryById.get(id), button = make('button', undefined, `toc-link${entry.detail ? ' toc-detail' : ''}`);
+        button.type = 'button'; button.dataset.entry = id;
+        if (!entry.detail) button.append(make('span', String(index + 1).padStart(2, '0'), 'toc-number'));
+        button.append(make('span', entry.title)); button.addEventListener('click', () => jumpTo(id));
+        group.append(button);
+      }
+      $('toc').append(group);
+    });
+  }
+}
+function closeContents() {
+  if ($('contents-menu').contains(document.activeElement)) $('contents-toggle').focus({ preventScroll: true });
+  $('contents-menu').hidden = true; $('contents-toggle').setAttribute('aria-expanded', 'false');
+}
+function buildHotspots() {
+  // Coarse regions sit behind the finer targets. Every canvas target has a
+  // matching heading and contents entry, including regions outside the current view.
+  for (const item of [...steps, ...details]) {
+    const button = make('button', undefined, 'hotspot');
+    button.type = 'button'; button.tabIndex = -1; button.dataset.entry = item.id;
+    button.setAttribute('aria-label', `Read ${item.title}`);
     position(button, item.bounds);
     button.addEventListener('pointerenter', event => {
       clearTimers();
       if (event.pointerType === 'touch' || pointers.size || performance.now() < suppressHoverUntil) return;
       hoverTimer = setTimeout(() => { preview = item.id; renderSelection(); }, 140);
     });
-    button.addEventListener('pointerleave', () => { clearTimers(); leaveTimer = setTimeout(() => { preview = null; renderSelection(); }, 120); });
-    button.addEventListener('focus', () => { preview = item.id; renderSelection(); });
-    button.addEventListener('blur', () => { preview = null; renderSelection(); });
-    button.addEventListener('click', () => { if (!moved) go(steps.findIndex(s => s.id === item.step), item.id); });
-    group.append(button);
+    button.addEventListener('pointerleave', () => { clearTimers(); preview = null; renderSelection(); });
+    button.addEventListener('click', () => {
+      if (moved) return;
+      jumpTo(item.id); reader.focus({ preventScroll: true });
+    });
+    $('hotspots').append(button);
   }
 }
 function renderSelection() {
-  const selected = preview ?? pinned;
-  for (const link of $('toc').querySelectorAll('button')) {
-    const active = pinned ? link.dataset.detail === pinned : Boolean(currentStep() && link.dataset.step === currentStep().id);
-    if (active) link.setAttribute('aria-current', 'location'); else link.removeAttribute('aria-current');
-    link.classList.toggle('is-previewed', Boolean(preview && link.dataset.detail === preview));
-  }
-  $('detail-outline').hidden = !selected;
-  if (selected) position($('detail-outline'), detailById.get(selected).bounds);
-  const paragraphs = annotations[selected ?? currentStep()?.id] ?? [];
-  $('annotation').hidden = !paragraphs.length;
-  $('annotation').replaceChildren(...paragraphs.map(text => {
-    // Typeset the author's literal TeX expression without adding or rewriting prose.
-    if (text === String.raw`\[\mathcal L_{\rm flow}.\]`) {
-      const mathNS = 'http://www.w3.org/1998/Math/MathML';
-      const math = document.createElementNS(mathNS, 'math'); math.setAttribute('display', 'block');
-      const sub = document.createElementNS(mathNS, 'msub');
-      const letter = document.createElementNS(mathNS, 'mi'); letter.textContent = 'ℒ';
-      const label = document.createElementNS(mathNS, 'mtext'); label.textContent = 'flow';
-      const period = document.createElementNS(mathNS, 'mo'); period.textContent = '.';
-      sub.append(letter, label); math.append(sub, period); return math;
-    }
-    return make('p', text);
-  }));
+  const item = entryById.get(preview ?? (pinned ? activeId : null));
+  $('detail-outline').hidden = !item || overview;
+  if (item) position($('detail-outline'), item.bounds);
 }
 function render() {
-  const active = stepIndex >= 0;
-  world.classList.toggle('focused', active);
-  $('start').replaceChildren(document.createTextNode(active ? 'Whole canvas ' : 'Start walkthrough '), make('span', active ? '↖' : '→'));
-  $('start').lastChild.setAttribute('aria-hidden', 'true');
-  $('lifted').hidden = !active;
-  if (active) {
-    const bounds = detailById.get(pinned)?.bounds ?? currentStep().bounds;
+  world.classList.toggle('focused', !overview);
+  $('lifted').hidden = overview;
+  if (!overview) {
+    const bounds = entryById.get(activeId).bounds;
     position($('lifted'), bounds);
     $('lifted').querySelector('svg')?.setAttribute('viewBox', bounds.join(' '));
   }
-  renderContents(); renderHotspots(); renderSelection();
-  revealCurrentEntry();
-}
-function revealCurrentEntry() {
-  const current = $('toc').querySelector('[aria-current="location"]');
-  if (current) {
-    const scroller = $('notes-scroll'), a = current.getBoundingClientRect(), b = scroller.getBoundingClientRect();
-    if (a.top < b.top || a.bottom > b.bottom) scroller.scrollTop += a.top - b.top - 16;
+  $('start').firstChild.textContent = detached || overview ? 'Resume reading ' : 'Whole canvas ';
+  $('chapter-label').textContent = macros.find(macro => macro.id === currentStep().macro).title;
+  for (const block of $('article').children) block.classList.toggle('is-current', block.dataset.entry === activeId);
+  for (const link of $('toc').querySelectorAll('button')) {
+    if (link.dataset.entry === activeId) link.setAttribute('aria-current', 'location');
+    else link.removeAttribute('aria-current');
   }
+  for (const button of $('hotspots').children) button.classList.toggle('is-available', currentStep().details.includes(button.dataset.entry));
+  renderSelection();
 }
-for (const macro of macros) {
-  const button = make('button', macro.title, 'macro-tab');
-  button.type = 'button'; button.dataset.macro = macro.id;
-  button.addEventListener('click', () => go(steps.findIndex(s => s.id === macro.entry)));
-  $('macro-tabs').append(button);
-}
-$('start').addEventListener('click', () => go(stepIndex < 0 ? 0 : -1));
-document.querySelector('.skip-link').addEventListener('click', event => { event.preventDefault(); $('macro-tabs').querySelector('button').focus({ preventScroll: true }); });
+$('contents-toggle').addEventListener('click', () => {
+  const open = $('contents-menu').hidden;
+  $('contents-menu').hidden = !open; $('contents-toggle').setAttribute('aria-expanded', String(open));
+  if (open) {
+    const current = $('toc').querySelector('[aria-current="location"]');
+    if (current) {
+      const a = current.getBoundingClientRect(), b = $('contents-menu').getBoundingClientRect();
+      $('contents-menu').scrollTop += a.top - b.top - 24;
+    }
+  }
+});
+document.addEventListener('pointerdown', event => {
+  if (!event.target.closest('#contents-menu,#contents-toggle')) closeContents();
+});
+$('start').addEventListener('click', () => {
+  if (detached || overview) { cancelJump(); activate(activeId, { force: true }); }
+  else { overview = true; detached = true; preview = null; render(); setCamera(fitBounds(allBounds, viewport.clientWidth, viewport.clientHeight, 30), true); }
+});
+document.querySelector('.skip-link').addEventListener('click', event => { event.preventDefault(); reader.focus({ preventScroll: true }); });
+reader.addEventListener('scroll', () => {
+  if (jumpTarget) { clearTimeout(jumpTimer); jumpTimer = setTimeout(finishJump, 120); }
+  else scheduleReading();
+}, { passive: true });
+reader.addEventListener('scrollend', finishJump);
+reader.addEventListener('wheel', () => { cancelJump(); scheduleReading(); }, { passive: true });
+reader.addEventListener('touchstart', () => { cancelJump(); scheduleReading(); }, { passive: true });
+reader.addEventListener('pointerdown', () => { cancelJump(); scheduleReading(); });
 window.addEventListener('hashchange', readRoute);
 window.addEventListener('popstate', readRoute);
 document.addEventListener('keydown', event => {
   if (event.defaultPrevented || event.metaKey || event.ctrlKey || event.altKey || event.target.closest('input,textarea,select,[contenteditable="true"]')) return;
-  const nativeSpace = event.key === ' ' && event.target.closest('button,a,summary');
-  if (event.key === 'Escape') { event.preventDefault(); if (pinned) go(stepIndex); else if (stepIndex >= 0) go(-1); return; }
-  if (event.key === 'ArrowRight' || event.key === 'ArrowLeft' || (event.key === ' ' && !nativeSpace)) {
-    if (stepIndex < 0) return;
-    event.preventDefault(); if (!event.repeat) advance(event.key === 'ArrowLeft' || (event.key === ' ' && event.shiftKey) ? -1 : 1);
+  if (event.key === 'Escape') {
+    event.preventDefault();
+    if (!$('contents-menu').hidden) closeContents();
+    else if (detached || overview) activate(activeId, { force: true });
+    else if (pinned) go(stepIndex);
+    return;
+  }
+  if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
+    event.preventDefault(); if (!event.repeat) go(stepIndex + (event.key === 'ArrowLeft' ? -1 : 1));
+  } else if ([' ', 'PageDown', 'PageUp', 'ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key) && !event.target.closest('button,a,#contents-menu')) {
+    event.preventDefault(); cancelJump();
+    const direction = ['PageUp', 'ArrowUp'].includes(event.key) || (event.key === ' ' && event.shiftKey) ? -1 : 1;
+    const amount = event.key.startsWith('Arrow') ? 56 : reader.clientHeight * .72;
+    if (event.key === 'Home' || event.key === 'End') reader.scrollTo({ top: event.key === 'Home' ? 0 : reader.scrollHeight, behavior: 'instant' });
+    else reader.scrollBy({ top: amount * direction, behavior: reducedMotion.matches ? 'instant' : 'smooth' });
+    scheduleReading();
   } else if (event.key === '+' || event.key === '=') { event.preventDefault(); zoom(1.2); }
   else if (event.key === '-') { event.preventDefault(); zoom(1 / 1.2); }
-  else if (event.key.toLowerCase() === 'f') { event.preventDefault(); fit(); }
+  else if (event.key.toLowerCase() === 'f') { event.preventDefault(); activate(activeId, { force: true }); }
 });
 function localPoint(event) { const rect = viewport.getBoundingClientRect(); return { x: event.clientX - rect.left, y: event.clientY - rect.top }; }
 function resetGesture() {
@@ -255,8 +314,9 @@ viewport.addEventListener('wheel', event => {
   const factor = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? viewport.clientHeight : 1;
   if (event.ctrlKey || event.metaKey) zoom(Math.exp(-event.deltaY * factor * .008), localPoint(event));
   else {
-    manuallyMoved();
-    setCamera({ ...camera, x: camera.x - (event.shiftKey ? event.deltaY : event.deltaX) * factor, y: camera.y - (event.shiftKey ? event.deltaX : event.deltaY) * factor });
+    cancelJump();
+    reader.scrollBy({ top: (event.deltaY || event.deltaX) * factor, behavior: 'instant' });
+    scheduleReading();
   }
 }, { passive: false });
 viewport.addEventListener('dblclick', event => { if (!event.target.closest('button')) zoom(event.shiftKey ? .65 : 1.5, localPoint(event), true); });
@@ -265,7 +325,11 @@ viewport.addEventListener('dblclick', event => { if (!event.target.closest('butt
 viewport.addEventListener('scroll', () => {
   if (viewport.scrollTop || viewport.scrollLeft) viewport.scrollTo(0, 0);
 });
-new ResizeObserver(() => { fit(false); revealCurrentEntry(); }).observe(viewport);
+const layoutObserver = new ResizeObserver(() => {
+  measureReading();
+  if (!detached && !overview) { syncReading(); fit(false); }
+});
+layoutObserver.observe(viewport); layoutObserver.observe(reader);
 
 
 async function loadArtwork() {
@@ -316,10 +380,10 @@ async function loadArtwork() {
     focus.setAttribute('preserveAspectRatio', 'none'); focus.append(use.cloneNode());
     $('lifted').replaceChildren(focus);
     await document.fonts.ready;
-    render(); fit(false); $('loading').hidden = true;
+    measureReading(); render(); fit(false); $('loading').hidden = true;
   } catch (error) {
     console.error(error); $('loading').hidden = true; $('asset-error').hidden = false;
   }
 }
 $('retry').addEventListener('click', loadArtwork);
-readRoute(); loadArtwork();
+buildArticle(); buildContents(); buildHotspots(); measureReading(); readRoute(); loadArtwork();

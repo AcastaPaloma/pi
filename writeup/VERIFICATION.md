@@ -21,3 +21,13 @@ Main architecture regions render from the provided vector SVG. The source SVG's 
 - Reviewed desktop and 390 × 844 phone layouts. Verified VLM-loss overview, FAST input, logits/probabilities, EAM flow loss, and the negative-log-likelihood detail crop. Empty detail commentary remains hidden.
 - Confirmed independent commentary/contents scrolling, current-entry visibility after resizing, and no phone page overflow or browser errors.
 - Versioned entry, CSS, and content URLs prevent stale cached modules from hiding new stops for returning readers.
+
+## October 14 — text-led reading and subgoal policy
+
+- Added the supplied subgoal-generation SVG with seven main stops and 22 component destinations. All 110 canvas destinations now have matching article sections.
+- Desktop uses equal canvas/article columns. Phone uses a fixed canvas above an independently scrolling article. Unwritten sections use lorem ipsum; the six supplied prose sections remain exact.
+- Eleven Node tests pass, including exact author-copy preservation, one-to-one article destinations, subgoal route order, and deterministic reading position selection. JavaScript syntax and layout scan pass.
+- Reviewed Chrome at 1440 × 900 and 390 × 844. Confirmed no page overflow, readable author prose and MathML, corrected observation framing, and focus synchronization after resizing.
+- Exercised article scrolling, canvas-wheel reading, free drag followed by automatic return, contents jumps, diagram-click-to-paragraph alignment, main-section keyboard navigation, and browser Back.
+- Final-version browser diagnostics contain no new errors. Earlier cached intermediate scripts were replaced using the coordinated reading-r3 entry/module version.
+- Safari and Firefox were not separately exercised.

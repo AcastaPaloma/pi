@@ -1,11 +1,11 @@
-// Each supplied drawing is segmented into named stops and optional components.
-// Coordinates are logical; source layers retain their native SVG coordinates.
+// Supplied SVGs, named reading destinations, and verbatim author commentary.
+// Empty annotation arrays render lorem ipsum until the author supplies text.
 export const artwork = {
   "src": "./assets/full-backbone.svg",
   "width": 2048,
-  "height": 1591.4394510756329,
+  "height": 1740.6368996139734,
   "nativeWidth": 4118.032888760241,
-  "nativeHeight": 3200,
+  "nativeHeight": 3500,
   "layers": [
     {
       "id": "base",
@@ -36,12 +36,20 @@ export const artwork = {
       "y": 2320,
       "scale": 0.63,
       "clip": "M0 0H1105V630H0Z"
+    },
+    {
+      "id": "subgoal-policy",
+      "src": "./assets/subgoal-generation.svg",
+      "x": 10,
+      "y": 2320,
+      "scale": 1.1
     }
   ]
 };
 
 export const macros = [
   {id:'ingestion',title:'Ingestion',entry:'context'},
+  {id:'subgoal-policy',title:'Subgoal policy',entry:'subgoal-policy'},
   {id:'decision',title:'Decision model',entry:'decision'},
 ];
 
@@ -138,6 +146,118 @@ export const steps = [
     ],
     "details": [
       "context-output"
+    ]
+  },
+  {
+    "id": "subgoal-policy",
+    "title": "High-level semantic subgoal policy",
+    "macro": "subgoal-policy",
+    "bounds": [
+      4.973,
+      1153.794,
+      1189.85,
+      571.675
+    ],
+    "details": []
+  },
+  {
+    "id": "sg-observation",
+    "title": "Full observation",
+    "macro": "subgoal-policy",
+    "bounds": [
+      15.914,
+      1224.911,
+      415.764,
+      404.824
+    ],
+    "details": [
+      "sg-current-frame",
+      "sg-patches",
+      "sg-position"
+    ]
+  },
+  {
+    "id": "sg-vision",
+    "title": "Visual encoding",
+    "macro": "subgoal-policy",
+    "bounds": [
+      238.02,
+      1287.276,
+      436.005,
+      421.781
+    ],
+    "details": [
+      "sg-backbone",
+      "sg-spatial-attention",
+      "sg-pooling",
+      "sg-projection",
+      "sg-camera-tokens"
+    ]
+  },
+  {
+    "id": "sg-text",
+    "title": "Text modalities",
+    "macro": "subgoal-policy",
+    "bounds": [
+      712.865,
+      1230.929,
+      423.422,
+      256.023
+    ],
+    "details": [
+      "sg-task",
+      "sg-history",
+      "sg-metadata",
+      "sg-text-tokenizer",
+      "sg-text-embedding"
+    ]
+  },
+  {
+    "id": "sg-context",
+    "title": "Combine image and text context",
+    "macro": "subgoal-policy",
+    "bounds": [
+      704.66,
+      1482.575,
+      187.094,
+      62.912
+    ],
+    "details": [
+      "sg-context-concat",
+      "sg-context-tensor"
+    ]
+  },
+  {
+    "id": "sg-next-subtask",
+    "title": "Next subtask",
+    "macro": "subgoal-policy",
+    "bounds": [
+      967.794,
+      1296.576,
+      210.617,
+      230.311
+    ],
+    "details": [
+      "sg-target-text",
+      "sg-target-tokenizer",
+      "sg-target-embedding",
+      "sg-combined-tokens"
+    ]
+  },
+  {
+    "id": "sg-prediction",
+    "title": "Subgoal prediction & loss",
+    "macro": "subgoal-policy",
+    "bounds": [
+      1041.647,
+      1523.604,
+      152.629,
+      119.806
+    ],
+    "details": [
+      "sg-transformer",
+      "sg-logits",
+      "sg-cross-entropy"
     ]
   },
   {
@@ -1074,10 +1194,251 @@ export const details = [
       54.706,
       21.385
     ]
+  },
+  {
+    "id": "sg-current-frame",
+    "step": "sg-observation",
+    "title": "Current frame · three cameras",
+    "bounds": [
+      26.856,
+      1271.411,
+      377.47,
+      96.282
+    ]
+  },
+  {
+    "id": "sg-patches",
+    "step": "sg-observation",
+    "title": "Patchification",
+    "bounds": [
+      26.856,
+      1375.899,
+      208.976,
+      246.723
+    ]
+  },
+  {
+    "id": "sg-position",
+    "step": "sg-observation",
+    "title": "Positional embedding",
+    "bounds": [
+      242.396,
+      1368.24,
+      180.529,
+      128.011
+    ]
+  },
+  {
+    "id": "sg-backbone",
+    "step": "sg-vision",
+    "title": "SigLIP · 27 transformer layers",
+    "bounds": [
+      238.567,
+      1542.204,
+      398.805,
+      167.947
+    ]
+  },
+  {
+    "id": "sg-spatial-attention",
+    "step": "sg-vision",
+    "title": "Spatial attention",
+    "bounds": [
+      259.355,
+      1582.139,
+      119.258,
+      96.829
+    ]
+  },
+  {
+    "id": "sg-pooling",
+    "step": "sg-vision",
+    "title": "Average pooling",
+    "bounds": [
+      488.572,
+      1401.611,
+      165.758,
+      99.017
+    ]
+  },
+  {
+    "id": "sg-projection",
+    "step": "sg-vision",
+    "title": "Linear(1152, 2560)",
+    "bounds": [
+      491.307,
+      1352.375,
+      166.852,
+      50.329
+    ]
+  },
+  {
+    "id": "sg-camera-tokens",
+    "step": "sg-vision",
+    "title": "Flatten camera tokens",
+    "bounds": [
+      490.213,
+      1290.011,
+      176.152,
+      59.082
+    ]
+  },
+  {
+    "id": "sg-task",
+    "step": "sg-text",
+    "title": "Task",
+    "bounds": [
+      847.989,
+      1280.711,
+      140.594,
+      19.147
+    ]
+  },
+  {
+    "id": "sg-history",
+    "step": "sg-text",
+    "title": "Previous subtasks",
+    "bounds": [
+      724.901,
+      1297.123,
+      164.664,
+      86.435
+    ]
+  },
+  {
+    "id": "sg-metadata",
+    "step": "sg-text",
+    "title": "Episode metadata",
+    "bounds": [
+      890.112,
+      1295.481,
+      90.264,
+      49.235
+    ]
+  },
+  {
+    "id": "sg-text-tokenizer",
+    "step": "sg-text",
+    "title": "Tokenize",
+    "bounds": [
+      718.883,
+      1391.764,
+      165.211,
+      45.953
+    ]
+  },
+  {
+    "id": "sg-text-embedding",
+    "step": "sg-text",
+    "title": "Embed",
+    "bounds": [
+      724.901,
+      1439.905,
+      166.852,
+      50.876
+    ]
+  },
+  {
+    "id": "sg-context-concat",
+    "step": "sg-context",
+    "title": "Concatenate context",
+    "bounds": [
+      712.318,
+      1485.31,
+      90.812,
+      27.353
+    ]
+  },
+  {
+    "id": "sg-context-tensor",
+    "step": "sg-context",
+    "title": "[B, L + 256 × 3, 2560]",
+    "bounds": [
+      711.224,
+      1506.646,
+      176.152,
+      35.012
+    ]
+  },
+  {
+    "id": "sg-target-text",
+    "step": "sg-next-subtask",
+    "title": "Next subtask text",
+    "bounds": [
+      1012.653,
+      1297.123,
+      100.111,
+      38.841
+    ]
+  },
+  {
+    "id": "sg-target-tokenizer",
+    "step": "sg-next-subtask",
+    "title": "Tokenize target",
+    "bounds": [
+      1013.2,
+      1343.075,
+      144.423,
+      88.076
+    ]
+  },
+  {
+    "id": "sg-target-embedding",
+    "step": "sg-next-subtask",
+    "title": "Embed target",
+    "bounds": [
+      962.324,
+      1432.246,
+      183.264,
+      51.423
+    ]
+  },
+  {
+    "id": "sg-combined-tokens",
+    "step": "sg-next-subtask",
+    "title": "Concatenate target and context",
+    "bounds": [
+      916.371,
+      1489.687,
+      261.493,
+      36.653
+    ]
+  },
+  {
+    "id": "sg-transformer",
+    "step": "sg-prediction",
+    "title": "34 transformer blocks",
+    "bounds": [
+      1082.676,
+      1523.604,
+      111.6,
+      30.088
+    ]
+  },
+  {
+    "id": "sg-logits",
+    "step": "sg-prediction",
+    "title": "[B, L′, 262208] · logits",
+    "bounds": [
+      1045.476,
+      1555.881,
+      120.353,
+      18.6
+    ]
+  },
+  {
+    "id": "sg-cross-entropy",
+    "step": "sg-prediction",
+    "title": "Cross-entropy loss",
+    "bounds": [
+      1044.382,
+      1594.175,
+      124.729,
+      47.047
+    ]
   }
 ];
 
-// Only verbatim author copy. Empty entries are ready for later writing.
 export const annotations = {
   "vlm": [
     "But it hasn't necessarily learned the detailed relationship between those observations and a robot's 50-step motor trajectory."
@@ -1178,5 +1539,34 @@ export const annotations = {
   "adaptive-rmsnorm": [],
   "ff-activation": [],
   "transformer-vlm-output": [],
-  "transformer-eam-output": []
+  "transformer-eam-output": [],
+  "subgoal-policy": [],
+  "sg-observation": [],
+  "sg-vision": [],
+  "sg-text": [],
+  "sg-context": [],
+  "sg-next-subtask": [],
+  "sg-prediction": [],
+  "sg-current-frame": [],
+  "sg-patches": [],
+  "sg-position": [],
+  "sg-backbone": [],
+  "sg-spatial-attention": [],
+  "sg-pooling": [],
+  "sg-projection": [],
+  "sg-camera-tokens": [],
+  "sg-task": [],
+  "sg-history": [],
+  "sg-metadata": [],
+  "sg-text-tokenizer": [],
+  "sg-text-embedding": [],
+  "sg-context-concat": [],
+  "sg-context-tensor": [],
+  "sg-target-text": [],
+  "sg-target-tokenizer": [],
+  "sg-target-embedding": [],
+  "sg-combined-tokens": [],
+  "sg-transformer": [],
+  "sg-logits": [],
+  "sg-cross-entropy": []
 };
