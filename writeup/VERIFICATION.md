@@ -31,3 +31,13 @@ Main architecture regions render from the provided vector SVG. The source SVG's 
 - Exercised article scrolling, canvas-wheel reading, free drag followed by automatic return, contents jumps, diagram-click-to-paragraph alignment, main-section keyboard navigation, and browser Back.
 - Final-version browser diagnostics contain no new errors. Earlier cached intermediate scripts were replaced using the coordinated reading-r3 entry/module version.
 - Safari and Firefox were not separately exercised.
+
+## October 14 — text editor and independent exploration
+
+- Added a local editor at /editor on port 4174. It edits section bodies, with bold, italic, underline, three font families, indentation, lists, and native undo/redo.
+- Copy overrides use a validated text tree. GitHub publication updates only writeup/text.json, with revision conflict detection, origin/Host/session-token checks, and a deployment status indicator.
+- Fourteen tests pass, including publisher authorization boundaries, fixed write path, malformed formatting, stale revisions, unchanged-save behavior, and deployment status.
+- Verified formatting and indentation survive local draft restoration. Restored the original author styling after exercising formatting.
+- Verified canvas wheel panning leaves article scroll unchanged, keeps exploration detached, and returns to the reading position upon entering the reader.
+- Reviewed desktop and 390 × 844 phone editor layouts; no horizontal overflow. Layout detector is clean.
+- Original author transcript remains unchanged. Saved text overrides are separate from diagram geometry and the source transcription.

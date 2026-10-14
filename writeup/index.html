@@ -7,15 +7,15 @@
   <meta name="description" content="An interactive visual canvas of Pi, from context ingestion to action.">
   <title>Pi · Kuan Yi Wang</title>
   <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./style.css?v=20261014-reading-r3">
-  <script type="module" src="./app.js?v=20261014-reading-r3"></script>
+  <link rel="stylesheet" href="./style.css?v=20261014-editor-r1">
+  <script type="module" src="./app.js?v=20261014-editor-r1"></script>
 </head>
 <body>
   <a class="skip-link" href="#reader">Skip to write-up</a>
   <main class="workspace">
     <section class="canvas-shell" aria-label="Interactive Pi architecture canvas">
       <button class="start-button" id="start" type="button">Whole canvas <span aria-hidden="true">↖</span></button>
-      <div class="viewport" id="viewport" tabindex="0" aria-label="Diagram canvas. Drag to pan; pinch or use plus and minus to zoom. Scroll to read and follow the drawing. Drag to explore. Left and right arrows jump between major sections.">
+      <div class="viewport" id="viewport" tabindex="0" aria-label="Diagram canvas. Drag to pan; pinch or use plus and minus to zoom. Scroll or drag to explore. Return to the reading panel to follow the text. Left and right arrows jump between major sections.">
         <div class="world" id="world">
           <div id="artwork" role="img" aria-label="Pi architecture: spatial and semantic context ingestion, VLM backbone, flow-matching model, expanded transformer layer, VLM and EAM losses, and the high-level semantic subgoal policy."></div>
           <div class="lifted-region" id="lifted" aria-hidden="true" hidden></div>

@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "edit": "node editor-server.mjs",
     "dev": "python3 -m http.server 4173 --bind 127.0.0.1",
     "test": "node --test tests/*.test.mjs"
   }

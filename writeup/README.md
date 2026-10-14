@@ -13,16 +13,30 @@ Run npm run dev in this directory, then open <http://127.0.0.1:4173/>. Any stati
 ## Reading and navigation
 
 - Desktop uses an equal split: canvas left, continuous article right. Phones keep the canvas above the article.
-- Scrolling either half advances the article and focuses the diagram associated with the passage at the reading line. Long passages retain their diagram until the next heading crosses that line.
-- Drag to explore the canvas. Pinch, Ctrl/Command-wheel, or + / − zooms. The next reading scroll returns the camera to the current passage. The floating button also resumes reading or shows the whole canvas.
+- Scrolling the reading panel focuses the diagram associated with the passage at the reading line. Long passages retain their diagram until the next heading crosses that line.
+- Drag or scroll over the canvas to explore freely. Pinch, Ctrl/Command-wheel, or + / − zooms. Camera tracking resumes when you return to the reading panel (pointer, focus, or reading scroll). Canvas scrolling never moves the article. The floating button also resumes reading or shows the whole canvas.
 - Clicking a diagram component scrolls to its matching article section. Hover outlines the target without changing the reading position.
 - Contents provides direct links to all 29 main sections and 81 components across ingestion, subgoal policy, and decision model.
 - Left/right arrows jump between main sections. Space, Page Up/Down, and up/down arrows scroll through the article. Escape closes contents, resumes a detached camera, or returns from a detail to its parent. F fits the current passage.
 - URLs such as #observation/patches restore both text and camera. Browser back/forward works. Reduced motion disables camera and article transitions.
 
+## Text editor
+
+Run **npm run edit** in writeup/, then open <http://127.0.0.1:4174/editor>. The local editor runs beside the same canvas. Choose a section from Contents, click its text, and edit directly. Select text to apply bold, italic, underline, or serif/sans-serif/monospace fonts. Indent/Outdent, lists, Undo, and Redo are available. Paste inserts plain text.
+
+Click **Save to live** (or Command/Ctrl-S). It updates only writeup/text.json on the repository's main branch and triggers the existing Pages workflow. The status moves from saving to publishing to published. Publication normally takes a minute or two; it is not instantaneous. Existing site visitors receive the new copy on reload.
+
+The editor uses the computer's existing GitHub CLI login (gh auth login if needed). It listens only on 127.0.0.1, keeps GitHub credentials outside the browser, and is not included in the public Pages site. The publisher's sole writable path is writeup/text.json. It uses the [GitHub Contents API](https://docs.github.com/en/rest/repos/contents#create-or-update-file-contents), with a file SHA check to reject stale edits.
+
+Unsaved changes are kept in local browser storage. Reload restores a draft when its base revision still matches GitHub. If another edit has been saved, the older draft remains downloadable and the editor loads the latest text. Conflicting saves retain the draft and show a recovery message.
+
+The toolbar uses the browser's native contenteditable editing commands to retain [native undo history](https://developer.mozilla.org/en-US/docs/Web/API/Document/execCommand). The saved document is a validated tree of text and allowed formatting, not raw HTML. Fonts come from the system; no font downloads or editor packages are required.
+
+The editor fetches current text from GitHub, so publishing does not modify or commit unrelated local work. After an editor save, use git pull --ff-only before making later code changes from this checkout.
+
 ## Author commentary
 
-author-copy.json preserves the supplied transcript; tests prevent unintended edits. Each destination has an explicit annotations entry in content.js. Supplied paragraphs appear verbatim. Empty arrays render lorem ipsum from reading.mjs until the author supplies text.
+author-copy.json preserves the supplied transcript; tests prevent unintended edits. Each destination has an explicit annotations entry in content.js. Supplied paragraphs appear verbatim until deliberately edited. Empty arrays render lorem ipsum from reading.mjs until the author supplies text. Published edits in text.json override individual section bodies; headings, diagram geometry, and section IDs stay fixed.
 
 Text is inserted as plain text. The supplied flow-loss expression is rendered with MathML. Do not draft extra explanatory prose.
 

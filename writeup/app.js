@@ -1,6 +1,8 @@
-import { artwork, macros, steps, details, annotations } from './content.js?v=20261014-reading-r3';
+import { artwork, macros, steps, details, annotations } from './content.js?v=20261014-editor-r1';
 import { clamp, fitBounds, zoomAt, constrainCamera } from './camera.mjs';
-import { buildReadingEntries, readingIndex } from './reading.mjs?v=20261014-reading-r3';
+import { buildReadingEntries, readingIndex } from './reading.mjs?v=20261014-editor-r1';
+
+import { validateCopy, renderNodes } from './rich-text.mjs';
 
 const $ = id => document.getElementById(id);
 const viewport = $('viewport'), world = $('world'), reader = $('reader');
@@ -10,6 +12,7 @@ const entries = buildReadingEntries(steps, details, annotations);
 const entryById = new Map(entries.map(item => [item.id, item]));
 const allBounds = [0, 0, artwork.width, artwork.height];
 const svgNS = 'http://www.w3.org/2000/svg';
+let ready = false;
 let stepIndex = 0, pinned = null, preview = null, activeId = steps[0].id;
 let camera = { x: 0, y: 0, scale: 1 }, animation = 0, frame = 0;
 let hoverTimer = 0, leaveTimer = 0, suppressHoverUntil = 0, moved = false;
@@ -86,7 +89,7 @@ function measureReading() {
 }
 function readingAnchor() { return Math.min(150, reader.clientHeight * .24); }
 function syncReading() {
-  if (jumpTarget) return;
+  if (!ready || jumpTarget) return;
   const entry = entries[readingIndex(tops, reader.scrollTop, readingAnchor())];
   activate(entry.id);
 }
@@ -131,7 +134,8 @@ function paragraph(text) {
   const letter = document.createElementNS(ns, 'mi'); letter.textContent = 'ℒ';
   const label = document.createElementNS(ns, 'mtext'); label.textContent = 'flow';
   const period = document.createElementNS(ns, 'mo'); period.textContent = '.';
-  sub.append(letter, label); math.append(sub, period); return math;
+  sub.append(letter, label); math.append(sub, period);
+  const holder = make('div'); holder.dataset.equation = 'flow-loss'; holder.contentEditable = 'false'; holder.append(math); return holder;
 }
 function buildArticle() {
   const fragment = document.createDocumentFragment();
@@ -141,7 +145,9 @@ function buildArticle() {
     block.dataset.placeholder = String(entry.isPlaceholder);
     const heading = make(entry.detail ? 'h3' : 'h2', entry.title);
     heading.id = `title-${entry.id}`; block.setAttribute('aria-labelledby', heading.id);
-    block.append(heading, ...entry.paragraphs.map(paragraph)); fragment.append(block);
+    const body = make('div', undefined, 'passage-body'); body.dataset.section = entry.id;
+    body.append(...entry.paragraphs.map(paragraph));
+    block.append(heading, body); fragment.append(block);
   }
   $('article').replaceChildren(fragment);
 }
@@ -229,6 +235,8 @@ $('start').addEventListener('click', () => {
   else { overview = true; detached = true; preview = null; render(); setCamera(fitBounds(allBounds, viewport.clientWidth, viewport.clientHeight, 30), true); }
 });
 document.querySelector('.skip-link').addEventListener('click', event => { event.preventDefault(); reader.focus({ preventScroll: true }); });
+reader.addEventListener('pointerenter', () => { if (detached || overview) { cancelJump(); syncReading(); } });
+reader.addEventListener('focusin', () => { if (detached || overview) { cancelJump(); syncReading(); } });
 reader.addEventListener('scroll', () => {
   if (jumpTarget) { clearTimeout(jumpTimer); jumpTimer = setTimeout(finishJump, 120); }
   else scheduleReading();
@@ -236,7 +244,7 @@ reader.addEventListener('scroll', () => {
 reader.addEventListener('scrollend', finishJump);
 reader.addEventListener('wheel', () => { cancelJump(); scheduleReading(); }, { passive: true });
 reader.addEventListener('touchstart', () => { cancelJump(); scheduleReading(); }, { passive: true });
-reader.addEventListener('pointerdown', () => { cancelJump(); scheduleReading(); });
+reader.addEventListener('pointerdown', event => { if (event.target.closest('[contenteditable="true"]')) return; cancelJump(); scheduleReading(); });
 window.addEventListener('hashchange', readRoute);
 window.addEventListener('popstate', readRoute);
 document.addEventListener('keydown', event => {
@@ -314,9 +322,9 @@ viewport.addEventListener('wheel', event => {
   const factor = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? viewport.clientHeight : 1;
   if (event.ctrlKey || event.metaKey) zoom(Math.exp(-event.deltaY * factor * .008), localPoint(event));
   else {
-    cancelJump();
-    reader.scrollBy({ top: (event.deltaY || event.deltaX) * factor, behavior: 'instant' });
-    scheduleReading();
+    cancelJump(); manuallyMoved();
+    setCamera({ ...camera, x: camera.x - event.deltaX * factor, y: camera.y - event.deltaY * factor });
+
   }
 }, { passive: false });
 viewport.addEventListener('dblclick', event => { if (!event.target.closest('button')) zoom(event.shiftKey ? .65 : 1.5, localPoint(event), true); });
@@ -386,4 +394,21 @@ async function loadArtwork() {
   }
 }
 $('retry').addEventListener('click', loadArtwork);
-buildArticle(); buildContents(); buildHotspots(); measureReading(); readRoute(); loadArtwork();
+export function applyCopy(doc) {
+  validateCopy(doc, new Set(entries.map(entry => entry.id)));
+  for (const entry of entries) {
+    const body = document.querySelector('.passage-body[data-section="' + entry.id + '"]');
+    if (Object.hasOwn(doc.sections, entry.id)) body.replaceChildren(renderNodes(doc.sections[entry.id], document));
+    else body.replaceChildren(...entry.paragraphs.map(paragraph));
+  }
+  measureReading();
+}
+export function previewPassage(id) { activate(id, { force: true }); }
+export function focusPassage(id) { jumpTo(id, { historyMode: 'replace', animate: false }); }
+export function refreshReadingMeasurements() { measureReading(); }
+buildArticle(); buildContents(); buildHotspots();
+try {
+  const response = await fetch('./text.json', { cache: 'no-cache' });
+  if (response.ok) applyCopy(await response.json());
+} catch (error) { console.warn('Saved text could not load; showing the original copy.', error); }
+ready = true; measureReading(); readRoute(); loadArtwork();
