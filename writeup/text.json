@@ -10,6 +10,71 @@
           }
         ]
       }
+    ],
+    "context": [
+      {
+        "tag": "p",
+        "children": [
+          {
+            "text": "This is the entire ingestion engine (fancy fancy words). "
+          },
+          {
+            "tag": "br",
+            "children": []
+          },
+          {
+            "text": "During training, provides all the context needed to predict the future 50 actions the robot needs to take:"
+          },
+          {
+            "tag": "br",
+            "children": []
+          },
+          {
+            "tag": "ul",
+            "children": [
+              {
+                "tag": "li",
+                "children": [
+                  {
+                    "text": "Full images from 3 (or 4) cameras;"
+                  },
+                  {
+                    "tag": "br",
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "tag": "li",
+                "children": [
+                  {
+                    "text": "Text, which includes instructions & metadata;"
+                  }
+                ]
+              },
+              {
+                "tag": "li",
+                "children": [
+                  {
+                    "text": "Proprioception, which tells the robot where IT is;"
+                  }
+                ]
+              },
+              {
+                "tag": "li",
+                "children": [
+                  {
+                    "text": "Visual subgoals, provided "
+                  },
+                  {
+                    "text": "by the BAGEL world model (ehhh);"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
     ]
   }
 }
