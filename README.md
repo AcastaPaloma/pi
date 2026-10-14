@@ -1,5 +1,7 @@
 # A small SO-101 manipulation playground
 
+**Interactive Pi write-up:** [open the canvas](https://acastapaloma.github.io/pi/) · [editing guide](writeup/README.md). For a local preview, run `npm run dev --prefix writeup` and open <http://127.0.0.1:4173/>.
+
 **For your encoder: [128 observations directly in Python](docs/BATCH_ENCODER.md).** Use `RobotBatch(...).observations()` for static simulated scenes or `ObservationBatch(...).observations()` for fast cached real SO-101 samples. Both return batched RGB images, proprioception, and text; neither includes a model or policy. The examples generate previews and small real-data caches in `outputs/`.
 
 Two SO-101 follower arms, a table, colored cubes/cylinders, and four cameras. Start by reaching a green target; then try picking up the block. Everything runs locally without a learned model.

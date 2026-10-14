@@ -1,0 +1,44 @@
+name: Deploy Pi canvas
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'writeup/**'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v6
+      - name: Verify canvas
+        run: |
+          npm --prefix writeup test
+          node --check writeup/app.js
+      - uses: actions/configure-pages@v5
+      - name: Prepare static site
+        run: |
+          mkdir -p _site/assets
+          cp writeup/index.html writeup/style.css writeup/app.js writeup/content.js writeup/camera.mjs _site/
+          cp writeup/assets/*.svg _site/assets/
+          touch _site/.nojekyll
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
