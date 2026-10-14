@@ -75,6 +75,219 @@
           }
         ]
       }
+    ],
+    "observation": [
+      {
+        "tag": "p",
+        "children": [
+          {
+            "text": "This follow a standard VLM encoder architecture. "
+          }
+        ]
+      },
+      {
+        "tag": "p",
+        "children": [
+          {
+            "text": "Images are captured in batches of 6 frames, patchified, infused with positional and temporal embeddings "
+          },
+          {
+            "tag": "u",
+            "children": [
+              {
+                "text": "(counterintuitive, yes, like why would you even patchify in the first place? lol)."
+              }
+            ]
+          },
+          {
+            "tag": "br",
+            "children": []
+          }
+        ]
+      },
+      {
+        "tag": "p",
+        "children": [
+          {
+            "text": "They go through 27 transformer layers, with spatial and temporal attention. The shape of the output remains [B, V, 6, 1024, 1152], where information has been shared among the V * 6 * 1024 patches of every batch. "
+          },
+          {
+            "tag": "strong",
+            "children": [
+              {
+                "text": "The concept of \"frame\" is lost at this point."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "tag": "p",
+        "children": [
+          {
+            "text": "To match dimensions downstream, the tensor is reduced to "
+          },
+          {
+            "tag": "br",
+            "children": []
+          },
+          {
+            "text": "[B, V, "
+          },
+          {
+            "tag": "strong",
+            "children": [
+              {
+                "text": "(1), "
+              }
+            ]
+          },
+          {
+            "text": "1024, 1152]."
+          }
+        ]
+      },
+      {
+        "tag": "p",
+        "children": [
+          {
+            "text": " "
+          }
+        ]
+      }
+    ],
+    "observation-input": [
+      {
+        "tag": "p",
+        "children": [
+          {
+            "text": "Hopefully, straightforward enough - it's a little video. "
+          }
+        ]
+      }
+    ],
+    "patches": [
+      {
+        "tag": "p",
+        "children": [
+          {
+            "text": "With patch size 14 x 14, there are 1024 patches per image channel."
+          },
+          {
+            "tag": "br",
+            "children": []
+          },
+          {
+            "text": "With 3 channels (RGB), each patch is effectively a 14 x 14 x 3 prism."
+          }
+        ]
+      },
+      {
+        "tag": "p",
+        "children": [
+          {
+            "text": "We flatten out the 14 x 14 x 3 = 588 values, project to 1152 through "
+          },
+          {
+            "tag": "strong",
+            "children": [
+              {
+                "text": "Linear(588, 1152), "
+              }
+            ]
+          },
+          {
+            "text": "and now call what used to be patches \"tokens\". "
+          },
+          {
+            "text": " "
+          }
+        ]
+      }
+    ],
+    "embeddings": [
+      {
+        "tag": "p",
+        "children": [
+          {
+            "text": "One of the weirder steps in a standard VLM encoder, where, at the cost of parallelism, position in the original video is completely lost. "
+          }
+        ]
+      },
+      {
+        "tag": "p",
+        "children": [
+          {
+            "text": "For a video, it's trivial to recognize where each patch belongs both in "
+          },
+          {
+            "tag": "strong",
+            "children": [
+              {
+                "text": "space and time"
+              }
+            ]
+          },
+          {
+            "text": ", but, flattened, we need to reintroduce them to the tensor. "
+          }
+        ]
+      },
+      {
+        "tag": "p",
+        "children": [
+          {
+            "tag": "u",
+            "children": [
+              {
+                "text": "Time and space embeddings can be fixed or learned parameters. "
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "vision-backbone": [
+      {
+        "tag": "p",
+        "children": [
+          {
+            "text": "27 layers of vanilla spatial attention, where every token can attend to every other token on the same frame. "
+          },
+          {
+            "tag": "br",
+            "children": []
+          },
+          {
+            "text": "Every 4 classical blocks, there is one temporal layer. "
+          },
+          {
+            "tag": "br",
+            "children": []
+          },
+          {
+            "text": "Pure multi-headed attention, with 1:1 Q/K ratios. "
+          },
+          {
+            "tag": "br",
+            "children": []
+          },
+          {
+            "text": "It is "
+          },
+          {
+            "tag": "strong",
+            "children": [
+              {
+                "text": "okay"
+              }
+            ]
+          },
+          {
+            "text": " to view all transformer blocks in this paper as black boxes."
+          }
+        ]
+      }
     ]
   }
 }
