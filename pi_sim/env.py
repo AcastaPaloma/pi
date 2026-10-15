@@ -112,7 +112,7 @@ class RobotEnv(gym.Env):
         self._rate_limit = self.joint_rate_limit * self.control_dt
         self._settle_steps = max(1, int(round(0.25 * control_hz)))
         self.camera_specs = load_camera_rig(camera_rig)
-        self.model = build_model(object_shape, object_color, camera_rig)
+        self.model = self._build_model(object_shape, object_color, camera_rig)
         self.data = mujoco.MjData(self.model)
         self._ik_data = mujoco.MjData(self.model)
         self.robot = {side: Arm(self, side) for side in ARMS}
@@ -143,6 +143,10 @@ class RobotEnv(gym.Env):
             obs["images"] = spaces.Dict({c: spaces.Box(0, 255, (image_size, image_size, 3), np.uint8) for c in self.camera_names})
         self.observation_space = spaces.Dict(obs)
         self._joint_targets = np.zeros((2, len(JOINTS)))
+
+    def _build_model(self, object_shape, object_color, camera_rig):
+        """Subclasses add task props here (see pi_sim.tasks)."""
+        return build_model(object_shape, object_color, camera_rig)
 
     # ------------------------------------------------------------------ visuals
     def _snapshot_visuals(self):

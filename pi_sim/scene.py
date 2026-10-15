@@ -76,7 +76,8 @@ def _fixed_camera(world, name, spec):
                       fromto=_numbers([x, y, -0.74, x, y, z + 0.035]), rgba="0.22 0.24 0.27 1", **common)
 
 
-def build_model(object_shape="cube", object_color="red", camera_rig=None) -> mujoco.MjModel:
+def build_model(object_shape="cube", object_color="red", camera_rig=None, extra_worldbody=None) -> mujoco.MjModel:
+    """`extra_worldbody`: optional XML string of bodies appended to the worldbody (task props)."""
     if object_shape not in ("cube", "cylinder") or object_color not in COLORS:
         raise ValueError("Choose cube/cylinder and red/green/blue/yellow")
     cameras = load_camera_rig(camera_rig)
@@ -109,6 +110,8 @@ def build_model(object_shape="cube", object_color="red", camera_rig=None) -> muj
     obj.set("type", "box" if object_shape == "cube" else "cylinder")
     obj.set("size", "0.015 0.015 0.015" if object_shape == "cube" else "0.015 0.015")
     obj.set("rgba", " ".join(map(str, COLORS[object_color])))
+    if extra_worldbody:
+        root.find("worldbody").extend(list(ET.fromstring(f"<extra>{extra_worldbody}</extra>")))
     for name in FIXED_CAMERAS:
         _fixed_camera(root.find("worldbody"), name, cameras[name])
     # Both bases point into the tabletop (+Y); one wrist camera per follower.

@@ -43,7 +43,8 @@ def quality_label(success: bool, style: str, mistakes: int) -> int:
 
 def record_episode(env: RobotEnv, out_dir: Path, *, seed: int, style: str = "clean",
                    image_size: int = 448, visual_randomization: bool = True,
-                   placement_range: str = "wide", jpeg_quality: int = 90, frame_stride: int = 1) -> dict:
+                   placement_range: str = "wide", jpeg_quality: int = 90, frame_stride: int = 1,
+                   teacher=ScriptedDemo) -> dict:
     """frame_stride > 1 saves camera frames only every `frame_stride` control steps.
 
     States and actions stay at the control rate. The history stride (1 s = 50 steps)
@@ -56,10 +57,11 @@ def record_episode(env: RobotEnv, out_dir: Path, *, seed: int, style: str = "cle
     speed, noise, _ = STYLES[style]
     obs, info = env.reset(seed=seed, options={"randomize": True, "visual_randomization": visual_randomization,
                                               "placement_range": placement_range})
-    demo = ScriptedDemo(env, rng=rng, speed=speed, noise=noise)
+    demo = teacher(env, rng=rng, speed=speed, noise=noise)
     for cam in env.camera_names:
         (out_dir / "frames" / cam).mkdir(parents=True)
     states, actions, subtasks, mistakes, phases, cube, goal, ee = [], [], [], [], [], [], [], []
+    extra = {k: [] for k in ("object2_position", "bin_position") if k in obs}
     start = time.monotonic()
     t = 0
     while True:
@@ -75,6 +77,8 @@ def record_episode(env: RobotEnv, out_dir: Path, *, seed: int, style: str = "cle
         cube.append(obs["cube_position"].copy())
         goal.append(obs["goal_position"].copy())
         ee.append(obs["ee_pose"].copy())
+        for k in extra:
+            extra[k].append(obs[k].copy())
         action = demo.action()
         obs, reward, terminated, truncated, info = env.step(action)
         actions.append(env.commanded_joint_targets.copy())
@@ -91,10 +95,13 @@ def record_episode(env: RobotEnv, out_dir: Path, *, seed: int, style: str = "cle
                         state=np.asarray(states, dtype=np.float32), action=np.asarray(actions, dtype=np.float32),
                         subtask_index=subtask_index, segment_id=segment_id.astype(np.int16),
                         mistake=np.asarray(mistakes, dtype=bool), cube_position=np.asarray(cube, dtype=np.float32),
-                        goal_position=np.asarray(goal, dtype=np.float32), ee_pose=np.asarray(ee, dtype=np.float32))
+                        goal_position=np.asarray(goal, dtype=np.float32), ee_pose=np.asarray(ee, dtype=np.float32),
+                        phase=np.asarray(phases), **{k: np.asarray(v, dtype=np.float32) for k, v in extra.items()})
     meta = {
         "schema_version": 1, "source": "pi_sim scripted", "task": info["instruction"],
-        "task_id": env.task, "object_shape": env.object_shape, "object_color": env.object_color,
+        "task_id": getattr(env, "task_name", env.task), "object_shape": env.object_shape, "object_color": env.object_color,
+        "second_color": getattr(env, "second_color", None), "active_side": getattr(env, "side", "left"),
+        "arms_touched": info.get("touched"),
         "control_mode": "joint", "control_hz": env.control_hz, "steps": t, "frame_stride": frame_stride, "success": success,
         "failure": info["failure"], "style": style, "speed_factor": speed, "target_noise_m": noise,
         "mistakes": demo.mistakes, "quality": quality_label(success, style, demo.mistakes),

@@ -1,0 +1,364 @@
+"""A gated ladder of tabletop tasks for the bimanual SO-101 rig, plus a two-arm scripted teacher.
+
+Rungs (TASKS order):
+  pick_place_any  one object anywhere; the arm on its side places it on the green disk on that side
+  bin             one object into an open container on the same side
+  handover        object on one side, container on the other: the near arm sets it on the grey
+                  relay pad in the middle and the far arm carries it into the container
+                  (success also requires that both grippers touched the object)
+  two_bins        one object per side; both arms put theirs into a shared central container at once
+
+`TaskEnv` extends `RobotEnv` with the props and success rules; `TaskTeacher` is a privileged-state
+scripted demonstrator (reads true object poses) that labels every step with a subtask sentence.
+Both object and container placement are seeded from the reset seed.
+"""
+from __future__ import annotations
+
+import numpy as np
+import mujoco
+
+from .env import RobotEnv
+from .scene import ARMS, COLORS, build_model
+
+TASKS = ("pick_place_any", "bin", "handover", "two_bins")
+BIN_INNER = 0.045          # half-width of the container's inner floor (9 cm square)
+BIN_WALL = 0.03            # wall height
+PARK = {"cube2": (0.46, 0.36), "bin": (2.0, 2.0), "relay_pad": (2.0, 2.0), "goal": (2.0, 2.0)}
+REGION = {  # object/prop sampling boxes per side (x range, y range), inside each arm's comfortable reach
+    "left": ((-0.26, -0.10), (-0.06, 0.06)),
+    "right": ((0.10, 0.26), (-0.06, 0.06)),
+}
+RELAY = np.array([0.0, -0.03])  # closer to the bases than the table centre, within both arms' reach
+CENTER_BIN = np.array([0.0, 0.02])
+
+
+def _props_xml(second_color, shape):
+    size = "0.015 0.015 0.015" if shape == "cube" else "0.015 0.015"
+    gtype = "box" if shape == "cube" else "cylinder"
+    rgba = " ".join(map(str, COLORS[second_color]))
+    t, h, w = 0.003, BIN_WALL / 2, BIN_INNER + 0.003
+    walls = "".join(
+        f'<geom name="bin_wall_{i}" type="box" size="{sx} {sy} {h}" pos="{px} {py} {h}" rgba="0.55 0.57 0.6 1"/>'
+        for i, (sx, sy, px, py) in enumerate([(t, w, -w, 0), (t, w, w, 0), (w, t, 0, -w), (w, t, 0, w)]))
+    return (f'<body name="cube2" pos="{PARK["cube2"][0]} {PARK["cube2"][1]} 0.016"><freejoint name="cube2_joint"/>'
+            f'<geom name="cube2_geom" type="{gtype}" size="{size}" mass="0.015" friction="1 0.01 0.001" rgba="{rgba}"/></body>'
+            f'<body name="bin" mocap="true" pos="2 2 0">'
+            f'<geom name="bin_floor" type="box" size="{w} {w} 0.002" pos="0 0 0.002" rgba="0.55 0.57 0.6 1"/>{walls}</body>'
+            f'<body name="relay_pad" mocap="true" pos="2 2 0.0005">'
+            f'<geom name="relay_pad_geom" type="cylinder" size="0.035 0.0005" contype="0" conaffinity="0" rgba="0.45 0.45 0.48 0.8"/></body>')
+
+
+class TaskEnv(RobotEnv):
+    """RobotEnv with the ladder's props and success rules. Actions and observations as RobotEnv,
+    plus `object2_position` and `bin_position` observations."""
+
+    def __init__(self, task="pick_place_any", *, object_color="red", second_color="blue", object_shape="cube", **kwargs):
+        if task not in TASKS:
+            raise ValueError(f"task must be one of {TASKS}")
+        if second_color == object_color:
+            raise ValueError("the two objects need different colors")
+        self.task_name, self.second_color, self.side = task, second_color, "left"
+        super().__init__(task="pick_place", object_shape=object_shape, object_color=object_color, **kwargs)
+        # Let both arms reach the middle of the table (relay pad and shared container).
+        self._workspace_low = np.array([[-0.30, -0.08, 0.016], [-0.06, -0.08, 0.016]])
+        self._workspace_high = np.array([[0.06, 0.13, 0.26], [0.30, 0.13, 0.26]])
+        m = self.model
+        self._mocap = {name: m.body_mocapid[m.body(name).id] for name in ("goal", "bin", "relay_pad")}
+        self._arm_geoms = {side: {g for g in range(m.ngeom) if m.body(m.geom_bodyid[g]).name.startswith(f"{side}_")}
+                           for side in ARMS}
+        self._object_geoms = {"cube": m.geom("cube_geom").id, "cube2": m.geom("cube2_geom").id}
+
+    def _build_model(self, object_shape, object_color, camera_rig):
+        return build_model(object_shape, object_color, camera_rig, extra_worldbody=_props_xml(self.second_color, object_shape))
+
+    # ------------------------------------------------------------------ helpers
+    def object_position(self, name="cube"):
+        return self.data.body(name).xpos.copy()
+
+    @property
+    def bin_position(self):
+        return self.data.mocap_pos[self._mocap["bin"]].copy()
+
+    def _set_object(self, name, xy, yaw):
+        q = self.data.joint(f"{name}_joint").qpos
+        q[:3] = [xy[0], xy[1], 0.016]
+        q[3:] = [np.cos(yaw / 2), 0, 0, np.sin(yaw / 2)]
+
+    def _sample(self, side, avoid=(), min_sep=0.1):
+        (x0, x1), (y0, y1) = REGION[side]
+        for _ in range(200):
+            p = self.np_random.uniform([x0, y0], [x1, y1])
+            if all(np.linalg.norm(p - a) >= min_sep for a in avoid):
+                return p
+        raise RuntimeError("could not sample a placement")
+
+    def _sample_pair(self, side, min_sep):
+        """Object and prop in the same region, resampling both until they are `min_sep` apart."""
+        for _ in range(500):
+            a, b = self._sample(side), self._sample(side)
+            if np.linalg.norm(a - b) >= min_sep:
+                return a, b
+        raise RuntimeError("could not sample a placement pair")
+
+    # ------------------------------------------------------------------ episodes
+    def reset(self, *, seed=None, options=None):
+        options = dict(options or {})
+        options.pop("placement_range", None)
+        obs, info = super().reset(seed=seed, options={**options, "placement_range": "small"})
+        rng = self.np_random
+        for name, (x, y) in PARK.items():
+            if name in self._mocap:
+                self.data.mocap_pos[self._mocap[name]] = [x, y, 0.0 if name == "bin" else 0.001]
+        self._set_object("cube2", PARK["cube2"], 0.0)
+        yaw = lambda: rng.uniform(-np.pi / 4, np.pi / 4)
+        sides = ("left", "right")
+        self.side = sides[int(rng.integers(2))]
+        other = "right" if self.side == "left" else "left"
+        if self.task_name == "pick_place_any":
+            obj, goal = self._sample_pair(self.side, 0.08)
+            self.data.mocap_pos[self._mocap["goal"]] = [goal[0], goal[1], 0.001]
+        elif self.task_name == "bin":
+            obj, b = self._sample_pair(self.side, 0.11)
+            self.data.mocap_pos[self._mocap["bin"]] = [b[0], b[1], 0.0]
+        elif self.task_name == "handover":
+            obj = self._sample(self.side)
+            b = self._sample(other)
+            self.data.mocap_pos[self._mocap["bin"]] = [b[0], b[1], 0.0]
+            self.data.mocap_pos[self._mocap["relay_pad"]] = [RELAY[0], RELAY[1], 0.0005]
+        else:  # two_bins
+            self.side = "both"
+            obj = self._sample("left", avoid=[CENTER_BIN], min_sep=0.1)
+            obj2 = self._sample("right", avoid=[CENTER_BIN], min_sep=0.1)
+            self._set_object("cube2", obj2, yaw())
+            self.data.mocap_pos[self._mocap["bin"]] = [CENTER_BIN[0], CENTER_BIN[1], 0.0]
+        self._set_object("cube", obj, yaw())
+        mujoco.mj_forward(self.model, self.data)
+        for _ in range(60):
+            mujoco.mj_step(self.model, self.data)
+        self.data.time = 0
+        mujoco.mj_forward(self.model, self.data)
+        self._ee_targets = np.array([a.position for a in self.robot.values()])
+        self._touched = {side: False for side in ARMS}
+        self._task_success_steps = 0
+        return self._observation(), self._info(False)
+
+    def _touches(self):
+        cube = self._object_geoms["cube"]
+        for c in self.data.contact[:self.data.ncon]:
+            pair = {c.geom1, c.geom2}
+            if cube in pair:
+                other = (pair - {cube}) or {cube}
+                g = next(iter(other))
+                for side in ARMS:
+                    if g in self._arm_geoms[side]:
+                        self._touched[side] = True
+
+    def _in_bin(self, name):
+        p, b = self.object_position(name), self.bin_position
+        return bool(np.all(np.abs(p[:2] - b[:2]) < BIN_INNER) and p[2] < BIN_WALL + 0.01)
+
+    def step(self, action):
+        obs, reward, terminated, truncated, info = super().step(action)
+        self._touches()
+        released = all(a.gripper_opening > 0.7 for a in self.robot.values())
+        slow = np.linalg.norm(self.data.joint("cube_joint").qvel[:3]) < 0.05
+        if self.task_name == "pick_place_any":
+            success = bool(info["is_success"])
+        else:
+            if self.task_name == "two_bins":
+                candidate = self._in_bin("cube") and self._in_bin("cube2") and released and slow
+            else:
+                candidate = self._in_bin("cube") and released and slow
+            if self.task_name == "handover":
+                candidate = candidate and all(self._touched.values())
+            self._task_success_steps = self._task_success_steps + 1 if candidate else 0
+            success = self._task_success_steps >= self._settle_steps
+        failed = self.object_position("cube")[2] < -0.1 or self.object_position("cube2")[2] < -0.1
+        terminated = bool(success or failed)
+        truncated = bool(self._steps >= self.max_episode_steps and not terminated)
+        self._done = terminated or truncated
+        return self._observation(), reward, terminated, truncated, self._info(success, failed)
+
+    def _observation(self):
+        obs = super()._observation()
+        if hasattr(self, "_mocap"):
+            obs["object2_position"] = self.object_position("cube2").astype(np.float32)
+            obs["bin_position"] = self.bin_position.astype(np.float32)
+        return obs
+
+    def instruction(self):
+        a, b = f"{self.object_color} {self.object_shape}", f"{self.second_color} {self.object_shape}"
+        if self.task_name == "pick_place_any":
+            return f"Place the {a} on the green disk."
+        if self.task_name == "bin":
+            return f"Put the {a} in the bin."
+        if self.task_name == "handover":
+            far = "right" if self.side == "left" else "left"
+            return f"Hand the {a} over to the {far} arm and put it in the bin."
+        return f"Put the {a} and the {b} in the bin, one with each arm."
+
+    def _info(self, success, failed=False):
+        info = super()._info(success, failed)
+        info["task"] = getattr(self, "task_name", "pick_place")
+        if hasattr(self, "_mocap"):
+            info["instruction"] = self.instruction()
+            info["touched"] = dict(self._touched) if hasattr(self, "_touched") else {}
+        return info
+
+
+# ---------------------------------------------------------------------- teacher
+PHRASES = {
+    "approach": "Move the {arm} gripper above the {obj}.",
+    "lower": "Lower the {arm} gripper around the {obj}.",
+    "grasp": "Close the {arm} gripper on the {obj}.",
+    "lift": "Lift the {obj} with the {arm} arm.",
+    "transfer": "Carry the {obj} to the {dest}.",
+    "lower to goal": "Lower the {obj} onto the {dest}.",
+    "release": "Open the {arm} gripper to release the {obj}.",
+    "retreat": "Raise the {arm} gripper away.",
+    "home": "Move the {arm} arm back to its rest position.",
+    "wait": "Hold the {obj} up with the {arm} arm and wait.",
+    "idle": "",
+}
+
+
+class ArmPickPlace:
+    """One arm's phased pick-and-place toward a destination, re-reading the object's pose on retries."""
+
+    PHASES = ("approach", "lower", "grasp", "lift", "transfer", "lower to goal", "release", "retreat", "home")
+
+    def __init__(self, env: TaskEnv, arm, body, dest_xy, dest_z, dest_name, *, rng, noise=0.0, carry_z=0.075):
+        self.env, self.arm, self.body = env, arm, body
+        self.i = ARMS.index(arm)
+        self.dest = np.r_[dest_xy, dest_z]
+        self.dest_name, self.rng, self.noise, self.carry_z = dest_name, rng, noise, carry_z
+        color = env.object_color if body == "cube" else env.second_color
+        self.obj_name = f"{color} {env.object_shape}"
+        self.phase, self.ticks, self.mistakes, self.mistake_active = 0, 0, 0, False
+        self._last = env.robot[arm].position
+        self.home = env.robot[arm].position
+        self.wait_for = None  # another ArmPickPlace that must finish before this one carries
+        self.obj = env.object_position(body)
+        self._offset = rng.normal(0, noise, 2) if noise else np.zeros(2)
+        hz = env.control_hz
+        self._dwell_long, self._dwell_short = int(round(1.25 * hz)), int(round(0.6 * hz))
+
+    @property
+    def done(self):
+        return self.phase >= len(self.PHASES)
+
+    @property
+    def waiting(self):
+        return self.phase == 4 and self.wait_for is not None and not self.wait_for.done
+
+    @property
+    def stage(self):
+        return "idle" if self.done else "wait" if self.waiting else self.PHASES[self.phase]
+
+    @property
+    def subtask(self):
+        return PHRASES[self.stage].format(arm=self.arm, obj=self.obj_name, dest=self.dest_name)
+
+    def target(self):
+        """(xyz, opening) for this step; advances phases."""
+        if self.done:
+            return None
+        c = self.obj[:2] + self._offset
+        d = self.dest
+        targets = [np.r_[c, 0.075], np.r_[c, 0.022], np.r_[c, 0.022], np.r_[c, self.carry_z],
+                   np.r_[d[:2], self.carry_z], d, d, np.r_[d[:2], self.carry_z], self.home]
+        opening = 1.0 if self.phase in (0, 1, 6, 7, 8) else 0.0
+        if self.waiting:
+            return np.r_[c, self.carry_z], 0.0
+        tgt = targets[self.phase]
+        self.ticks += 1
+        hand = self.env.robot[self.arm].position
+        err = np.linalg.norm(hand - tgt)
+        settled = np.linalg.norm(hand - self._last) < 2e-4  # under 1 cm/s at 50 Hz
+        self._last = hand
+        # Exact arrival, or settled close by when the IK cannot reach the target exactly.
+        reached = err < 0.012 or (settled and err < 0.03 and self.ticks > 2 * self._dwell_short)
+        dwell = self._dwell_long if self.phase in (2, 6) else self._dwell_short
+        if reached and self.ticks >= dwell:
+            if self.phase == 3 and self.env.object_position(self.body)[2] < 0.045:
+                self.mistakes += 1
+                self.mistake_active = True
+                self.obj = self.env.object_position(self.body)
+                self._offset = self.rng.normal(0, self.noise, 2) if self.noise else np.zeros(2)
+                self.phase, self.ticks = 0, 0
+            else:
+                if self.phase == 3:
+                    self.mistake_active = False
+                self.phase += 1
+                self.ticks = 0
+        return tgt, opening
+
+
+class TaskTeacher:
+    """Scripted demonstrator for every rung; works in ee_delta control."""
+
+    def __init__(self, env: TaskEnv, *, rng=None, speed=1.0, noise=0.0):
+        if env.control_mode != "ee_delta":
+            raise ValueError("TaskTeacher needs ee_delta control")
+        self.env, self.speed = env, speed
+        rng = rng if rng is not None else np.random.default_rng(0)
+        t, near = env.task_name, env.side
+        far = "right" if near == "left" else "left"
+        if t == "pick_place_any":
+            g = env.goal_position
+            self.stages = [[ArmPickPlace(env, near, "cube", g[:2], 0.022, "green disk", rng=rng, noise=noise)]]
+        elif t == "bin":
+            b = env.bin_position
+            self.stages = [[ArmPickPlace(env, near, "cube", b[:2], 0.06, "bin", rng=rng, noise=noise)]]
+        elif t == "handover":
+            b = env.bin_position
+            self.stages = [[ArmPickPlace(env, near, "cube", RELAY, 0.022, "grey pad", rng=rng, noise=noise)],
+                           ["handover", lambda: ArmPickPlace(env, far, "cube", b[:2], 0.06, "bin", rng=rng, noise=noise)]]
+        else:
+            b = env.bin_position
+            first = ArmPickPlace(env, "left", "cube", b[:2] + [-0.022, 0], 0.055, "bin", rng=rng, noise=noise)
+            second = ArmPickPlace(env, "right", "cube2", b[:2] + [0.022, 0], 0.055, "bin", rng=rng, noise=noise)
+            second.wait_for = first  # both pick at once; the right arm carries once the left has left the bin
+            self.stages = [[first, second]]
+        self.k = 0
+
+    @property
+    def workers(self):
+        stage = self.stages[min(self.k, len(self.stages) - 1)]
+        return [w for w in stage if isinstance(w, ArmPickPlace)]
+
+    @property
+    def subtask(self):
+        texts = [w.subtask for w in self.workers if w.subtask]
+        return " ".join(texts) if texts else "Hold still."
+
+    @property
+    def stage(self):
+        return "+".join(f"{w.arm}:{w.stage}" for w in self.workers)
+
+    @property
+    def mistakes(self):
+        return sum(w.mistakes for s in self.stages for w in s if isinstance(w, ArmPickPlace))
+
+    @property
+    def mistake_active(self):
+        return any(w.mistake_active for w in self.workers)
+
+    def action(self):
+        env = self.env
+        if self.k < len(self.stages) and all(w.done for w in self.workers):
+            nxt = self.k + 1
+            if nxt < len(self.stages) and self.stages[nxt][0] == "handover":
+                self.stages[nxt] = [self.stages[nxt][1]()]  # far arm reads the object's pose now
+            self.k = nxt
+        action = env.hold_action().reshape(2, -1)
+        for w in self.workers:
+            out = w.target()
+            if out is None:
+                continue
+            tgt, opening = out
+            row = (tgt - env._ee_targets[w.i]) / env.delta_scale
+            row = np.clip(row, -1, 1) * self.speed
+            action[w.i, :3] = row
+            action[w.i, 3] = opening
+        return np.clip(action.ravel(), env.action_space.low, env.action_space.high)
