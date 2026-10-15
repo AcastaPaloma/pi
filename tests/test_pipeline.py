@@ -45,7 +45,7 @@ class PipelineTests(unittest.TestCase):
 
     def test_dataset_sample_and_batch_layout(self):
         ds = Pi07Dataset(self.root, self.root / "pi07_meta", self.cfg, self.tokenizer, train=True)
-        self.assertEqual(len(ds), int(self.stats["steps"]))
+        self.assertEqual(len(ds), int(self.stats["samples"]))
         sample = ds[len(ds) - 5]
         S = self.cfg.vision.image_size
         self.assertEqual(sample["images"].shape, (3, 6, S, S, 3))

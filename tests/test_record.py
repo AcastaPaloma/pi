@@ -38,6 +38,23 @@ class RecordTests(unittest.TestCase):
                 record_episode(env, out, seed=3)
             json.loads((out / "meta.json").read_text())
 
+    def test_frame_stride_records_subset_and_dataset_indexes_it(self):
+        from pi_model.data import EpisodeStore
+        with tempfile.TemporaryDirectory() as tmp, RobotEnv(task="pick_place", control_hz=50) as env:
+            out = Path(tmp) / "episode_00000"
+            meta = record_episode(env, out, seed=1, style="clean", image_size=32, frame_stride=5)
+            T = meta["steps"]
+            self.assertEqual(meta["frame_stride"], 5)
+            self.assertEqual(len(list((out / "frames" / "overhead").glob("*.jpg"))), (T + 4) // 5)
+            store = EpisodeStore(Path(tmp))
+            self.assertEqual(len(store.episodes), 1)
+            self.assertEqual(int(store.sample_counts[0]), (T + 4) // 5)
+            self.assertEqual(store.locate(3), (0, 15))
+            self.assertEqual(store.episodes[0].frame_step(17), 15)
+            self.assertEqual(store.frame(store.episodes[0], "overhead", 17, 32).shape, (32, 32, 3))
+            with self.assertRaises(ValueError):
+                record_episode(env, Path(tmp) / "bad", seed=1, frame_stride=7)
+
     def test_visual_randomization_restores(self):
         with RobotEnv(task="pick_place") as env:
             env.reset(seed=0)

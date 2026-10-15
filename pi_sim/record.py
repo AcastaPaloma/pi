@@ -43,7 +43,14 @@ def quality_label(success: bool, style: str, mistakes: int) -> int:
 
 def record_episode(env: RobotEnv, out_dir: Path, *, seed: int, style: str = "clean",
                    image_size: int = 448, visual_randomization: bool = True,
-                   placement_range: str = "wide", jpeg_quality: int = 90) -> dict:
+                   placement_range: str = "wide", jpeg_quality: int = 90, frame_stride: int = 1) -> dict:
+    """frame_stride > 1 saves camera frames only every `frame_stride` control steps.
+
+    States and actions stay at the control rate. The history stride (1 s = 50 steps)
+    must be a multiple of frame_stride so that every history frame exists.
+    """
+    if frame_stride < 1 or env.control_hz % frame_stride:
+        raise ValueError("frame_stride must divide the control rate")
     out_dir.mkdir(parents=True, exist_ok=False)
     rng = np.random.default_rng(seed)
     speed, noise, _ = STYLES[style]
@@ -56,10 +63,11 @@ def record_episode(env: RobotEnv, out_dir: Path, *, seed: int, style: str = "cle
     start = time.monotonic()
     t = 0
     while True:
-        for cam in env.camera_names:
-            frame = env.render_camera(cam, native=True)
-            Image.fromarray(frame).resize((image_size, image_size), Image.Resampling.BILINEAR).save(
-                out_dir / "frames" / cam / f"{t:05d}.jpg", quality=jpeg_quality)
+        if t % frame_stride == 0:
+            for cam in env.camera_names:
+                frame = env.render_camera(cam, native=True)
+                Image.fromarray(frame).resize((image_size, image_size), Image.Resampling.BILINEAR).save(
+                    out_dir / "frames" / cam / f"{t:05d}.jpg", quality=jpeg_quality)
         states.append(obs["state"].copy())
         subtasks.append(demo.subtask)
         phases.append(demo.stage)
@@ -87,7 +95,7 @@ def record_episode(env: RobotEnv, out_dir: Path, *, seed: int, style: str = "cle
     meta = {
         "schema_version": 1, "source": "pi_sim scripted", "task": info["instruction"],
         "task_id": env.task, "object_shape": env.object_shape, "object_color": env.object_color,
-        "control_mode": "joint", "control_hz": env.control_hz, "steps": t, "success": success,
+        "control_mode": "joint", "control_hz": env.control_hz, "steps": t, "frame_stride": frame_stride, "success": success,
         "failure": info["failure"], "style": style, "speed_factor": speed, "target_noise_m": noise,
         "mistakes": demo.mistakes, "quality": quality_label(success, style, demo.mistakes),
         "subtasks": subtask_names, "cameras": list(env.camera_names), "image_size": image_size,
@@ -115,6 +123,7 @@ def main(argv=None):
     parser.add_argument("--colors", default="red,green,blue,yellow")
     parser.add_argument("--shapes", default="cube,cylinder")
     parser.add_argument("--image-size", type=int, default=448)
+    parser.add_argument("--frame-stride", type=int, default=5, help="Save camera frames every N control steps (states/actions stay at 50 Hz)")
     parser.add_argument("--control-hz", type=int, default=50)
     parser.add_argument("--episode-seconds", type=float, default=20.0)
     parser.add_argument("--no-visual-randomization", action="store_true")
@@ -153,7 +162,7 @@ def main(argv=None):
         meta = record_episode(envs[key], target, seed=seed,
                               style=styles[index % len(styles)], image_size=args.image_size,
                               visual_randomization=not args.no_visual_randomization,
-                              placement_range=args.placement)
+                              placement_range=args.placement, frame_stride=args.frame_stride)
         summary.append(meta)
         print(f"episode_{index:05d}: {color} {shape} {meta['style']:<11} steps={meta['steps']:4d} "
               f"success={meta['success']} mistakes={meta['mistakes']} quality={meta['quality']} "

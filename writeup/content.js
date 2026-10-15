@@ -1,5 +1,7 @@
-// Supplied SVGs, named reading destinations, and verbatim author commentary.
-// Empty annotation arrays render lorem ipsum until the author supplies text.
+// Supplied SVGs, chapters, and named reading destinations. Bounds are
+// [x, y, width, height] on the 2048-wide logical canvas. Article prose lives in article.js.
+export { annotations } from './article.js?v=20261014-r2';
+
 export const artwork = {
   "src": "./assets/full-backbone.svg",
   "width": 2048,
@@ -43,17 +45,146 @@ export const artwork = {
       "x": 10,
       "y": 2320,
       "scale": 1.1
+    },
+    {
+      "id": "world-model",
+      "src": "./assets/world-model-placeholder.svg",
+      "x": 3428.3,
+      "y": 2750.7,
+      "scale": 1
     }
   ]
 };
 
 export const macros = [
-  {id:'ingestion',title:'Ingestion',entry:'context'},
-  {id:'subgoal-policy',title:'Subgoal policy',entry:'subgoal-policy'},
-  {id:'decision',title:'Decision model',entry:'decision'},
+  {
+    "id": "start",
+    "title": "Start here",
+    "entry": "preface"
+  },
+  {
+    "id": "ingestion",
+    "title": "Ingestion",
+    "entry": "context"
+  },
+  {
+    "id": "decision",
+    "title": "Decision model",
+    "entry": "decision"
+  },
+  {
+    "id": "training",
+    "title": "Training losses",
+    "entry": "eam-loss"
+  },
+  {
+    "id": "subgoal-policy",
+    "title": "High-level policy",
+    "entry": "subgoal-policy"
+  },
+  {
+    "id": "world-model",
+    "title": "World model",
+    "entry": "world-model"
+  }
 ];
 
 export const steps = [
+  {
+    "id": "preface",
+    "title": "Preface",
+    "macro": "start",
+    "bounds": [
+      0,
+      0,
+      2048,
+      1740
+    ],
+    "details": []
+  },
+  {
+    "id": "map",
+    "title": "How π0.7 fits together",
+    "macro": "start",
+    "bounds": [
+      630,
+      86,
+      716,
+      186
+    ],
+    "details": [],
+    "routes": [
+      {
+        "title": "The short version",
+        "note": "One main section per idea, about fifteen minutes.",
+        "ids": [
+          "context",
+          "together",
+          "decision",
+          "transformer",
+          "flow-loss",
+          "vlm-loss",
+          "subgoal-policy",
+          "world-model"
+        ]
+      },
+      {
+        "title": "What the model reads",
+        "note": "Images, text, and joint positions become one tensor.",
+        "ids": [
+          "context",
+          "observation",
+          "subgoals",
+          "text",
+          "proprioception",
+          "together"
+        ]
+      },
+      {
+        "title": "How an action is produced",
+        "note": "The backbone, the action expert, and the attention they share.",
+        "ids": [
+          "decision",
+          "vlm",
+          "flow",
+          "transformer",
+          "attention-mask",
+          "adaptive-rmsnorm"
+        ]
+      },
+      {
+        "title": "How it is trained",
+        "note": "Two losses, and why the backbone is protected from one of them.",
+        "ids": [
+          "eam-loss",
+          "flow-loss",
+          "vlm-loss",
+          "fast-input",
+          "cross-entropy"
+        ]
+      },
+      {
+        "title": "Who writes the prompt at runtime",
+        "note": "The subtask text and the subgoal images.",
+        "ids": [
+          "subgoal-policy",
+          "world-model"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "notation",
+    "title": "Notation used in the drawings",
+    "macro": "start",
+    "bounds": [
+      0,
+      0,
+      2048,
+      1740
+    ],
+    "details": []
+  },
   {
     "id": "context",
     "title": "Spatial & semantic context ingestion",
@@ -146,118 +277,6 @@ export const steps = [
     ],
     "details": [
       "context-output"
-    ]
-  },
-  {
-    "id": "subgoal-policy",
-    "title": "High-level semantic subgoal policy",
-    "macro": "subgoal-policy",
-    "bounds": [
-      4.973,
-      1153.794,
-      1189.85,
-      571.675
-    ],
-    "details": []
-  },
-  {
-    "id": "sg-observation",
-    "title": "Full observation",
-    "macro": "subgoal-policy",
-    "bounds": [
-      15.914,
-      1224.911,
-      415.764,
-      404.824
-    ],
-    "details": [
-      "sg-current-frame",
-      "sg-patches",
-      "sg-position"
-    ]
-  },
-  {
-    "id": "sg-vision",
-    "title": "Visual encoding",
-    "macro": "subgoal-policy",
-    "bounds": [
-      238.02,
-      1287.276,
-      436.005,
-      421.781
-    ],
-    "details": [
-      "sg-backbone",
-      "sg-spatial-attention",
-      "sg-pooling",
-      "sg-projection",
-      "sg-camera-tokens"
-    ]
-  },
-  {
-    "id": "sg-text",
-    "title": "Text modalities",
-    "macro": "subgoal-policy",
-    "bounds": [
-      712.865,
-      1230.929,
-      423.422,
-      256.023
-    ],
-    "details": [
-      "sg-task",
-      "sg-history",
-      "sg-metadata",
-      "sg-text-tokenizer",
-      "sg-text-embedding"
-    ]
-  },
-  {
-    "id": "sg-context",
-    "title": "Combine image and text context",
-    "macro": "subgoal-policy",
-    "bounds": [
-      704.66,
-      1482.575,
-      187.094,
-      62.912
-    ],
-    "details": [
-      "sg-context-concat",
-      "sg-context-tensor"
-    ]
-  },
-  {
-    "id": "sg-next-subtask",
-    "title": "Next subtask",
-    "macro": "subgoal-policy",
-    "bounds": [
-      967.794,
-      1296.576,
-      210.617,
-      230.311
-    ],
-    "details": [
-      "sg-target-text",
-      "sg-target-tokenizer",
-      "sg-target-embedding",
-      "sg-combined-tokens"
-    ]
-  },
-  {
-    "id": "sg-prediction",
-    "title": "Subgoal prediction & loss",
-    "macro": "subgoal-policy",
-    "bounds": [
-      1041.647,
-      1523.604,
-      152.629,
-      119.806
-    ],
-    "details": [
-      "sg-transformer",
-      "sg-logits",
-      "sg-cross-entropy"
     ]
   },
   {
@@ -422,7 +441,7 @@ export const steps = [
   {
     "id": "eam-loss",
     "title": "EAM Loss",
-    "macro": "decision",
+    "macro": "training",
     "bounds": [
       1700.851,
       1153.794,
@@ -434,7 +453,7 @@ export const steps = [
   {
     "id": "eam-projection",
     "title": "Linear(D, d)",
-    "macro": "decision",
+    "macro": "training",
     "bounds": [
       1823.044,
       1191.391,
@@ -450,7 +469,7 @@ export const steps = [
   {
     "id": "flow-loss",
     "title": "Flow loss",
-    "macro": "decision",
+    "macro": "training",
     "bounds": [
       1713.383,
       1255.308,
@@ -466,7 +485,7 @@ export const steps = [
   {
     "id": "vlm-loss",
     "title": "VLM Loss",
-    "macro": "decision",
+    "macro": "training",
     "bounds": [
       1327.857,
       1153.794,
@@ -478,7 +497,7 @@ export const steps = [
   {
     "id": "fast-input",
     "title": "FAST tokens → Gemma input",
-    "macro": "decision",
+    "macro": "training",
     "bounds": [
       1484.455,
       1215.223,
@@ -495,7 +514,7 @@ export const steps = [
   {
     "id": "fast-transformer",
     "title": "34 transformer layers",
-    "macro": "decision",
+    "macro": "training",
     "bounds": [
       1483.818,
       1310.71,
@@ -511,7 +530,7 @@ export const steps = [
   {
     "id": "token-probabilities",
     "title": "Logits → probabilities",
-    "macro": "decision",
+    "macro": "training",
     "bounds": [
       1495.277,
       1352.724,
@@ -528,7 +547,7 @@ export const steps = [
   {
     "id": "cross-entropy",
     "title": "Cross-entropy",
-    "macro": "decision",
+    "macro": "training",
     "bounds": [
       1494.004,
       1410.015,
@@ -541,6 +560,136 @@ export const steps = [
       "zero-loss",
       "token-confidence",
       "mean-cross-entropy"
+    ]
+  },
+  {
+    "id": "subgoal-policy",
+    "title": "High-level policy: writing the next subtask",
+    "macro": "subgoal-policy",
+    "bounds": [
+      4.973,
+      1153.794,
+      1189.85,
+      571.675
+    ],
+    "details": []
+  },
+  {
+    "id": "sg-observation",
+    "title": "Full observation",
+    "macro": "subgoal-policy",
+    "bounds": [
+      15.914,
+      1224.911,
+      415.764,
+      404.824
+    ],
+    "details": [
+      "sg-current-frame",
+      "sg-patches",
+      "sg-position"
+    ]
+  },
+  {
+    "id": "sg-vision",
+    "title": "Visual encoding",
+    "macro": "subgoal-policy",
+    "bounds": [
+      238.02,
+      1287.276,
+      436.005,
+      421.781
+    ],
+    "details": [
+      "sg-backbone",
+      "sg-spatial-attention",
+      "sg-pooling",
+      "sg-projection",
+      "sg-camera-tokens"
+    ]
+  },
+  {
+    "id": "sg-text",
+    "title": "Text modalities",
+    "macro": "subgoal-policy",
+    "bounds": [
+      712.865,
+      1230.929,
+      423.422,
+      256.023
+    ],
+    "details": [
+      "sg-task",
+      "sg-history",
+      "sg-metadata",
+      "sg-text-tokenizer",
+      "sg-text-embedding"
+    ]
+  },
+  {
+    "id": "sg-context",
+    "title": "Combine image and text context",
+    "macro": "subgoal-policy",
+    "bounds": [
+      704.66,
+      1482.575,
+      187.094,
+      62.912
+    ],
+    "details": [
+      "sg-context-concat",
+      "sg-context-tensor"
+    ]
+  },
+  {
+    "id": "sg-next-subtask",
+    "title": "Next subtask",
+    "macro": "subgoal-policy",
+    "bounds": [
+      967.794,
+      1296.576,
+      210.617,
+      230.311
+    ],
+    "details": [
+      "sg-target-text",
+      "sg-target-tokenizer",
+      "sg-target-embedding",
+      "sg-combined-tokens"
+    ]
+  },
+  {
+    "id": "sg-prediction",
+    "title": "Subgoal prediction & loss",
+    "macro": "subgoal-policy",
+    "bounds": [
+      1041.647,
+      1523.604,
+      152.629,
+      119.806
+    ],
+    "details": [
+      "sg-transformer",
+      "sg-logits",
+      "sg-cross-entropy"
+    ]
+  },
+  {
+    "id": "world-model",
+    "title": "World model: drawing the subgoal images",
+    "macro": "world-model",
+    "bounds": [
+      1704.979,
+      1367.991,
+      336.192,
+      360.063
+    ],
+    "details": [
+      "wm-inputs",
+      "wm-encoders",
+      "wm-backbone",
+      "wm-loss",
+      "wm-inference"
     ]
   }
 ];
@@ -1436,137 +1585,60 @@ export const details = [
       124.729,
       47.047
     ]
+  },
+  {
+    "id": "wm-inputs",
+    "step": "world-model",
+    "title": "Inputs and target images",
+    "bounds": [
+      1717.43,
+      1432.652,
+      311.33,
+      52.22
+    ]
+  },
+  {
+    "id": "wm-encoders",
+    "step": "world-model",
+    "title": "Two encoders: ViT and VAE",
+    "bounds": [
+      1717.43,
+      1489.845,
+      311.33,
+      52.22
+    ]
+  },
+  {
+    "id": "wm-backbone",
+    "step": "world-model",
+    "title": "Mixture of transformers",
+    "bounds": [
+      1717.43,
+      1547.037,
+      311.33,
+      52.22
+    ]
+  },
+  {
+    "id": "wm-loss",
+    "step": "world-model",
+    "title": "Flow-matching loss on images",
+    "bounds": [
+      1717.43,
+      1604.229,
+      311.33,
+      52.22
+    ]
+  },
+  {
+    "id": "wm-inference",
+    "step": "world-model",
+    "title": "Inference, refresh, and training π0.7 on generated goals",
+    "bounds": [
+      1717.43,
+      1661.422,
+      311.33,
+      52.22
+    ]
   }
 ];
-
-export const annotations = {
-  "vlm": [
-    "But it hasn't necessarily learned the detailed relationship between those observations and a robot's 50-step motor trajectory."
-  ],
-  "flow": [
-    "You attach an initially untrained 860M action expert."
-  ],
-  "flow-loss": [
-    "Now, suppose you only optimize:",
-    "\\[\\mathcal L_{\\rm flow}.\\]",
-    "You have two options:",
-    "Option A: Allow flow gradients into Gemma.",
-    "The randomly initialized action expert initially produces poor velocity predictions. Backpropagating those errors into Gemma can disrupt its useful pretrained representations.",
-    "Option B: Freeze Gemma against flow gradients.",
-    "Now its existing knowledge is protected, but there's no action-supervision signal directly teaching Gemma how observations and instructions relate to robot trajectories."
-  ],
-  "vlm-loss": [
-    "The answer is Knowledge Insulation: π0.7 wants the VLM to understand robot actions without letting the continuous flow-matching loss damage its pretrained vision-language knowledge."
-  ],
-  "fast-input": [
-    "FAST solves this problem.",
-    "The hope is that at the beginning, before any transformer layers, you literally have the FAST tokens in the input tensor."
-  ],
-  "token-probabilities": [
-    "After 34 transformer layers, at those same positions, you now have 262208-dimensional vectors carrying the probabilities for all next possible token IDs."
-  ],
-  "context": [],
-  "observation": [],
-  "subgoals": [],
-  "text": [],
-  "proprioception": [],
-  "together": [],
-  "decision": [],
-  "l1": [],
-  "l2": [],
-  "l33": [],
-  "l34": [],
-  "transformer": [],
-  "eam-loss": [],
-  "eam-projection": [],
-  "fast-transformer": [],
-  "cross-entropy": [],
-  "observation-input": [],
-  "patches": [],
-  "embeddings": [],
-  "vision-backbone": [],
-  "pooling": [],
-  "observation-output": [],
-  "goal-input": [],
-  "goal-patches": [],
-  "goal-backbone": [],
-  "goal-embeddings": [],
-  "goal-output": [],
-  "prompt-parts": [],
-  "tokenizer": [],
-  "text-output": [],
-  "state-history": [],
-  "state-output": [],
-  "context-output": [],
-  "vlm-context": [],
-  "action-chunk": [],
-  "noise-time": [],
-  "velocity": [],
-  "context-qkv": [],
-  "action-qkv": [],
-  "concatenate": [],
-  "attention-mask": [],
-  "attention-output": [],
-  "context-residual": [],
-  "action-residual": [],
-  "eam-output": [],
-  "eam-linear": [],
-  "eam-prediction": [],
-  "eam-target": [],
-  "eam-squared-error": [],
-  "eam-mean": [],
-  "loss-context": [],
-  "fast-tokenizer": [],
-  "fast-embedding": [],
-  "fast-concatenate": [],
-  "fast-mask": [],
-  "fast-positions": [],
-  "fast-meaning": [],
-  "vocabulary-projection": [],
-  "fast-logits": [],
-  "fast-log-softmax": [],
-  "fast-probabilities": [],
-  "target-probability": [],
-  "negative-log-likelihood": [],
-  "zero-loss": [],
-  "token-confidence": [],
-  "mean-cross-entropy": [],
-  "transformer-fast-input": [],
-  "rope": [],
-  "context-attention": [],
-  "fast-attention": [],
-  "action-attention": [],
-  "adaptive-rmsnorm": [],
-  "ff-activation": [],
-  "transformer-vlm-output": [],
-  "transformer-eam-output": [],
-  "subgoal-policy": [],
-  "sg-observation": [],
-  "sg-vision": [],
-  "sg-text": [],
-  "sg-context": [],
-  "sg-next-subtask": [],
-  "sg-prediction": [],
-  "sg-current-frame": [],
-  "sg-patches": [],
-  "sg-position": [],
-  "sg-backbone": [],
-  "sg-spatial-attention": [],
-  "sg-pooling": [],
-  "sg-projection": [],
-  "sg-camera-tokens": [],
-  "sg-task": [],
-  "sg-history": [],
-  "sg-metadata": [],
-  "sg-text-tokenizer": [],
-  "sg-text-embedding": [],
-  "sg-context-concat": [],
-  "sg-context-tensor": [],
-  "sg-target-text": [],
-  "sg-target-tokenizer": [],
-  "sg-target-embedding": [],
-  "sg-combined-tokens": [],
-  "sg-transformer": [],
-  "sg-logits": [],
-  "sg-cross-entropy": []
-};

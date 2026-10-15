@@ -39,6 +39,19 @@ class Episode:
     def length(self) -> int:
         return int(self.meta["steps"])
 
+    @property
+    def frame_stride(self) -> int:
+        return int(self.meta.get("frame_stride", 1))
+
+    @property
+    def samples(self) -> int:
+        """Timesteps that have a camera frame (the sampling points)."""
+        return (self.length + self.frame_stride - 1) // self.frame_stride
+
+    def frame_step(self, t: int) -> int:
+        """Nearest recorded frame at or before t."""
+        return min(self.length - 1, t) // self.frame_stride * self.frame_stride
+
 
 class EpisodeStore:
     def __init__(self, root, *, episodes=None):
@@ -57,16 +70,22 @@ class EpisodeStore:
         self.cameras = list(self.episodes[0].meta["cameras"])
         self.hz = int(self.episodes[0].meta["control_hz"])
         self.lengths = np.asarray([e.length for e in self.episodes])
-        self.offsets = np.r_[0, np.cumsum(self.lengths)]
+        self.sample_counts = np.asarray([e.samples for e in self.episodes])
+        self.offsets = np.r_[0, np.cumsum(self.sample_counts)]
+        for e in self.episodes:
+            if self.hz % e.frame_stride:
+                raise ValueError(f"{e.path}: frame_stride {e.frame_stride} must divide the control rate")
 
     def __len__(self):
         return len(self.episodes)
 
     def locate(self, index: int):
+        """Sample index -> (episode index, timestep with a recorded frame)."""
         e = int(np.searchsorted(self.offsets, index, side="right") - 1)
-        return e, int(index - self.offsets[e])
+        return e, int(index - self.offsets[e]) * self.episodes[e].frame_stride
 
     def frame(self, episode: Episode, cam: str, t: int, size: int) -> np.ndarray:
+        t = episode.frame_step(t)
         image = Image.open(episode.path / "frames" / cam / f"{t:05d}.jpg").convert("RGB")
         if image.size != (size, size):
             image = image.resize((size, size), Image.Resampling.BILINEAR)
@@ -104,7 +123,7 @@ def prepare(root, out, cfg: Pi07Config, *, chunk_stride=5, horizon=None):
         "state_q01": np.percentile(states, 1, axis=0).tolist(), "state_q99": np.percentile(states, 99, axis=0).tolist(),
         "action_q01": tok.low.tolist(), "action_q99": tok.high.tolist(),
         "episode_lengths_by_task": store.episode_lengths_by_task(),
-        "episodes": len(store), "steps": int(store.lengths.sum()), "fast_chunks": len(chunks),
+        "episodes": len(store), "steps": int(store.lengths.sum()), "samples": int(store.sample_counts.sum()), "fast_chunks": len(chunks),
         "fast_tokens_per_chunk_mean": float(np.mean([len(tok.encode(c)) for c in chunks[:: max(1, len(chunks) // 200)]])),
     }
     (out / "stats.json").write_text(json.dumps(stats, indent=2) + "\n")
@@ -149,11 +168,14 @@ class Pi07Dataset(Dataset):
         self.cameras = self.store.cameras
         self.subgoal_cameras = list(subgoal_cameras or self.cameras[: cfg.max_subgoals])
         self.stride = int(round(cfg.history_stride_s * self.store.hz))
+        for e in self.store.episodes:
+            if self.stride % e.frame_stride:
+                raise ValueError("history stride must be a multiple of every episode's frame_stride")
         if len(self.cameras) > cfg.max_cameras:
             raise ValueError(f"{len(self.cameras)} cameras exceed max_cameras={cfg.max_cameras}")
 
     def __len__(self):
-        return int(self.store.lengths.sum())
+        return int(self.store.sample_counts.sum())
 
     def _rng(self, index):
         salt = torch.initial_seed() % (2 ** 31) if self.train else 0
