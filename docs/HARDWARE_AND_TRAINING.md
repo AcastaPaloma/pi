@@ -1,4 +1,4 @@
-# Hardware, compute and training setup: π₀.₅ on SO-101, sim first
+# Hardware, compute and training setup: π₀.₇ on SO-101, sim first
 
 Checked on 2026-10-14 against vendor pages, Lambda's pricing page, the openpi and
 LeRobot repositories and community SO-101 fine-tunes. Prices are on-demand list
@@ -80,12 +80,12 @@ official BOM, roughly 160–200 USD. The third Arducam module goes on its wrist.
 The project currently trains on a dedicated machine with **two NVIDIA H100 80 GB,
 52 CPU cores, 442 GB RAM and 5.4 TB of disk** (`ssh ubuntu@192.222.52.191`).
 Rendering there is CPU-side OSMesa, parallelised over 24 processes;
-`scripts/box/` holds the launch scripts.
+`scripts/box/` holds the launch scripts: `generate_data.sh`, `train_small.sh`, `train_full.sh`, `eval.sh`, and `eval_full_when_ready.sh`, which waits for each named full-run checkpoint and evaluates it on the CPU with an oracle subtask (the GPUs are full while the run trains; a GPU evaluation alongside it caused out-of-memory retries).
 
 | Run | Config | Memory and speed |
 | --- | --- | --- |
 | `small` from scratch | 0.3B, 224 px, batch 32 per GPU, bf16 autocast | Fits comfortably; two GPUs with DDP via `torchrun`. |
-| `full` from Gemma 3 4B | 5.2B, 448 px | fp32 master weights, gradients and Adam states are about 80 GB alone, so the full run needs `--gradient-checkpointing`, batch 4 per GPU with gradient accumulation, and will move to FSDP or 8-bit optimizer states for larger batches. Gated weights: accept the Gemma license, then `hf download google/gemma-3-4b-pt --local-dir weights/gemma-3-4b-pt`. |
+| `full` from Gemma 3 4B | 5.2B, 448 px | Runs with FSDP2 on both GPUs (`--fsdp`, bf16 parameters, fp32 reductions) plus `--gradient-checkpointing`, batch 4 per GPU with 4 accumulation steps, 77–80 GB per GPU and about 10 s per step (3 samples/s), so 10k steps take 28–30 h. Gated weights: accept the Gemma license, then `hf download google/gemma-3-4b-pt --local-dir weights/gemma-3-4b-pt`. |
 
 Lambda on-demand prices for reference (2026-10-14, per GPU-hour, plus tax): 1× H100 PCIe 3.29, 1× H100 SXM 4.29, 8× H100 SXM 3.99, 8× A100 80 GB 2.79, 1× A100 40 GB 1.99, 1× A10 24 GB 1.29.
 
