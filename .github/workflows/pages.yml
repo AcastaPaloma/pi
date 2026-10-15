@@ -29,12 +29,16 @@ jobs:
         run: |
           npm --prefix writeup test
           node --check writeup/app.js
+          node --check writeup/inference.js
+          node --check writeup/robot-stage.js
       - uses: actions/configure-pages@v5
       - name: Prepare static site
         run: |
-          mkdir -p _site/assets
-          cp writeup/index.html writeup/style.css writeup/app.js writeup/content.js writeup/article.js writeup/camera.mjs writeup/reading.mjs writeup/rich-text.mjs writeup/text.json _site/
+          mkdir -p _site/assets/so101 _site/vendor
+          cp writeup/index.html writeup/training.html writeup/style.css writeup/inference.css writeup/app.js writeup/content.js writeup/article.js writeup/inference.js writeup/inference-content.js writeup/robot-stage.js writeup/camera.mjs writeup/reading.mjs writeup/rich-text.mjs writeup/text.json _site/
           cp writeup/assets/*.svg _site/assets/
+          cp writeup/assets/so101/so101.json writeup/assets/so101/so101.bin writeup/assets/so101/LICENSE _site/assets/so101/
+          cp writeup/vendor/three.module.min.js writeup/vendor/LICENSE-three.txt _site/vendor/
           touch _site/.nojekyll
       - uses: actions/upload-pages-artifact@v4
         with:

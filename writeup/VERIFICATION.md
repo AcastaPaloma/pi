@@ -48,3 +48,10 @@ Main architecture regions render from the provided vector SVG. The source SVG's 
 - Added Start here (preface placeholder, map with five reading routes, notation), a Training losses chapter, and a World model chapter with a placeholder drawing slot and five component notes. High-level policy moved after the losses it refers to.
 - Component notes fold under their main section; chips outline their exact region on the canvas, and canvas hover highlights the matching chip. Camera animation and lifted-crop focus are unchanged.
 - Sixteen Node tests pass. Headless Chrome at 1440 × 900 and 390 × 844: scroll-sync across folded and opened notes, chip and Contents jumps open notes and move the camera, deep links such as #transformer/attention-mask restore, no phone overflow, no console errors. The local editor opens every note and all 119 passages are editable.
+
+## October 15 — Inference tab and 3D stage
+
+- index.html is now the Inference tab; the previous page moved to training.html with Inference/Training tabs. Old hash links redirect to training.html; the editor serves training.html.
+- Eighteen blocks from the supplied inference drawing, each with text from the paper (Sec. VII, Algorithm 1, Appendix D), drawing bounds checked against rendered crops, and stage directives.
+- SO-101 asset: 14 meshes, 31,920 triangles, 300 KB gzipped. All scripted waypoints solve to under 1 mm.
+- Twenty Node tests pass. Headless Chrome (SwiftShader WebGL) at 1440 × 900 and 390 × 844: stage renders, startup camera dives and shutter captures, subtask typing, BAGEL denoising, chunk dots, splice, loop 2 subtasks, autoplay advance, no phone overflow, no console errors. Safari, Firefox, and real GPUs were not exercised.

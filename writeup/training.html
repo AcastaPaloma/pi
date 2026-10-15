@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#fbfbfa">
+  <meta name="description" content="An illustrated walkthrough of π0.7: how images, text, and joint positions become robot actions, how the model is trained, and which models write its prompt.">
+  <title>π0.7 training · Kuan Yi Wang</title>
+  <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./style.css?v=20261014-r2">
+  <script type="module" src="./app.js?v=20261014-r2"></script>
+</head>
+<body>
+  <a class="skip-link" href="#reader">Skip to write-up</a>
+  <main class="workspace">
+    <section class="canvas-shell" aria-label="Interactive Pi architecture canvas">
+      <button class="start-button" id="start" type="button">Whole canvas <span aria-hidden="true">↖</span></button>
+      <div class="viewport" id="viewport" tabindex="0" aria-label="Diagram canvas. Drag to pan; pinch or use plus and minus to zoom. Scroll or drag to explore. Return to the reading panel to follow the text. Left and right arrows jump between major sections.">
+        <div class="world" id="world">
+          <div id="artwork" role="img" aria-label="Pi architecture: spatial and semantic context ingestion, VLM backbone, flow-matching model, expanded transformer layer, VLM and EAM losses, and the high-level policy that writes the next subtask, and a placeholder for the world model diagram."></div>
+          <div class="lifted-region" id="lifted" aria-hidden="true" hidden></div>
+          <div id="hotspots" role="group" aria-label="Inspect diagram details"></div>
+          <div class="detail-outline" id="detail-outline" aria-hidden="true" hidden></div>
+        </div>
+      </div>
+      <div class="loading" id="loading" role="status">Opening the drawing…</div>
+      <div class="asset-error" id="asset-error" hidden><p>The drawing couldn’t load.</p><button id="retry" type="button">Try again</button></div>
+    </section>
+    <aside class="notes" aria-label="Pi write-up">
+      <div class="reading-nav">
+        <nav class="page-tabs" aria-label="Write-up sections"><a href="./">Inference</a><a href="training.html" aria-current="page">Training</a></nav>
+        <button id="contents-toggle" aria-expanded="false" aria-controls="contents-menu">Contents <svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4"/></svg></button>
+        <span id="chapter-label"></span>
+      </div>
+      <nav id="contents-menu" aria-label="Write-up contents" hidden><label class="expand-all"><input type="checkbox" id="expand-all"> Open every component note</label><div id="toc"></div></nav>
+      <div class="reader" id="reader" tabindex="0" aria-label="Read the Pi write-up">
+        <article id="article"></article>
+      </div>
+    </aside>
+  </main>
+  <div class="sr-only" id="announcement" role="status" aria-live="polite"></div>
+  <noscript><div class="no-script">This canvas needs JavaScript. <a href="./assets/full-backbone.svg">Open the drawing</a>.</div></noscript>
+</body>
+</html>

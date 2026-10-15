@@ -88,6 +88,8 @@ Controls and overlays have small rounded corners; article sections have no enclo
 - **Local editor:** toolbar sits above the reader and wraps on narrow screens. Body outlines appear on hover/focus; headings stay outside editing. Tools provide B/I/U, three system fonts, indent/outdent, list, undo/redo, and Save to live. Save disables when clean or busy. Compact status text distinguishes drafts, saving, publishing, published, and recoverable errors. Public pages have no editor toolbar.
 - **Motion:** camera and reading transitions support orientation; reduced-motion preferences disable transitions and smooth scrolling.
 
+- **Inference stage:** paper-toned studio, real SO-101 geometry, motion slowed and exaggerated. Camera shots look from the far side of the table so the arms face the viewer. Overlays (frustums, action-chunk dots) use the accent; pending chunks use orange. HUD panels are pale paper with Arial labels and Georgia values. Reduced motion cuts instead of animating and disables autoplay.
+
 ## Do's and Don'ts
 
 - Do preserve the original drawing and its typography.

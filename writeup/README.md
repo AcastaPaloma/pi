@@ -1,6 +1,6 @@
 # Pi canvas
 
-A static, text-led visual write-up using the supplied SVG artwork. No framework, runtime dependency, external font request, or build step.
+A static, text-led visual write-up using the supplied SVG artwork, in two tabs. **Inference** (index.html, the entry page) replays the inference timeline block by block beside a 3D model of two SO-101 arms. **Training** (training.html) is the illustrated architecture and training article. No framework, external font request, or build step; three.js r169 (MIT) is vendored in vendor/ for the 3D stage.
 
 ## Published site
 
@@ -10,7 +10,14 @@ Open <https://acastapaloma.github.io/pi/>. The GitHub Pages workflow verifies an
 
 Run npm run dev in this directory, then open <http://127.0.0.1:4173/>. Any static HTTP server works, including GitHub Pages under a project path.
 
-## Reading and navigation
+## Inference tab
+
+- The left column stacks the 3D stage over the inference drawing (assets/inference.svg); the right column holds one passage per timeline block. ← and →, the player buttons, timeline clicks, and reading scroll all select a block; the timeline camera lifts that block and the stage replays it.
+- The walkthrough autoplays and loops. Each loop moves the robot on to its next two subtasks (Open the faucet, Scrub the plate, Put the sponge back, Close the faucet). Manual navigation pauses autoplay; Play resumes. Deep links use #inf-<block>, and older links without that prefix redirect to training.html.
+- inference-content.js holds the blocks: text, drawing bounds, and stage directives (beat, robot task time, caption, BAGEL progress, action chunks). robot-stage.js builds the scene in pi_sim coordinates, solves IK for every scripted waypoint at load, and choreographs camera dives, shutter captures, subgoal denoising, and action-chunk dots. Nothing runs a model.
+- assets/so101/ is generated from the vendored MuJoCo Menagerie SO-101 (Apache-2.0, LICENSE included) by scripts/build_so101_asset.py: visual meshes voxel-remeshed at 0.8 mm, decimated, quantized (about 300 KB gzipped). Rerun it after changing the vendored model.
+
+## Training tab: reading and navigation
 
 - Desktop uses an equal split: canvas left, continuous article right. Phones keep the canvas above the article.
 - Scrolling the reading panel focuses the diagram associated with the passage at the reading line. Long passages retain their diagram until the next heading crosses that line.
@@ -49,6 +56,6 @@ Editor metadata was removed; vector paths, text, bundled fonts, and authored emb
 
 ## Checks and future additions
 
-Run npm test and node --check app.js. Browser verification is recorded in [VERIFICATION.md](VERIFICATION.md).
+Run npm test and node --check app.js inference.js robot-stage.js. The tests also solve every scripted waypoint against the real SO-101 kinematics (under 2 mm). Browser verification is recorded in [VERIFICATION.md](VERIFICATION.md).
 
 For each new drawing, add named component bounds, contents destinations, and a passage in article.js. When the world-model drawing is ready, replace the placeholder layer and update the five wm-* bounds. Preserve IDs so shared links keep working. Bump entry, CSS, and content version queries together when publishing changes.
