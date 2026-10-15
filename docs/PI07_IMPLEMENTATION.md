@@ -112,9 +112,14 @@ torchrun --nproc_per_node 2 -m pi_model.train --data data/sim_v1 --config full \
     --gemma weights/gemma-3-4b-pt --tokenizer weights/gemma-3-4b-pt/tokenizer.model \
     --out runs/full_v1 --batch-size 4 --grad-accum 4 --bf16 --gradient-checkpointing
 
-# closed loop in MuJoCo with the paper's runtime prompting
-python -m pi_model.eval_sim --checkpoint runs/full_v1/step_0030000 --episodes 40 --execute 25 --delay 6
+# closed loop in MuJoCo with the paper's runtime prompting; the paper always supplies a
+# subtask at run time (high-level policy or human), so evaluate with one: `oracle` derives
+# the scripted phase from simulator state, or train the high-level policy (--objective subtask)
+python -m pi_model.eval_sim --checkpoint runs/full_v1/step_0010000 --episodes 40 --execute 25 --delay 6 --subtask oracle
 ```
+
+Training prompts contain a subtask about 92% of the time (it is dropped only in 30% of the
+25% of examples that carry subgoal images), so running without one is out of distribution.
 
 `scripts/box/` holds the launch scripts used on the two-H100 machine. Tests:
 `python -m unittest tests.test_model tests.test_pipeline`.
