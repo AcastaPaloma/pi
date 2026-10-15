@@ -119,6 +119,7 @@ def prepare(root, out, cfg: Pi07Config, *, chunk_stride=5, horizon=None):
     tok.save(out / "fast")
     stats = {
         "schema_version": 1, "control_hz": store.hz, "cameras": store.cameras, "horizon": horizon,
+        "recorded_image_size": int(store.episodes[0].meta.get("image_size", 448)),
         "action_dims": ACTION_DIMS,
         "state_q01": np.percentile(states, 1, axis=0).tolist(), "state_q99": np.percentile(states, 99, axis=0).tolist(),
         "action_q01": tok.low.tolist(), "action_q99": tok.high.tolist(),

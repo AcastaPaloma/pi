@@ -70,6 +70,18 @@ class Pi07Policy:
         self.hz = int(self.stats["control_hz"])
         self.stride = int(round(self.cfg.history_stride_s * self.hz))
         self.steps = denoise_steps or self.cfg.denoise_steps
+        self.recorded_image_size = int(self.stats.get("recorded_image_size", 448))
+
+    def prepare_image(self, native_rgb):
+        """Native camera frame -> model input, through the same two resizes as recorded data."""
+        from PIL import Image
+        image = Image.fromarray(np.asarray(native_rgb))
+        if image.size != (self.recorded_image_size, self.recorded_image_size):
+            image = image.resize((self.recorded_image_size, self.recorded_image_size), Image.Resampling.BILINEAR)
+        size = self.cfg.vision.image_size
+        if image.size != (size, size):
+            image = image.resize((size, size), Image.Resampling.BILINEAR)
+        return np.asarray(image)
 
     def speed_for(self, task, percentile=15.0):
         return speed_prompt_value(self.stats, task, percentile)

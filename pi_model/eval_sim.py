@@ -20,9 +20,40 @@ from PIL import Image
 import torch
 
 from pi_sim import RobotEnv
+from pi_sim.demo import SUBTASKS
 from pi_sim.scene import COLORS
 from .policy import HistoryBuffer, Pi07Policy
 from .prompt import PromptContext
+
+
+def oracle_subtask(env: RobotEnv, obs, released_after_place: bool) -> str:
+    """Current scripted-demo phase from simulator state: stands in for the high-level policy.
+
+    Uses privileged state (cube pose), so it is an evaluation aid, not a deployable component.
+    """
+    hand = obs["ee_pose"][:3]
+    cube = obs["cube_position"]
+    goal = obs["goal_position"]
+    opening = env.robot["left"].gripper_opening
+    lifted = cube[2] > 0.045
+    at_goal_xy = np.linalg.norm(cube[:2] - goal[:2]) < 0.03
+    above_cube = np.linalg.norm(hand[:2] - cube[:2]) < 0.02
+    near_cube = np.linalg.norm(hand - cube) < 0.03
+    if released_after_place:
+        return SUBTASKS["retreat"]
+    if lifted:
+        if np.linalg.norm(hand[:2] - goal[:2]) > 0.03:
+            return SUBTASKS["transfer"]
+        return SUBTASKS["lower to goal"] if cube[2] > 0.03 else SUBTASKS["release"]
+    if at_goal_xy and opening < 0.7 and near_cube:
+        return SUBTASKS["release"]
+    if near_cube and opening < 0.7:
+        return SUBTASKS["lift"]
+    if near_cube:
+        return SUBTASKS["grasp"]
+    if above_cube:
+        return SUBTASKS["lower"]
+    return SUBTASKS["approach"]
 
 
 def run_episode(env: RobotEnv, policy: Pi07Policy, *, seed, execute, delay, cfg_beta, subtask, image_size,
@@ -30,12 +61,26 @@ def run_episode(env: RobotEnv, policy: Pi07Policy, *, seed, execute, delay, cfg_
     obs, info = env.reset(seed=seed, options={"placement_range": placement, "visual_randomization": visual_randomization})
     history = HistoryBuffer(policy.cameras, hz=env.control_hz)
     task = info["instruction"]
-    context = PromptContext(task=task, subtask=subtask, speed_steps=policy.speed_for(task), quality=5,
-                            mistake=False, control_mode="joint", speed_bin=500)
+    released = False
+
+    def current_subtask():
+        nonlocal released
+        if subtask == "oracle":
+            if not released and obs["cube_position"][2] < 0.03 and \
+                    np.linalg.norm(obs["cube_position"][:2] - obs["goal_position"][:2]) < 0.03 and \
+                    env.robot["left"].gripper_opening > 0.7:
+                released = True
+            return oracle_subtask(env, obs, released)
+        return subtask
+
+    def make_context():
+        return PromptContext(task=task, subtask=current_subtask(), speed_steps=policy.speed_for(task), quality=5,
+                             mistake=False, control_mode="joint", speed_bin=500)
+
+    context = make_context()
 
     def observe(step):
-        images = {cam: np.asarray(Image.fromarray(env.render_camera(cam, native=True)).resize(
-            (image_size, image_size), Image.Resampling.BILINEAR)) for cam in policy.cameras}
+        images = {cam: policy.prepare_image(env.render_camera(cam, native=True)) for cam in policy.cameras}
         history.append(step, images, obs["state"])
         if video_frames is not None:
             video_frames.append(images[policy.cameras[0]])
@@ -55,6 +100,7 @@ def run_episode(env: RobotEnv, policy: Pi07Policy, *, seed, execute, delay, cfg_
             # A new chunk is requested now; the `delay` actions executed while the
             # model computes are the committed prefix the new chunk must respect.
             observe(t)
+            context = make_context()
             prefix = chunk[cursor:cursor + delay] if delay else None
             if delay and len(prefix) < delay:
                 prefix = np.concatenate([prefix, np.repeat(prefix[-1:], delay - len(prefix), axis=0)])
@@ -72,7 +118,7 @@ def run_episode(env: RobotEnv, policy: Pi07Policy, *, seed, execute, delay, cfg_
         if terminated or truncated:
             break
     return {"seed": seed, "success": bool(info["is_success"]), "steps": int(info["elapsed_steps"]),
-            "failure": info["failure"], "inference_calls": inference_calls, "task": task,
+            "failure": info["failure"], "inference_calls": inference_calls, "task": task, "subtask_mode": subtask,
             "object": f"{env.object_color} {env.object_shape}",
             "closest_hand_to_cube_m": round(closest, 4), "max_cube_height_m": round(lifted, 4),
             "lifted": bool(lifted > 0.045),
@@ -106,7 +152,7 @@ def main(argv=None):
     parser.add_argument("--execute", type=int, default=25, help="Actions executed per chunk (paper: 15 or 25)")
     parser.add_argument("--delay", type=int, default=0, help="Simulated inference delay in steps (RTC prefix)")
     parser.add_argument("--cfg-beta", type=float, help="Classifier-free guidance weight on the metadata")
-    parser.add_argument("--subtask", help="Fixed subtask instruction; omit to run without one")
+    parser.add_argument("--subtask", help="Subtask instruction: a fixed string, 'oracle' (scripted phase from sim state), or omit for none")
     parser.add_argument("--denoise-steps", type=int, default=5)
     parser.add_argument("--device", default="auto")
     parser.add_argument("--tokenizer", type=Path)
@@ -149,6 +195,7 @@ def main(argv=None):
     rate = float(np.mean([r["success"] for r in results])) if results else 0.0
     lift_rate = float(np.mean([r["lifted"] for r in results])) if results else 0.0
     summary = {"checkpoint": str(args.checkpoint), "episodes": len(results), "success_rate": rate, "lift_rate": lift_rate,
+               "subtask": args.subtask,
                "execute": args.execute, "delay": args.delay, "cfg_beta": args.cfg_beta, "denoise_steps": args.denoise_steps,
                "elapsed_s": round(time.monotonic() - started, 1), "results": results}
     print(f"success rate {rate:.2%}, lift rate {lift_rate:.2%}, over {len(results)} episodes")
