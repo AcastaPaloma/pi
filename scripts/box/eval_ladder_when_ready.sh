@@ -4,7 +4,9 @@
 # Prints one "RUNG <step> <rung> success=<x> lift=<y>" line per rung so trends are easy to grep.
 set -u
 RUN=${RUN:-full_v2}; EPISODES=${EPISODES:-8}; RUNGS=${RUNGS:-pick_place_any bin handover two_bins}
-export MUJOCO_GL=${MUJOCO_GL:-osmesa} LP_NUM_THREADS=8
+# NVIDIA EGL: the ladder episodes (most of the training data) were rendered with it, and it is ~100x
+# faster than Mesa, which leaves the ~1 s policy calls as the main cost (~60 s per failed 30 s episode).
+export MUJOCO_GL=${MUJOCO_GL:-egl} LP_NUM_THREADS=8
 for step in "$@"; do
   ckpt=$(printf "exports/%s/step_%07d" "$RUN" "$step")
   until [ -f "$ckpt/model.pt" ]; do sleep 60; done
