@@ -297,9 +297,12 @@ class ArmPickPlace:
 class TaskTeacher:
     """Scripted demonstrator for every rung; works in ee_delta control."""
 
-    def __init__(self, env: TaskEnv, *, rng=None, speed=1.0, noise=0.0):
-        if env.control_mode != "ee_delta":
+    def __init__(self, env: TaskEnv, *, rng=None, speed=1.0, noise=0.0, observe_only=False):
+        """observe_only: track the scripted phase from true state while something else (a policy)
+        moves the arms; `observe()` advances it and `subtask` gives the oracle label."""
+        if env.control_mode != "ee_delta" and not observe_only:
             raise ValueError("TaskTeacher needs ee_delta control")
+        self.observe_only = observe_only
         self.env, self.speed = env, speed
         rng = rng if rng is not None else np.random.default_rng(0)
         t, near = env.task_name, env.side
@@ -344,13 +347,22 @@ class TaskTeacher:
     def mistake_active(self):
         return any(w.mistake_active for w in self.workers)
 
-    def action(self):
-        env = self.env
+    def observe(self):
+        """Advance phases from the current state without producing an action (observe_only mode)."""
+        self._advance()
+        for w in self.workers:
+            w.target()
+
+    def _advance(self):
         if self.k < len(self.stages) and all(w.done for w in self.workers):
             nxt = self.k + 1
             if nxt < len(self.stages) and self.stages[nxt][0] == "handover":
-                self.stages[nxt] = [self.stages[nxt][1]()]  # far arm reads the object's pose now
+                self.stages[nxt] = [self.stages[nxt][1]()]
             self.k = nxt
+
+    def action(self):
+        env = self.env
+        self._advance()  # the far arm reads the object's pose when the handover stage starts
         action = env.hold_action().reshape(2, -1)
         for w in self.workers:
             out = w.target()

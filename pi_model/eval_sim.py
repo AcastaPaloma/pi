@@ -62,9 +62,16 @@ def run_episode(env: RobotEnv, policy: Pi07Policy, *, seed, execute, delay, cfg_
     history = HistoryBuffer(policy.cameras, hz=env.control_hz)
     task = info["instruction"]
     released = False
+    ladder = hasattr(env, "task_name")
+    shadow = None
+    if ladder and subtask == "oracle":
+        from pi_sim.tasks import TaskTeacher
+        shadow = TaskTeacher(env, rng=np.random.default_rng(seed), observe_only=True)
 
     def current_subtask():
         nonlocal released
+        if shadow is not None:
+            return shadow.subtask
         if subtask == "oracle":
             if not released and obs["cube_position"][2] < 0.03 and \
                     np.linalg.norm(obs["cube_position"][:2] - obs["goal_position"][:2]) < 0.03 and \
@@ -119,15 +126,18 @@ def run_episode(env: RobotEnv, policy: Pi07Policy, *, seed, execute, delay, cfg_
             inference_calls += 1
         action = chunk[min(cursor, len(chunk) - 1)]
         obs, reward, terminated, truncated, info = env.step(action)
+        if shadow is not None:
+            shadow.observe()
         cursor += 1
         t += 1
-        closest = min(closest, float(np.linalg.norm(obs["ee_pose"][:3] - obs["cube_position"])))
+        closest = min(closest, float(min(np.linalg.norm(obs["ee_pose"][k:k + 3] - obs["cube_position"]) for k in (0, 7))))
         lifted = max(lifted, float(obs["cube_position"][2]))
         if t % observe_every == 0 and cursor < execute:
             observe(t)  # keep the one-second-stride history populated between inferences
         if terminated or truncated:
             break
-    return {"seed": seed, "success": bool(info["is_success"]), "steps": int(info["elapsed_steps"]),
+    extra = {"task_id": env.task_name, "side": env.side, "touched": info.get("touched")} if ladder else {}
+    return {**extra, "seed": seed, "success": bool(info["is_success"]), "steps": int(info["elapsed_steps"]),
             "failure": info["failure"], "inference_calls": inference_calls, "task": task, "subtask_mode": subtask,
             "object": f"{env.object_color} {env.object_shape}",
             "closest_hand_to_cube_m": round(closest, 4), "max_cube_height_m": round(lifted, 4),
@@ -172,6 +182,8 @@ def main(argv=None):
     parser.add_argument("--colors", default="red,green,blue,yellow")
     parser.add_argument("--shapes", default="cube")
     parser.add_argument("--placement", choices=("small", "wide"), default="wide")
+    parser.add_argument("--task", default="pick_place",
+                        help="pick_place (original left-arm task) or a ladder rung: pick_place_any, bin, handover, two_bins")
     parser.add_argument("--visual-randomization", action="store_true")
     parser.add_argument("--episode-seconds", type=float, default=20.0)
     parser.add_argument("--out", type=Path, help="Write results.json (and videos) here")
@@ -191,8 +203,14 @@ def main(argv=None):
     for i in range(args.episodes):
         color, shape = colors[i % len(colors)], shapes[(i // len(colors)) % len(shapes)]
         if (color, shape) not in envs:
-            envs[(color, shape)] = RobotEnv(task="pick_place", control_mode="joint", object_color=color, object_shape=shape,
-                                            control_hz=policy.hz, episode_seconds=args.episode_seconds)
+            if args.task == "pick_place":
+                envs[(color, shape)] = RobotEnv(task="pick_place", control_mode="joint", object_color=color, object_shape=shape,
+                                                control_hz=policy.hz, episode_seconds=args.episode_seconds)
+            else:
+                from pi_sim.tasks import TaskEnv
+                second = next(c for c in ("blue", "red", "yellow", "green") if c != color)
+                envs[(color, shape)] = TaskEnv(args.task, control_mode="joint", object_color=color, second_color=second,
+                                               object_shape=shape, control_hz=policy.hz, episode_seconds=args.episode_seconds)
         frames = [] if args.video else None
         result = run_episode(envs[(color, shape)], policy, seed=args.seed + i, execute=args.execute, delay=args.delay,
                              cfg_beta=args.cfg_beta, subtask=args.subtask, image_size=image_size,

@@ -55,11 +55,23 @@ def lr_at(step, *, base, warmup, total, floor=0.1):
     return base * (floor + (1 - floor) * 0.5 * (1 + math.cos(math.pi * progress)))
 
 
-def build_model(cfg, *, gemma=None, device=torch.device("cpu"), checkpoint=None):
+def reset_action_io(model):
+    """Re-initialise the layers that map joint numbers in and out of the model (state input,
+    action-expert input and output) for a warm start on data with new action statistics,
+    keeping the vision encoder, backbone and expert transformer."""
+    model.state_proj.reset_parameters()
+    model.expert.action_in.reset_parameters()
+    torch.nn.init.zeros_(model.expert.action_out.weight)
+    torch.nn.init.zeros_(model.expert.action_out.bias)
+
+
+def build_model(cfg, *, gemma=None, device=torch.device("cpu"), checkpoint=None, reset_io=False):
     model = Pi07(cfg)
     report = None
     if checkpoint is not None:
         model.load_state_dict(torch.load(Path(checkpoint) / "model.pt", map_location="cpu"))
+        if reset_io:
+            reset_action_io(model)
     elif gemma is not None:
         report = load_gemma3(model, gemma)
         report["vlm_fraction"] = gemma_loaded_fraction(report, model)
@@ -74,7 +86,9 @@ def main(argv=None):
     parser.add_argument("--objective", choices=("action", "subtask"), default="action")
     parser.add_argument("--gemma", type=Path, help="Gemma 3 4B safetensors directory (initialises the VLM)")
     parser.add_argument("--tokenizer", type=Path, help="Gemma tokenizer.model; byte fallback when omitted")
-    parser.add_argument("--resume", type=Path, help="Checkpoint directory to continue from")
+    parser.add_argument("--resume", type=Path, help="Checkpoint directory to warm-start from (weights only)")
+    parser.add_argument("--reset-action-io", action="store_true",
+                        help="With --resume: re-initialise state/action input-output layers (new action statistics)")
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--steps", type=int, default=30000)
     parser.add_argument("--batch-size", type=int, default=16)
@@ -115,7 +129,8 @@ def main(argv=None):
     loader = DataLoader(dataset, batch_size=args.batch_size, shuffle=sampler is None, sampler=sampler, drop_last=True,
                         num_workers=args.num_workers, collate_fn=lambda s: collate(s, cfg),
                         persistent_workers=args.num_workers > 0)
-    model, report = build_model(cfg, gemma=args.gemma, device=device, checkpoint=args.resume)
+    model, report = build_model(cfg, gemma=args.gemma, device=device, checkpoint=args.resume,
+                                reset_io=args.reset_action_io)
     if args.gradient_checkpointing:
         model.set_gradient_checkpointing(True)
     core = model
