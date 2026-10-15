@@ -1,8 +1,8 @@
 /* Inference tab: 3D stage over the timeline drawing on the left, walkthrough text on the right. */
 .visual-column{display:grid;grid-template-rows:minmax(0,62fr) minmax(0,38fr);min-width:0;min-height:0}
-.stage{position:relative;min-height:0;overflow:hidden;background:#f1eee8;border-bottom:1px solid var(--rule)}
+.stage{position:relative;min-height:0;overflow:hidden;background:#2a2928;border-bottom:1px solid var(--rule)}
 .stage-canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
-.stage-loading{position:absolute;inset:0;display:grid;place-content:center;color:var(--secondary);font-size:14px;text-align:center;padding:24px}
+.stage-loading{position:absolute;inset:0;display:grid;place-content:center;color:#c9c5bd;font-size:14px;text-align:center;padding:24px}
 .timeline{position:relative}.timeline .world.focused #artwork{opacity:.2}
 .timeline .hotspot{border-radius:6px}.timeline .hotspot:hover{background:#1f3a8a08;border-color:#1f3a8a80}.timeline .hotspot.is-current{border-color:transparent}
 .timeline .start-button{top:12px;left:16px;padding:7px 11px;font-size:13px}

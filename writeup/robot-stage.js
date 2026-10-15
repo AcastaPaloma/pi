@@ -230,7 +230,7 @@ function frustum(camera, depth, aspect = 4 / 3) {
 function materialsFor() {
   const m = (o) => new THREE.MeshStandardMaterial(o);
   return {
-    plastic: m({ color: '#f6c726', roughness: .58, metalness: 0 }),
+    plastic: m({ color: '#f2b81c', roughness: .5, metalness: 0 }),
     servo: m({ color: '#1c1c1e', roughness: .45, metalness: .15, emissive: '#000000' }),
     lens: m({ color: '#121314', roughness: .3, metalness: .4 }),
     glass: m({ color: '#0b1a33', roughness: .05, metalness: .9 }),
@@ -245,9 +245,9 @@ function materialsFor() {
     water: m({ color: '#b9dcff', roughness: .05, metalness: 0, transparent: true, opacity: .78, emissive: '#7fb6ee', emissiveIntensity: .45, depthWrite: false }),
     ripple: new THREE.MeshBasicMaterial({ color: '#a8d1f5', transparent: true, opacity: .6, depthWrite: false }),
     gantry: m({ color: '#3b3f45', roughness: .45, metalness: .6 }),
-    table: m({ color: '#e7ddcb', roughness: .85 }),
-    leg: m({ color: '#cfc4b0', roughness: .9 }),
-    floor: m({ color: '#ece8e1', roughness: 1 })
+    table: m({ color: '#6e5f4b', roughness: .78 }),
+    leg: m({ color: '#3a3633', roughness: .9 }),
+    floor: m({ color: '#242322', roughness: 1 })
   };
 }
 
@@ -286,18 +286,19 @@ export async function createStage(container, { subtasks, task, base = './assets/
   const canvas = document.createElement('canvas'); canvas.className = 'stage-canvas';
   container.prepend(canvas);
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
-  renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.05;
+  renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = .95;
   renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   const small = () => Math.min(container.clientWidth, container.clientHeight) < 420;
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color('#f1eee8'); scene.fog = new THREE.Fog('#f1eee8', 2.4, 6.5);
-  scene.environment = studioEnvironment(renderer); scene.environmentIntensity = .55;
-  scene.add(new THREE.HemisphereLight('#fffaf0', '#cfc6b6', 1.1));
-  const key = new THREE.DirectionalLight('#fff3e2', 2.6); key.position.set(.7, -.9, 1.6); key.castShadow = true;
+  // A dark studio so the yellow arms, white sink, and chrome stand out.
+  scene.background = new THREE.Color('#2a2928'); scene.fog = new THREE.Fog('#2a2928', 2.2, 5.5);
+  scene.environment = studioEnvironment(renderer); scene.environmentIntensity = .4;
+  scene.add(new THREE.HemisphereLight('#fff4e0', '#3a342c', .5));
+  const key = new THREE.DirectionalLight('#fff1dc', 3.1); key.position.set(.6, .9, 1.5); key.castShadow = true;
   Object.assign(key.shadow.camera, { left: -.6, right: .6, top: .6, bottom: -.6, near: .2, far: 4 });
   key.shadow.mapSize.setScalar(small() ? 1024 : 2048); key.shadow.bias = -.0004; key.shadow.normalBias = .01; key.shadow.radius = 4;
-  const fill = new THREE.DirectionalLight('#e8efff', .7); fill.position.set(-1, .3, .8);
-  const rim = new THREE.DirectionalLight('#ffffff', .9); rim.position.set(-.2, 1.2, .7);
+  const fill = new THREE.DirectionalLight('#dfe8ff', .35); fill.position.set(-1, .6, .7);
+  const rim = new THREE.DirectionalLight('#fff6ea', 1.6); rim.position.set(-.3, -1.1, .9);
   scene.add(key, fill, rim);
 
   const materials = materialsFor();
@@ -573,10 +574,11 @@ export async function createStage(container, { subtasks, task, base = './assets/
     for (const step of sequence) if (!step.done && now - beatStart >= step.at) { step.done = true; step.fn(); }
     if (motion) { const k = clamp((now - motion.start) / motion.dur, 0, 1); T = motion.from + (motion.to - motion.from) * (k < 1 ? easeInOut(k) * .15 + k * .85 : 1); if (k >= 1) motion = null; }
     const state = stateAt(T); apply(state);
+    // Servos glow faintly on the arm that is executing actions, only while it moves.
     for (const side of ['left', 'right']) {
-      const arm = arms[side], speed = arm.prev ? arm.q.reduce((s, v, i) => s + Math.abs(v - arm.prev[i]), 0) / Math.max(dt, 1e-3) : 0;
-      arm.prev = arm.q.slice(); arm.glow = (arm.glow ?? 0) + (clamp(speed * .9, 0, 1) - (arm.glow ?? 0)) * Math.min(1, dt * 8);
-      arm.servoMaterial.emissive.copy(ACCENT).multiplyScalar(arm.glow * .55);
+      const arm = arms[side], target = motion && Math.abs(motion.to - motion.from) > 1e-6 && side === state.active ? 1 : 0;
+      arm.glow = (arm.glow ?? 0) + (target - (arm.glow ?? 0)) * Math.min(1, dt * 4);
+      arm.servoMaterial.emissive.copy(ACCENT).multiplyScalar(arm.glow * .16);
     }
     if (typing && now >= typing.start) { const shown = Math.min(typing.words.length, 1 + Math.floor((now - typing.start) / 260)); if (shown !== typing.shown) { typing.shown = shown; $('.hud-subtask').textContent = typing.words.slice(0, shown).join(' '); } if (shown >= typing.words.length) typing = null; }
     if (goalAnim) { const k = clamp((now - goalAnim.start) / goalAnim.dur, 0, 1); drawGoals(goalAnim.s, goalAnim.from + (goalAnim.to - goalAnim.from) * (reduced.matches ? 1 : k)); if (k >= 1) goalAnim = null; }
