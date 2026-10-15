@@ -22,7 +22,7 @@ python examples/observe_robot.py
 
 Captures are saved under `outputs/observations/`. The [observation guide](docs/OBSERVATIONS.md) also explains reading your physical SO-101 pair after configuring its serial ports, calibration files, and cameras.
 
-All four camera PNGs now preserve the native lens image (initially 640×480). See [camera rig matching](docs/CAMERA_RIG.md) to share measured optics/poses with hardware. In the sim window, press **V** to cycle the camera views, or start with `./play.sh --view overhead`.
+All three camera PNGs preserve the native lens image (640×480). See [camera rig matching](docs/CAMERA_RIG.md) to share measured optics/poses with hardware. In the sim window, press **V** to cycle the camera views, or start with `./play.sh --view overhead`.
 
 **Get data for your low-level encoder:**
 
@@ -55,8 +55,8 @@ conda activate mini-vla
 python examples/tap_in.py
 ```
 
-Edit the `action = ...` line in that example to plug in your controller. The core API is `env.reset()` and `env.step(action)`. Read joint positions through `env.robot["left"].joint_positions`; get images through `env.render_camera("front")`; access raw MuJoCo through `env.model` and `env.data`.
+Edit the `action = ...` line in that example to plug in your controller. The core API is `env.reset()` and `env.step(action)`. Read joint positions through `env.robot["left"].joint_positions`; get images through `env.render_camera("overhead")`; access raw MuJoCo through `env.model` and `env.data`.
 
 The [full guide](README.md) explains actions, cameras, recording demonstrations, and a fresh installation. The [paper mapping](docs/PAPER_MAPPING.md) explains which π₀.₇ robot details are reproduced and which are approximated. No training model is included.
 
-For colored printed objects, public manipulation datasets and the four-camera mounting layout, see [the SO-101 plan](docs/SO101_MANIPULATION.md). Try `./play.sh --demo --task pick_place --object-shape cylinder --object-color blue`.
+For colored printed objects, public manipulation datasets and the three-camera mounting layout, see [the SO-101 plan](docs/SO101_MANIPULATION.md). To train the π₀.₇ reimplementation, see [the implementation notes](docs/PI07_IMPLEMENTATION.md). Try `./play.sh --demo --task pick_place --object-shape cylinder --object-color blue`.

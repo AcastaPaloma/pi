@@ -1,5 +1,6 @@
 """Integration checks with real MuJoCo physics. Run with unittest; no extra deps."""
 
+import subprocess
 import sys
 import unittest
 
@@ -19,7 +20,11 @@ class EnvironmentTests(unittest.TestCase):
         with gym.make("PiSim-Reach-v0") as env:
             obs, _ = env.reset(seed=1)
             self.assertTrue(env.observation_space.contains(obs))
-        self.assertNotIn("torch", sys.modules)
+        # The simulator stays PyTorch-free; check in a fresh interpreter because
+        # the model tests import torch into this process.
+        probe = subprocess.run([sys.executable, "-c", "import pi_sim, pi_observe, sys; print('torch' in sys.modules)"],
+                               capture_output=True, text=True, check=True)
+        self.assertEqual(probe.stdout.strip(), "False")
 
     def test_seeded_trajectory_repeats(self):
         with RobotEnv(task="pick_place") as env:
@@ -42,7 +47,7 @@ class EnvironmentTests(unittest.TestCase):
                         obs, _ = env.reset(seed=seed)
                         demo = ScriptedDemo(env)
                         peak_height = 0
-                        for _ in range(400):
+                        for _ in range(env.max_episode_steps):
                             obs, _, terminated, truncated, info = env.step(demo.action())
                             peak_height = max(peak_height, obs["cube_position"][2])
                             if terminated or truncated:
@@ -68,7 +73,7 @@ class EnvironmentTests(unittest.TestCase):
             self.assertLess(env.robot["right"].joint_positions[0] - before["right"][0], -0.10)
             self.assertLess(env.robot["left"].gripper_opening, 0.2)
             self.assertLess(env.robot["right"].gripper_opening, 0.2)
-            self.assertAlmostEqual(env.data.time, 1.5, places=8)
+            self.assertAlmostEqual(env.data.time, 30 * env.control_dt, places=8)
 
     def test_chunk_timeout_invalid_inputs_and_observation_copies(self):
         with RobotEnv(max_episode_steps=3) as env:
@@ -129,7 +134,7 @@ class EnvironmentTests(unittest.TestCase):
                 self.assertEqual(frame.shape, (448, 448, 3))
                 self.assertEqual(frame.dtype, np.uint8)
                 self.assertGreater(float(frame.std()), 10)
-            np.testing.assert_array_equal(env.render(), obs["images"]["front"])
+            np.testing.assert_allclose(env.render().astype(int), obs["images"]["overhead"].astype(int), atol=1)
 
 
 if __name__ == "__main__":

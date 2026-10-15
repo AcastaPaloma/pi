@@ -60,38 +60,33 @@ The loader reads **all episode metadata shards**, verifies numeric frame/time or
 
 Each source retains its **native motor values**. These public cards do not establish every recording's normalization/calibration; the adapter marks units `source_native_unverified`. Do not assume similarly sized values are degrees or send them directly to a physical arm. Audit recorder configuration and calibrated zero/sign/range before combining sources or replaying actions. The simulator's degree convention uses the Menagerie joint origin; it is not an independently measured hardware calibration.
 
-Your encoder prototype currently expects four views and 12D proprioception. A two-view/6D public sample needs an explicit model adapter: preserve view identities, mask absent views and absent arm dimensions, and use a source-specific state projector or normalization. Repeating images to manufacture four views supplies no extra supervision. The loader preserves the original evidence instead of hiding these differences.
+The π₀.₇ reimplementation expects up to four views (three here) and 12D proprioception. A two-view/6D public sample needs an explicit model adapter: preserve view identities, mask absent views and absent arm dimensions, and use a source-specific state projector or normalization. Repeating images to manufacture four views supplies no extra supervision. The loader preserves the original evidence instead of hiding these differences.
 
-## Where the four cameras go
+## Where the three cameras go
 
-**Four cameras total across the two follower arms**:
+**Three cameras total across the two follower arms**, all Arducam B030401 IMX708 USB autofocus modules:
 
 | Name in our rig | Physical mount | Purpose |
 | --- | --- | --- |
-| `left_wrist` | Left follower's wrist-roll/fixed-gripper structure, just behind and above the fingertips | Close view of the grasp and left-arm contact |
+| `overhead` | Rigid crossbar/gantry 0.70 m above the workspace center, looking straight down; or the official printed base-connected overhead mount | The base view: object color, layout, sorting targets and inter-arm coverage |
+| `left_wrist` | Left follower's wrist-roll camera mount, just behind and above the fingertips | Close view of the grasp and left-arm contact |
 | `right_wrist` | Same mount on the right follower | Close view of right-arm contact and handoffs |
-| `front` | Fixed table clamp or tripod at the front edge, looking diagonally across both arms | Scene context and height/occlusion cues |
-| `overhead` | Rigid crossbar/gantry above the center of the workspace, or the official printed base-connected overhead mount | Object color, layout, sorting targets and inter-arm coverage |
 
-The [official SO-101 wrist adapter](https://github.com/TheRobotStudio/SO-ARM100/tree/main/Optional/SO101_Wrist_Cam_Hex-Nut_Mount_32x32_UVC_Module) uses hex-nut recesses in the **wrist-roll element**, two M3×8 screws/nuts, and four M2 screws for a 32×32 mm USB camera board. Print one per follower. Keep the moving jaw unobstructed and add cable slack/strain relief across wrist movement. Different camera-board sizes need a matching mount; the simulated mount is an approximation, not a drilling template.
+The [official SO-101 wrist adapter](https://github.com/TheRobotStudio/SO-ARM100/tree/main/Optional/SO101_Wrist_Cam_Hex-Nut_Mount_32x32_UVC_Module) uses hex-nut recesses in the **wrist-roll element**, two M3×8 screws/nuts, and four M2 screws for a 32×32 mm USB camera board; the B030401 board is 32×32 mm. Print one per follower. Keep the moving jaw unobstructed and add cable slack/strain relief across wrist movement.
 
-The [official overhead assembly](https://github.com/TheRobotStudio/SO-ARM100/blob/main/Optional/Overhead_Cam_Mount_Webcam/README.md) connects the camera support to one or two printed follower bases. A separate rigid gantry is another option. My starting placement would be 60–90 cm above the table for overhead and 30–50 cm above table height for the front camera, adjusted until both workspaces fit the actual lenses. These heights are proposed rig choices, not dimensions from the official mount.
+The [official overhead assembly](https://github.com/TheRobotStudio/SO-ARM100/blob/main/Optional/Overhead_Cam_Mount_Webcam/README.md) connects the camera support to one or two printed follower bases; a separate rigid gantry is another option. At 0.70 m the 61° horizontal field covers about 0.82 × 0.63 m of tabletop, enough for both workspaces. Lock the overhead autofocus with the UVC focus control; the wrists use autofocus (10 cm to infinity). Capture at 640×480, 30 fps; keep exposure and white balance fixed for color experiments. The [camera guide](CAMERA_RIG.md) records the profile; its optics are nominal until calibrated. Buy a fourth module as the spare.
 
-The final purchase recommendation was four identical InnoMaker U20CAM-1080P 130° M12 modules (`B0CNCSFQC1`), so a spare could replace any position. The simulator's [shared camera profile](CAMERA_RIG.md) now records this model for both wrists, front and overhead, using all four modules as requested. Start at 640×480, 30 fps; use consistent focus/exposure/white balance for color experiments. Inspect all four actual feeds with the arms at their workspace extremes. The first useful setup can use only overhead plus one wrist; four views are a model choice, not an SO-101 requirement. The profile's optics/poses are explicitly nominal until calibrated on your assembled rig.
-
-[The example hardware configuration](../configs/so101_observe.example.json) now uses these four names in the same order as simulation. The physical observation reader remains read-only and requires already calibrated arms. Host timing checks reveal stale/skewed inputs; they do not provide camera exposure synchronization. Distribute streams across USB controllers if measured frame rate/latency suffers.
-
-If you intended four cameras on **each individual arm**, mount only one on each wrist and allocate the remaining views to fixed overhead/front/side positions around its workspace. Extra arm-mounted cameras add load and often redundant views.
+[The example hardware configuration](../configs/so101_observe.example.json) uses these three names in the same order as simulation. The physical observation reader remains read-only and requires already calibrated arms.
 
 ## Train for generalization, not just repeated placement
 
 My suggested local curriculum:
 
 1. Print baseline cubes/cylinders in four matte colors and several colored disks. Match object dimensions across colors. Keep 24/36 mm variants for later size shifts.
-2. Start one follower with pick-and-place, push-to-pad, color sorting, and two-object stacking. Collect approximately 50–100 varied successful demonstrations per task as an initial pilot, then add data where failures concentrate. This is a collection target, not a promised sample-complexity threshold. The current simulator implements reach and pick/place only; push/sort/stack need local task definitions and demonstrations.
+2. Start one follower with pick-and-place, push-to-pad, color sorting, and two-object stacking. Collect approximately 50–100 varied successful demonstrations per task as an initial pilot, then add data where failures concentrate. This is a collection target, not a promised sample-complexity threshold. The current simulator implements reach and pick/place only; push/sort/stack need local task definitions and demonstrations. `python -m pi_sim.record` produces π₀.₇ training episodes with subtask segments, mistake retries and visual randomization.
 3. Randomize object position/orientation, destination position, distractor count, and task instructions. Train each color across several destinations, so “red” does not become a synonym for one location. Include corrections and recovery behavior.
 4. Split by collection session first, then reserve color–shape–destination combinations. Test known colors/shapes in new combinations, unseen sizes, new layouts, and a second background/lighting condition separately. Unseen-color evaluation is harder than novel combinations and should be reported separately.
 5. Evaluate at least 20 physical rollouts per condition with a fixed success definition. Report per-task success and failure type. Neighboring frames from the same demonstration must not fall on opposite sides of a train/test split.
-6. Only then add two-arm handoff and cooperative placement, recording all 12 motor values and all four cameras together. Keep initial single-arm pretrained supervision separate from coordinated action supervision.
+6. Only then add two-arm handoff and cooperative placement, recording all 12 motor values and all three cameras together. Keep initial single-arm pretrained supervision separate from coordinated action supervision.
 
 For a quick baseline, fine-tune a pretrained language-conditioned LeRobot policy such as SmolVLA on the public source, then on your printed-object recordings. ACT is a useful control baseline for a narrow task. No policy training or hardware motion was run as part of this repository migration.

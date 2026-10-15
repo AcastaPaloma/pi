@@ -12,9 +12,10 @@ dependencies = ["mujoco==3.15.0", "gymnasium==1.4.0", "numpy>=1.26,<3", "pillow>
 [project.optional-dependencies]
 data = ["av>=16,<19", "pyarrow>=20,<26", "huggingface-hub>=1,<2", "fastapi>=0.115,<1", "uvicorn>=0.34,<1", "httpx>=0.28,<1"]
 capture = ["opencv-python>=4.10,<5", "feetech-servo-sdk==1.0.0", "pyserial>=3.5,<4"]
+model = ["torch>=2.5", "einops>=0.8", "scipy>=1.12", "tokenizers>=0.20", "safetensors>=0.4", "sentencepiece>=0.2"]
 
 [tool.setuptools.packages.find]
-include = ["pi_sim*", "pi_data*", "pi_observe*"]
+include = ["pi_sim*", "pi_data*", "pi_observe*", "pi_model*"]
 
 [tool.setuptools.package-data]
 pi_sim = ["assets/**/*"]

@@ -1,17 +1,54 @@
 {
   "schema_version": 1,
-  "note": "Four identical InnoMaker U20CAM-1080P-S1 130-degree lens modules from the final purchase recommendation, installed as two wrists plus front and overhead. Native capture 640x480/30. Intrinsics are a nominal pinhole approximation from the manual technical table horizontal FOV=106 degrees; actual mode crop, distortion, focus and mount poses require calibration.",
+  "note": "Three identical Arducam B030401 IMX708 USB autofocus modules: one overhead on a gantry looking straight down from 0.70 m, one on each follower's Menagerie wrist-roll camera mount. Native capture 640x480 at 30 fps. The overhead view plays the paper's base-camera role; there is no front camera in this rig.",
   "cameras": {
-    "left_wrist": {
-      "hardware_model": "InnoMaker U20CAM-1080P-S1 (130-degree M12 lens, B0CNCSFQC1)",
+    "overhead": {
+      "hardware_model": "Arducam 12MP IMX708 USB UVC autofocus camera module (B030401, 75-degree diagonal lens)",
       "calibration_status": "nominal",
       "width": 640,
       "height": 480,
       "fps": 30,
       "rotation": 0,
       "intrinsics": {
-        "fx": 241.13729603289417,
-        "fy": 241.13729603289417,
+        "fx": 543.2521981843486,
+        "fy": 543.2521981843486,
+        "cx": 320,
+        "cy": 240
+      },
+      "distortion": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "pose": {
+        "parent_body": "world",
+        "pos": [
+          0,
+          -0.03,
+          0.7
+        ],
+        "quat_wxyz": [
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "optics_note": "Arducam B030401: Sony IMX708 (Raspberry Pi Camera Module 3 sensor) on a USB 2.0 UVC adapter, autofocus 10 cm to infinity, 75-degree diagonal lens listed as 61 degrees horizontal and 50 degrees vertical, 32x32 mm board. Nominal pinhole from the 61-degree horizontal figure at 640x480 (vertical then 47.8 degrees). Distortion coefficients are unmeasured zero placeholders; autofocus changes the effective focal length slightly with focus distance, so calibrate each unit at its working focus. Mount poses are nominal.",
+      "reference_url": "https://thepihut.com/products/arducam-12mp-imx708-usb-c-uvc-fixed-focus-camera-module"
+    },
+    "left_wrist": {
+      "hardware_model": "Arducam 12MP IMX708 USB UVC autofocus camera module (B030401, 75-degree diagonal lens)",
+      "calibration_status": "nominal",
+      "width": 640,
+      "height": 480,
+      "fps": 30,
+      "rotation": 0,
+      "intrinsics": {
+        "fx": 543.2521981843486,
+        "fy": 543.2521981843486,
         "cx": 320,
         "cy": 240
       },
@@ -36,19 +73,19 @@
           0.004547
         ]
       },
-      "optics_note": "Manufacturer manual v1.1: 130-degree diagonal; technical table 106-degree horizontal (feature list says 103). Nominal pinhole uses 106 horizontal at 640x480. Distortion coefficients are unmeasured zero placeholders; the advertised diagonal angle is not reproduced by this pinhole estimate.",
-      "reference_url": "https://github.com/INNO-MAKER/U20CAM-1080P-S1/blob/main/U20CAM-1080P-S1%20UserManual-v1.1.pdf"
+      "optics_note": "Arducam B030401: Sony IMX708 (Raspberry Pi Camera Module 3 sensor) on a USB 2.0 UVC adapter, autofocus 10 cm to infinity, 75-degree diagonal lens listed as 61 degrees horizontal and 50 degrees vertical, 32x32 mm board. Nominal pinhole from the 61-degree horizontal figure at 640x480 (vertical then 47.8 degrees). Distortion coefficients are unmeasured zero placeholders; autofocus changes the effective focal length slightly with focus distance, so calibrate each unit at its working focus. Mount poses are nominal.",
+      "reference_url": "https://thepihut.com/products/arducam-12mp-imx708-usb-c-uvc-fixed-focus-camera-module"
     },
     "right_wrist": {
-      "hardware_model": "InnoMaker U20CAM-1080P-S1 (130-degree M12 lens, B0CNCSFQC1)",
+      "hardware_model": "Arducam 12MP IMX708 USB UVC autofocus camera module (B030401, 75-degree diagonal lens)",
       "calibration_status": "nominal",
       "width": 640,
       "height": 480,
       "fps": 30,
       "rotation": 0,
       "intrinsics": {
-        "fx": 241.13729603289417,
-        "fy": 241.13729603289417,
+        "fx": 543.2521981843486,
+        "fy": 543.2521981843486,
         "cx": 320,
         "cy": 240
       },
@@ -73,84 +110,8 @@
           0.004547
         ]
       },
-      "optics_note": "Manufacturer manual v1.1: 130-degree diagonal; technical table 106-degree horizontal (feature list says 103). Nominal pinhole uses 106 horizontal at 640x480. Distortion coefficients are unmeasured zero placeholders; the advertised diagonal angle is not reproduced by this pinhole estimate.",
-      "reference_url": "https://github.com/INNO-MAKER/U20CAM-1080P-S1/blob/main/U20CAM-1080P-S1%20UserManual-v1.1.pdf"
-    },
-    "front": {
-      "hardware_model": "InnoMaker U20CAM-1080P-S1 (130-degree M12 lens, B0CNCSFQC1)",
-      "calibration_status": "nominal",
-      "width": 640,
-      "height": 480,
-      "fps": 30,
-      "rotation": 0,
-      "intrinsics": {
-        "fx": 241.13729603289417,
-        "fy": 241.13729603289417,
-        "cx": 320,
-        "cy": 240
-      },
-      "distortion": [
-        0,
-        0,
-        0,
-        0,
-        0
-      ],
-      "pose": {
-        "parent_body": "world",
-        "pos": [
-          0.65,
-          -0.85,
-          0.45
-        ],
-        "xyaxes": [
-          0.7943578329771962,
-          0.6074501075707971,
-          0,
-          -0.22422766810421546,
-          0.29322079675166635,
-          0.9293780270744858
-        ]
-      },
-      "optics_note": "Manufacturer manual v1.1: 130-degree diagonal; technical table 106-degree horizontal (feature list says 103). Nominal pinhole uses 106 horizontal at 640x480. Distortion coefficients are unmeasured zero placeholders; the advertised diagonal angle is not reproduced by this pinhole estimate.",
-      "reference_url": "https://github.com/INNO-MAKER/U20CAM-1080P-S1/blob/main/U20CAM-1080P-S1%20UserManual-v1.1.pdf"
-    },
-    "overhead": {
-      "hardware_model": "InnoMaker U20CAM-1080P-S1 (130-degree M12 lens, B0CNCSFQC1)",
-      "calibration_status": "nominal",
-      "width": 640,
-      "height": 480,
-      "fps": 30,
-      "rotation": 0,
-      "intrinsics": {
-        "fx": 241.13729603289417,
-        "fy": 241.13729603289417,
-        "cx": 320,
-        "cy": 240
-      },
-      "distortion": [
-        0,
-        0,
-        0,
-        0,
-        0
-      ],
-      "pose": {
-        "parent_body": "world",
-        "pos": [
-          0,
-          0,
-          0.85
-        ],
-        "quat_wxyz": [
-          1,
-          0,
-          0,
-          0
-        ]
-      },
-      "optics_note": "Manufacturer manual v1.1: 130-degree diagonal; technical table 106-degree horizontal (feature list says 103). Nominal pinhole uses 106 horizontal at 640x480. Distortion coefficients are unmeasured zero placeholders; the advertised diagonal angle is not reproduced by this pinhole estimate.",
-      "reference_url": "https://github.com/INNO-MAKER/U20CAM-1080P-S1/blob/main/U20CAM-1080P-S1%20UserManual-v1.1.pdf"
+      "optics_note": "Arducam B030401: Sony IMX708 (Raspberry Pi Camera Module 3 sensor) on a USB 2.0 UVC adapter, autofocus 10 cm to infinity, 75-degree diagonal lens listed as 61 degrees horizontal and 50 degrees vertical, 32x32 mm board. Nominal pinhole from the 61-degree horizontal figure at 640x480 (vertical then 47.8 degrees). Distortion coefficients are unmeasured zero placeholders; autofocus changes the effective focal length slightly with focus distance, so calibrate each unit at its working focus. Mount poses are nominal.",
+      "reference_url": "https://thepihut.com/products/arducam-12mp-imx708-usb-c-uvc-fixed-focus-camera-module"
     }
   }
 }

@@ -12,15 +12,15 @@ python -m pi_observe sim
 This creates a timestamped folder under `outputs/observations/`. Inside each `000000/` capture:
 
 ```text
+overhead.png      native RGB view
 left_wrist.png    native RGB view
 right_wrist.png   native RGB view
-front.png        native RGB view
 encoder.npz      resized images + proprioception + text + goals/masks + history
 metadata.json    joint names/units, timestamps, source, camera shapes
 COMPLETE         present only after all files were saved
 ```
 
-For multiple captures: `python -m pi_observe sim --frames 10 --fps 5`. The CLI advances the simulator between captures using a hold command; `Observer.read()` itself never advances it. Simulation steps remain 0.05 seconds each, independently of the CLI's wall-clock capture rate. The saved `simulation_time_seconds` distinguishes the clocks. The CLI holds the robot stationary; your control loop can move it between observations.
+For multiple captures: `python -m pi_observe sim --frames 10 --fps 5`. The CLI advances the simulator between captures using a hold command; `Observer.read()` itself never advances it. Simulation steps remain 0.02 seconds each (50 Hz), independently of the CLI's wall-clock capture rate. The saved `simulation_time_seconds` distinguishes the clocks. The CLI holds the robot stationary; your control loop can move it between observations.
 
 ```python
 from pi_sim import RobotEnv
@@ -31,10 +31,10 @@ with RobotEnv(control_mode="joint") as env:
     with Observer(SimSource(env), task=info["instruction"]) as observer:
         obs = observer.read()
         x = obs.inputs
-        images = x["images"]                 # [3,448,448,3], RGB uint8
+        images = x["images"]                 # [3,448,448,3], RGB uint8 (overhead, left_wrist, right_wrist)
         state = x["proprioception"]          # [12] for this two-SO-101 simulation
         prompt = str(x["task"])
-        native_front = obs.images["front"]
+        native_overhead = obs.images["overhead"]
         # Your encoder consumes x here.
         # obs.save("outputs/my_capture")     # Use a new directory.
         # env.step(your_action)
@@ -56,7 +56,7 @@ There were no SO-101 serial devices visible on this Mac during implementation. T
    python -m pi_observe devices
    ```
 
-2. Copy `configs/so101_observe.example.json` to `configs/so101_observe.local.json`. Set the two serial ports, the two existing LeRobot calibration JSON paths, and the four camera device IDs or paths. Linux `/dev/video*` paths are supported; macOS cameras usually use integer indices. Relative calibration/goal file paths are resolved relative to the config file. Device listing only lists serial devices and does not probe cameras.
+2. Copy `configs/so101_observe.example.json` to `configs/so101_observe.local.json`. Set the two serial ports, the two existing LeRobot calibration JSON paths, and the three camera device IDs or paths. Linux `/dev/video*` paths are supported; macOS cameras usually use integer indices. Relative calibration/goal file paths are resolved relative to the config file. Device listing only lists serial devices and does not probe cameras.
 
 3. Run:
 
@@ -64,9 +64,9 @@ There were no SO-101 serial devices visible on this Mac during implementation. T
    python -m pi_observe robot --config configs/so101_observe.local.json
    ```
 
-The config's default camera order matches simulation: `left_wrist`, `right_wrist`, `front`, `overhead`. See the [mounting plan](SO101_MANIPULATION.md#where-the-four-cameras-go) and [shared camera calibration guide](CAMERA_RIG.md). The example uses a `camera_rig` profile for native resolution, FPS and rotation. With a shared rig, conflicts and fallback image dimensions are rejected; without one, requests are best-effort. Public dataset views retain their original names and count. Additional named cameras remain supported in configs without `camera_rig`. Check the first saved images to confirm identities. Optional `rotation` is 0, 90, 180, or 270 degrees counterclockwise.
+The config's default camera order matches simulation: `overhead`, `left_wrist`, `right_wrist`. See the [mounting plan](SO101_MANIPULATION.md#where-the-three-cameras-go) and [shared camera calibration guide](CAMERA_RIG.md). The example uses a `camera_rig` profile for native resolution, FPS and rotation. With a shared rig, conflicts and fallback image dimensions are rejected; without one, requests are best-effort. Public dataset views retain their original names and count. Additional named cameras remain supported in configs without `camera_rig`. Check the first saved images to confirm identities. Optional `rotation` is 0, 90, 180, or 270 degrees counterclockwise.
 
-Simulation captures now preserve each lens's native aspect ratio/resolution, then use the same bilinear encoder resize as hardware. `python -m pi_observe sim --camera-rig configs/so101_camera_rig.local.json` selects your measured optics and poses. Sim metadata includes native intrinsics, distortion and current world poses. The shipped profile identifies the recommended InnoMaker U20CAM-1080P modules; its optics and poses remain nominal until the assembled rig is calibrated.
+Simulation captures now preserve each lens's native aspect ratio/resolution, then use the same bilinear encoder resize as hardware. `python -m pi_observe sim --camera-rig configs/so101_camera_rig.local.json` selects your measured optics and poses. Sim metadata includes native intrinsics, distortion and current world poses. The shipped profile identifies the Arducam B030401 IMX708 USB modules; its optics and poses remain nominal until the assembled rig is calibrated.
 
 For your own live loop:
 
@@ -130,7 +130,7 @@ observer.set_context(
     task="Place the red cube on the green disk",
     subtask="Bring the left edge to the right edge",
     goal_images={
-        "front": np.asarray(Image.open("desired_placement.png").convert("RGB"))
+        "overhead": np.asarray(Image.open("desired_placement.png").convert("RGB"))
     },
 )
 ```

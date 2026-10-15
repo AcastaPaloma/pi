@@ -118,7 +118,7 @@ class CaptureTest(unittest.TestCase):
             qpos, before = env.data.qpos.copy(), env.data.time
             with Observer(SimSource(env), task="Reach", size=32) as observer:
                 observation = observer.read()
-                self.assertEqual(observation.inputs["images"].shape, (4, 32, 32, 3))
+                self.assertEqual(observation.inputs["images"].shape, (3, 32, 32, 3))
                 self.assertEqual(observation.proprioception.shape, (12,))
                 self.assertEqual(observation.metadata["state_units"][0], "degree")
                 self.assertEqual(observation.metadata["host_timing_spread_ms"], 0)

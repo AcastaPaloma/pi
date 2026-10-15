@@ -13,17 +13,14 @@
     }
   },
   "cameras": {
-    "left_wrist": {
+    "overhead": {
       "device": 0
     },
-    "right_wrist": {
+    "left_wrist": {
       "device": 1
     },
-    "front": {
+    "right_wrist": {
       "device": 2
-    },
-    "overhead": {
-      "device": 3
     }
   },
   "goal_images": {},

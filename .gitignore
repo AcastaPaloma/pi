@@ -6,3 +6,6 @@ dist/
 outputs/
 .DS_Store
 configs/*.local.json
+
+data/
+runs/

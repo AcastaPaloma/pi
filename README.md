@@ -4,15 +4,19 @@
 
 **For your encoder: [128 observations directly in Python](docs/BATCH_ENCODER.md).** Use `RobotBatch(...).observations()` for static simulated scenes or `ObservationBatch(...).observations()` for fast cached real SO-101 samples. Both return batched RGB images, proprioception, and text; neither includes a model or policy. The examples generate previews and small real-data caches in `outputs/`.
 
-Two SO-101 follower arms, a table, colored cubes/cylinders, and four cameras. Start by reaching a green target; then try picking up the block. Everything runs locally without a learned model.
+Two SO-101 follower arms, a table, colored cubes/cylinders, and three cameras (overhead plus one per wrist). Start by reaching a green target; then try picking up the block. Everything runs locally without a learned model.
 
-**Match your real camera rig:** the [camera guide](docs/CAMERA_RIG.md) records the recommended InnoMaker U20CAM-1080P modules and covers native 640×480 feeds, wrist attachment, a shared optics/pose profile, lens calibration and remaining transfer differences. Press **V** in the viewer to cycle all four views, or launch `./play.sh --view overhead`. The shipped wide-angle optics remain nominal until each real camera is calibrated.
+**Match your real camera rig:** the [camera guide](docs/CAMERA_RIG.md) records the Arducam B030401 IMX708 USB modules (the Raspberry Pi Camera Module 3 sensor with autofocus) and covers native 640×480 feeds, wrist attachment, a shared optics/pose profile, lens calibration and remaining transfer differences. Press **V** in the viewer to cycle all three views, or launch `./play.sh --view overhead`. The optics remain nominal until each real camera is calibrated. `python scripts/render_setup.py` renders the rig overview in `outputs/mujoco_setup.png`.
 
 **Already installed in your `mini-vla` conda environment.** Its existing PyTorch installation was left as-is. This project uses MuJoCo, NumPy and Gymnasium, with no PyTorch code.
 
 **Read and capture robot observations:** run `python -m pi_observe sim` or use `Observer.read()` directly. The [observation guide](docs/OBSERVATIONS.md) covers RGB cameras, proprioception, timing, saved captures, optional goals/history, and the read-only physical SO-101 configuration.
 
-**Training for printed-object manipulation?** Start with the [dataset, printable-object and camera guide](docs/SO101_MANIPULATION.md). It covers pinned real SO-101 manipulation datasets, generalization experiments, and the four-camera rig. Run `python -m pi_data serve` in `mini-vla`, then open http://127.0.0.1:8000/docs.
+**Build the rig:** [docs/RIG_REPLICATION.md](docs/RIG_REPLICATION.md) lists the exact parts, positions and calibration steps, with the simulated rig pictured in `docs/images/`.
+
+**π₀.₇ itself, reimplemented.** [`pi_model/`](docs/PI07_IMPLEMENTATION.md) is the paper's architecture at the paper's dimensions (Gemma 3 4B backbone, MEM history encoder, 860M flow expert, FAST tokens, knowledge insulation, training-time RTC), with recording, training and closed-loop MuJoCo evaluation. The [hardware plan](docs/HARDWARE_AND_TRAINING.md) covers the SO-101 kits, the three Arducam cameras and the GPUs.
+
+**Training for printed-object manipulation?** Start with the [dataset, printable-object and camera guide](docs/SO101_MANIPULATION.md). It covers pinned real SO-101 manipulation datasets, generalization experiments, and the three-camera rig. Run `python -m pi_data serve` in `mini-vla`, then open http://127.0.0.1:8000/docs.
 
 ## 1. Watch it work
 
@@ -44,9 +48,9 @@ Click the simulation window. Move the **left gripper to the green sphere** to fi
 | B | Switch between demo and manual mode; resets the task |
 | V | Cycle scene, left wrist, right wrist, front, overhead |
 
-Each key press moves the target **2 cm**; key repeat also works. A slow hand after a large command is normal: the joint targets are rate-limited. The default task only scores the left arm. An episode freezes after success or its 100-second simulation timeout; press R to reset. The Python environment defaults to 20-second episodes; the interactive launcher allows more practice time.
+Each key press moves the target **8 mm**; key repeat also works. A slow hand after a large command is normal: the joint targets are rate-limited to 2 rad/s. The default task only scores the left arm. An episode freezes after success or its 100-second simulation timeout; press R to reset. The Python environment defaults to 20-second episodes (1000 steps at 50 Hz); the interactive launcher allows more practice time.
 
-To practice grasping manually: `./play.sh --task pick_place --steps 2000`. Open the fingers, approach above the block, lower between its sides, close, lift, move above the disk, lower, and open.
+To practice grasping manually: `./play.sh --task pick_place --steps 5000`. Open the fingers, approach above the block, lower between its sides, close, lift, move above the disk, lower, and open.
 
 ## 3. Tap into it from Python
 
@@ -71,7 +75,7 @@ with RobotEnv(task="reach") as env:
             break
 ```
 
-`reset()` starts an episode. `step(action)` advances **0.05 seconds (20 Hz)** and returns the usual Gymnasium tuple. Call `reset()` again after termination or truncation. `seed` makes the small block/goal randomization reproducible; `reset(options={"randomize": False})` gives fixed positions.
+`reset()` starts an episode. `step(action)` advances **0.02 seconds (50 Hz, `control_hz` is configurable)** and returns the usual Gymnasium tuple. Call `reset()` again after termination or truncation. `seed` makes the small block/goal randomization reproducible; `reset(options={"randomize": False})` gives fixed positions.
 
 ### Actions
 
@@ -79,7 +83,7 @@ with RobotEnv(task="reach") as env:
 
 | Mode | Action per arm | Total shape |
 | --- | --- | --- |
-| `ee_delta` (default, easiest) | `[dx, dy, dz, opening]`; XYZ in [-1, 1], scaled to ±2 cm per step; approach direction stays downward | `(8,)` |
+| `ee_delta` (default, easiest) | `[dx, dy, dz, opening]`; XYZ in [-1, 1], scaled to 0.4 m/s (8 mm per step at 50 Hz); approach direction stays downward | `(8,)` |
 | `ee` | `[x, y, z, rx, ry, rz, opening]`; absolute world position in meters and absolute orientation as a rotation vector in radians | `(14,)` |
 | `joint` | `[q1, q2, q3, q4, q5, opening]`; absolute joint angles in degrees, gripper 0–100 | `(12,)` |
 
@@ -112,28 +116,28 @@ Observations are copies, so you can safely store them. Object/goal positions are
 ```python
 with RobotEnv(images=True) as env:
     obs, info = env.reset(seed=0)
-    front = obs["images"]["front"]           # uint8 RGB, (448, 448, 3)
-    wrist = obs["images"]["left_wrist"]      # Also: "right_wrist", "overhead"
-    frame = env.render_camera("front")      # Works even with images=False.
-    native = env.render_camera("front", native=True)  # Native lens image, initially 640×480.
+    overhead = obs["images"]["overhead"]     # uint8 RGB, (448, 448, 3)
+    wrist = obs["images"]["left_wrist"]      # Also: "right_wrist"
+    frame = env.render_camera("overhead")   # Works even with images=False.
+    native = env.render_camera("overhead", native=True)  # Native lens image, 640×480.
 
     left = env.robot["left"]
     print(left.joint_positions, left.position, left.gripper_opening)  # raw radians, meters, 0–1
     model, data = env.model, env.data        # Native mujoco.MjModel / MjData
 ```
 
-Images are off by default for fast physics loops. Set `image_size=224` for smaller frames. `env.render()` returns the front RGB image; use `play.sh` for the interactive viewer. Direct mutations of `model` or `data` bypass the environment's controls; prefer `step()` for ordinary use.
+Images are off by default for fast physics loops. Set `image_size=224` for smaller frames. `env.render()` returns the overhead RGB image; use `play.sh` for the interactive viewer. Direct mutations of `model` or `data` bypass the environment's controls; prefer `step()` for ordinary use.
 
 ### Hook up a future training loop
 
-The Gymnasium IDs are `PiSim-Reach-v0` and `PiSim-PickPlace-v0` (import `pi_sim` before `gymnasium.make`). Both provide dense reward, success termination, falling-block failure termination, and time-limit truncation. Reaching succeeds within 2.5 cm for five steps; placement requires the block at rest on the disk with grippers open for five steps. Rewards and tasks are local design choices, not paper benchmark scores.
+The Gymnasium IDs are `PiSim-Reach-v0` and `PiSim-PickPlace-v0` (import `pi_sim` before `gymnasium.make`). Both provide dense reward, success termination, falling-block failure termination, and time-limit truncation. Reaching succeeds within 2.5 cm held for a quarter second; placement requires the block at rest on the disk with grippers open for a quarter second. Rewards and tasks are local design choices, not paper benchmark scores.
 
 Action chunks work without a training framework:
 
 ```python
 import numpy as np
 
-# Example only: hold the pose for up to 50 control steps (2.5 seconds).
+# Example only: hold the pose for up to 50 control steps (1 second).
 chunk = np.tile(env.hold_action(), (50, 1))
 transitions = env.step_chunk(chunk)  # Stops early at episode end.
 # For a future 50-action policy, execute chunk[:15] or chunk[:25], then replan.
@@ -145,7 +149,7 @@ Record a working state/action demonstration:
 python examples/collect_demo.py
 ```
 
-This writes `outputs/demo.npz`: state, action, next_state, reward, terminated, truncated, and JSON metadata. The scripted controller uses exact simulator state; it is a debugging example, not a trained policy. It does not record camera frames.
+This writes `outputs/demo.npz`: state, action, next_state, reward, terminated, truncated, and JSON metadata. The scripted controller uses exact simulator state; it is a debugging example, not a trained policy. It does not record camera frames. For full training episodes with all three cameras, subtask segments and mistake labels, use `python -m pi_sim.record --out data/sim_v1 --episodes 20`.
 
 ## Installation elsewhere
 

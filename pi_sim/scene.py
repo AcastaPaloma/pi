@@ -6,7 +6,7 @@ import xml.etree.ElementTree as ET
 import mujoco
 import numpy as np
 
-from .cameras import CAMERAS, load_camera_rig
+from .cameras import CAMERAS, FIXED_CAMERAS, load_camera_rig
 
 ASSETS = Path(__file__).parent / "assets" / "vendor"
 ARMS = ("left", "right")
@@ -58,10 +58,7 @@ def _fixed_camera(world, name, spec):
     ET.SubElement(mount, "geom", name=f"{name}_camera_lens", type="cylinder",
                   size="0.006 0.007", pos="0 0 0.009", rgba="0.08 0.09 0.11 1", **common)
     x, y, z = spec.pos
-    if name == "front":
-        ET.SubElement(world, "geom", name="front_camera_stand", type="capsule", size="0.008",
-                      fromto=_numbers([x, y, -0.74, x, y, z + 0.035]), rgba="0.22 0.24 0.27 1", **common)
-    else:
+    if name == "overhead":
         # A gantry outside the table edges; its exact dimensions are nominal.
         bar_y, bar_z = y + 0.18, z + 0.055
         for side, bar_x in (("left", x - 0.56), ("right", x + 0.56)):
@@ -74,6 +71,9 @@ def _fixed_camera(world, name, spec):
         ET.SubElement(world, "geom", name="overhead_camera_bracket", type="capsule", size="0.008",
                       fromto=_numbers([x, y, z + 0.025, x, bar_y, bar_z]),
                       rgba="0.22 0.24 0.27 1", **common)
+    else:
+        ET.SubElement(world, "geom", name=f"{name}_camera_stand", type="capsule", size="0.008",
+                      fromto=_numbers([x, y, -0.74, x, y, z + 0.035]), rgba="0.22 0.24 0.27 1", **common)
 
 
 def build_model(object_shape="cube", object_color="red", camera_rig=None) -> mujoco.MjModel:
@@ -91,7 +91,7 @@ def build_model(object_shape="cube", object_color="red", camera_rig=None) -> muj
         <material name="floor_mat" texture="floor_tex" texrepeat="3 3"/>
       </asset>
       <worldbody>
-        <light pos="0 -0.5 1.5" dir="0 0 -1" diffuse="0.8 0.8 0.8"/>
+        <light name="key_light" pos="0 -0.5 1.5" dir="0 0 -1" diffuse="0.8 0.8 0.8"/>
         <geom name="floor" type="plane" size="3 3 0.1" pos="0 0 -0.76" material="floor_mat"/>
         <geom name="table" type="box" size="0.5 0.4 0.025" pos="0 0 -0.025" rgba="0.72 0.64 0.51 1"/>
         <body name="cube" pos="-0.18 0 0.016">
@@ -99,7 +99,7 @@ def build_model(object_shape="cube", object_color="red", camera_rig=None) -> muj
           <geom name="cube_geom" type="box" size="0.015 0.015 0.015" mass="0.015" friction="1 0.01 0.001" rgba="0.92 0.24 0.14 1"/>
         </body>
         <body name="goal" mocap="true" pos="-0.12 0.06 0.001">
-          <geom type="cylinder" size="0.04 0.001" contype="0" conaffinity="0" rgba="0.18 0.65 0.40 0.7"/>
+          <geom name="goal_disk_geom" type="cylinder" size="0.04 0.001" contype="0" conaffinity="0" rgba="0.18 0.65 0.40 0.7"/>
           <site name="reach_target" pos="0 0 0.07" size="0.012" rgba="0.18 0.9 0.4 0.55"/>
         </body>
       </worldbody>
@@ -109,7 +109,7 @@ def build_model(object_shape="cube", object_color="red", camera_rig=None) -> muj
     obj.set("type", "box" if object_shape == "cube" else "cylinder")
     obj.set("size", "0.015 0.015 0.015" if object_shape == "cube" else "0.015 0.015")
     obj.set("rgba", " ".join(map(str, COLORS[object_color])))
-    for name in ("front", "overhead"):
+    for name in FIXED_CAMERAS:
         _fixed_camera(root.find("worldbody"), name, cameras[name])
     # Both bases point into the tabletop (+Y); one wrist camera per follower.
     for side, x in (("left", -0.18), ("right", 0.18)):

@@ -8,7 +8,7 @@ with RobotBatch(128, image_size=224, seed=0) as robot:
     images = obs["images"]           # uint8 RGB [128,4,224,224,3]
     state = obs["proprioception"]     # float32 [128,12]
     print(obs["camera_names"])       # left_wrist, right_wrist, front, overhead
-    robot.grid(obs, camera="front").save("outputs/so101_batch.png")
+    robot.grid(obs, camera="overhead").save("outputs/so101_batch.png")
     robot.resample(seed=1)           # explicitly change static scene poses
 ```
 

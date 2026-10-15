@@ -10,7 +10,8 @@ from pathlib import Path
 import mujoco
 import numpy as np
 
-CAMERAS = ("left_wrist", "right_wrist", "front", "overhead")
+CAMERAS = ("overhead", "left_wrist", "right_wrist")
+FIXED_CAMERAS = ("overhead",)
 DEFAULT_RIG = Path(__file__).parent / "assets" / "so101_camera_rig.json"
 
 
@@ -87,7 +88,7 @@ def _vector(value, count, label):
 
 
 def load_camera_rig(source=None):
-    """Load a JSON path or mapping; require the same four named views."""
+    """Load a JSON path or mapping; require the same three named views."""
     if source is None:
         source = DEFAULT_RIG
     raw = json.loads(Path(source).expanduser().read_text()) if isinstance(source, (str, Path)) else source

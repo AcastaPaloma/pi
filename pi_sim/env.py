@@ -9,7 +9,7 @@ from gymnasium import spaces
 from PIL import Image
 
 from .cameras import camera_metadata, load_camera_rig
-from .scene import ARMS, CAMERAS, JOINTS, build_model
+from .scene import ARMS, CAMERAS, COLORS, JOINTS, build_model
 
 
 def _quat_to_rotvec(quat):
@@ -73,16 +73,21 @@ class RobotEnv(gym.Env):
     State and joint commands use degrees plus 0–100 grippers. Arm/raw MuJoCo
     angles remain radians. Model joint origins require a hardware calibration audit.
     `model`, `data`, and `robot['left'/'right']` are public integration points.
+
+    Control runs at `control_hz` (default 50 Hz, the paper's robot rate). Speeds
+    and dwell times are defined per second, so the behaviour per second does not
+    depend on the rate; step counts do.
     """
 
-    metadata = {"render_modes": ["rgb_array"], "render_fps": 20}
-    control_dt = 0.05
-    delta_scale = 0.02
+    metadata = {"render_modes": ["rgb_array"], "render_fps": 50}
+    cartesian_speed = 0.4      # m/s at a full-scale ee_delta action
+    joint_rate_limit = 2.0     # rad/s applied to the PD targets
     camera_names = CAMERAS
 
     def __init__(self, task="reach", control_mode="ee_delta", images=False,
-                 image_size=448, max_episode_steps=400, render_mode=None,
-                 object_shape="cube", object_color="red", camera_rig=None):
+                 image_size=448, max_episode_steps=None, render_mode=None,
+                 object_shape="cube", object_color="red", camera_rig=None,
+                 control_hz=50, episode_seconds=20.0):
         if task not in ("reach", "pick_place"):
             raise ValueError("task must be 'reach' or 'pick_place'")
         if control_mode not in ("ee_delta", "ee", "joint"):
@@ -91,12 +96,21 @@ class RobotEnv(gym.Env):
             raise ValueError("Use render_mode='rgb_array'; interactive play: python -m pi_sim")
         if not isinstance(image_size, int) or not 16 <= image_size <= 640:
             raise ValueError("image_size must be an integer between 16 and 640")
+        if not isinstance(control_hz, int) or not 5 <= control_hz <= 500 or 500 % control_hz:
+            raise ValueError("control_hz must be an integer divisor of 500 between 5 and 500")
+        if max_episode_steps is None:
+            max_episode_steps = int(round(episode_seconds * control_hz))
         if not isinstance(max_episode_steps, int) or max_episode_steps < 1:
             raise ValueError("max_episode_steps must be a positive integer")
         self.task, self.control_mode = task, control_mode
         self.images, self.image_size = images, image_size
         self.max_episode_steps, self.render_mode = max_episode_steps, render_mode
         self.object_shape, self.object_color = object_shape, object_color
+        self.control_hz = control_hz
+        self.control_dt = 1.0 / control_hz
+        self.delta_scale = self.cartesian_speed * self.control_dt
+        self._rate_limit = self.joint_rate_limit * self.control_dt
+        self._settle_steps = max(1, int(round(0.25 * control_hz)))
         self.camera_specs = load_camera_rig(camera_rig)
         self.model = build_model(object_shape, object_color, camera_rig)
         self.data = mujoco.MjData(self.model)
@@ -109,6 +123,8 @@ class RobotEnv(gym.Env):
         self._done = False
         self._workspace_low = np.array([[-0.30, -0.08, 0.016], [0.05, -0.08, 0.016]])
         self._workspace_high = np.array([[-0.05, 0.13, 0.26], [0.30, 0.13, 0.26]])
+        self._baseline = self._snapshot_visuals()
+        self.visual_randomization = None
         if control_mode == "ee_delta":
             low, high = np.tile([-1., -1., -1., 0.], 2), np.ones(8)
         elif control_mode == "ee":
@@ -126,7 +142,75 @@ class RobotEnv(gym.Env):
         if images:
             obs["images"] = spaces.Dict({c: spaces.Box(0, 255, (image_size, image_size, 3), np.uint8) for c in self.camera_names})
         self.observation_space = spaces.Dict(obs)
+        self._joint_targets = np.zeros((2, len(JOINTS)))
 
+    # ------------------------------------------------------------------ visuals
+    def _snapshot_visuals(self):
+        m = self.model
+        return {"geom_rgba": m.geom_rgba.copy(), "light_pos": m.light_pos.copy(),
+                "light_diffuse": m.light_diffuse.copy(), "light_ambient": m.light_ambient.copy(),
+                "cam_pos": m.cam_pos.copy(), "cam_quat": m.cam_quat.copy(),
+                "mat_rgba": m.mat_rgba.copy(), "headlight_diffuse": m.vis.headlight.diffuse.copy(),
+                "headlight_ambient": m.vis.headlight.ambient.copy()}
+
+    def restore_visuals(self):
+        """Undo randomize_visuals(); the nominal rig and colors return."""
+        m = self.model
+        for key, value in self._baseline.items():
+            if key.startswith("headlight"):
+                getattr(m.vis.headlight, key.split("_")[1])[:] = value
+            else:
+                getattr(m, key)[:] = value
+        self.visual_randomization = None
+
+    def randomize_visuals(self, rng, *, camera_jitter=True, lighting=True, colors=True):
+        """Per-episode domain randomization of appearance, not of physics.
+
+        Table/floor colors, lighting, small camera pose jitter (within 1 cm and
+        2 degrees) and a mild hue jitter of the named object color. The object
+        keeps its named color class so the instruction stays truthful. Returns
+        the sampled parameters for the episode record.
+        """
+        self.restore_visuals()
+        m = self.model
+        record = {}
+        if colors:
+            table = m.geom("table").id
+            m.geom_rgba[table, :3] = rng.uniform([0.45, 0.4, 0.3], [0.85, 0.8, 0.7])
+            floor = m.mat("floor_mat").id
+            m.mat_rgba[floor, :3] = rng.uniform(0.6, 1.0, 3)
+            obj = m.geom("cube_geom").id
+            base = np.asarray(COLORS[self.object_color][:3])
+            m.geom_rgba[obj, :3] = np.clip(base + rng.uniform(-0.08, 0.08, 3), 0, 1)
+            record["table_rgb"] = m.geom_rgba[table, :3].tolist()
+            record["object_rgb"] = m.geom_rgba[obj, :3].tolist()
+        if lighting:
+            light = m.light("key_light").id
+            m.light_pos[light] = self._baseline["light_pos"][light] + rng.uniform([-0.5, -0.5, -0.3], [0.5, 0.5, 0.5])
+            m.light_diffuse[light] = rng.uniform(0.5, 1.0) * np.ones(3)
+            m.light_ambient[light] = rng.uniform(0.0, 0.25) * np.ones(3)
+            m.vis.headlight.diffuse[:] = rng.uniform(0.35, 0.75)
+            m.vis.headlight.ambient[:] = rng.uniform(0.15, 0.4)
+            record["light_pos"] = m.light_pos[light].tolist()
+            record["light_diffuse"] = float(m.light_diffuse[light][0])
+        if camera_jitter:
+            record["camera_jitter"] = {}
+            for name in self.camera_names:
+                cid = m.camera(name).id
+                offset = rng.uniform(-0.01, 0.01, 3)
+                axis = rng.normal(size=3)
+                axis /= np.linalg.norm(axis)
+                angle = np.deg2rad(rng.uniform(-2, 2))
+                delta = np.r_[np.cos(angle / 2), np.sin(angle / 2) * axis]
+                quat = np.zeros(4)
+                mujoco.mju_mulQuat(quat, self._baseline["cam_quat"][cid], delta)
+                m.cam_pos[cid] = self._baseline["cam_pos"][cid] + offset
+                m.cam_quat[cid] = quat
+                record["camera_jitter"][name] = {"pos_m": offset.tolist(), "angle_deg": float(np.rad2deg(angle))}
+        self.visual_randomization = record
+        return record
+
+    # ---------------------------------------------------------------- episodes
     @property
     def goal_position(self):
         pos = self.data.mocap_pos[0].copy()
@@ -136,7 +220,7 @@ class RobotEnv(gym.Env):
     def reset(self, *, seed=None, options=None):
         super().reset(seed=seed)
         options = options or {}
-        unknown = options.keys() - {"randomize"}
+        unknown = options.keys() - {"randomize", "visual_randomization", "placement_range"}
         if unknown:
             raise ValueError(f"Unknown reset options: {sorted(unknown)}")
         mujoco.mj_resetData(self.model, self.data)
@@ -146,9 +230,33 @@ class RobotEnv(gym.Env):
             self.data.ctrl[arm.actuator_ids] = home
             self.data.qpos[self.model.joint(f"{arm.name}_gripper").qposadr[0]] = self.model.actuator_ctrlrange[arm.gripper_actuator, 1]
             self.data.ctrl[arm.gripper_actuator] = self.model.actuator_ctrlrange[arm.gripper_actuator, 1]
-        jitter = self.np_random.uniform(-0.008, 0.008, (2, 2)) if options.get("randomize", True) else np.zeros((2, 2))
+        # "small" keeps the historical 8 mm jitter; "wide" spreads objects and
+        # goals over the left arm's reachable tabletop for training diversity.
+        placement = options.get("placement_range", "small")
+        if not options.get("randomize", True):
+            jitter = np.zeros((2, 2))
+        elif placement == "small":
+            jitter = self.np_random.uniform(-0.008, 0.008, (2, 2))
+        elif placement == "wide":
+            for _ in range(100):
+                jitter = self.np_random.uniform([[-0.05, -0.04], [-0.06, -0.05]], [[0.06, 0.05], [0.08, 0.06]])
+                separation = np.linalg.norm((np.array([-0.20, -0.025]) + jitter[0]) - (np.array([-0.14, -0.02]) + jitter[1]))
+                if separation >= 0.08:
+                    break
+            else:
+                raise RuntimeError("Could not sample a cube/goal placement with 8 cm separation")
+        else:
+            raise ValueError("placement_range must be 'small' or 'wide'")
         self.data.joint("cube_joint").qpos[:3] = np.r_[np.array([-0.20, -0.025]) + jitter[0], 0.016]
+        self.data.joint("cube_joint").qpos[3:] = [1, 0, 0, 0]
+        if placement == "wide" and options.get("randomize", True):
+            yaw = self.np_random.uniform(-np.pi / 4, np.pi / 4)
+            self.data.joint("cube_joint").qpos[3:] = [np.cos(yaw / 2), 0, 0, np.sin(yaw / 2)]
         self.data.mocap_pos[0] = np.r_[np.array([-0.14, -0.02]) + jitter[1], 0.001]
+        if options.get("visual_randomization", False):
+            self.randomize_visuals(self.np_random)
+        else:
+            self.restore_visuals()
         self.model.site_rgba[self.model.site("reach_target").id, 3] = 0.55 if self.task == "reach" else 0
         mujoco.mj_forward(self.model, self.data)
         # Let contact constraints and the gripper's servo constraints settle.
@@ -160,6 +268,7 @@ class RobotEnv(gym.Env):
         self._orientations = np.array([a.quaternion for a in self.robot.values()])
         self._steps, self._success_steps = 0, 0
         self._ik_errors = np.zeros(2)
+        self._joint_targets = np.array([self.data.ctrl[a.actuator_ids] for a in self.robot.values()])
         self._ready, self._done = True, False
         return self._observation(), self._info(False)
 
@@ -177,6 +286,23 @@ class RobotEnv(gym.Env):
                 rows.append(np.r_[self._ee_targets[i], _quat_to_rotvec(self._orientations[i]), opening])
             else:
                 rows.append(np.r_[np.rad2deg(self.data.ctrl[arm.actuator_ids]), opening * 100])
+        return np.concatenate(rows).astype(np.float32)
+
+    @property
+    def commanded_joint_targets(self):
+        """The last joint-space command, degrees plus gripper 0–100, left then right.
+
+        This is the target handed to the rate-limited PD servos, before rate
+        limiting. It is the action label for joint-mode policies regardless of
+        the control mode used to produce it.
+        """
+        if not self._ready:
+            raise RuntimeError("Call reset() first")
+        rows = []
+        for i, arm in enumerate(self.robot.values()):
+            low, high = self.model.actuator_ctrlrange[arm.gripper_actuator]
+            opening = (self.data.ctrl[arm.gripper_actuator] - low) / (high - low)
+            rows.append(np.r_[np.rad2deg(self._joint_targets[i]), opening * 100])
         return np.concatenate(rows).astype(np.float32)
 
     def action_toward(self, position, *, arm="left", opening=1.0):
@@ -249,9 +375,10 @@ class RobotEnv(gym.Env):
                     self._ee_targets[i] = row[:3]
                     self._orientations[i] = _rotvec_to_quat(row[3:6])
                 target, self._ik_errors[i] = self._solve_ik(arm, self._ee_targets[i], self._orientations[i])
+            self._joint_targets[i] = target
             # Rate-limit the PD target to avoid snapping between distant commands.
             current = self.data.ctrl[arm.actuator_ids]
-            self.data.ctrl[arm.actuator_ids] = current + np.clip(target - current, -0.10, 0.10)
+            self.data.ctrl[arm.actuator_ids] = current + np.clip(target - current, -self._rate_limit, self._rate_limit)
             low, high = self.model.actuator_ctrlrange[arm.gripper_actuator]
             self.data.ctrl[arm.gripper_actuator] = low + (row[-1] / 100 if self.control_mode == "joint" else row[-1]) * (high - low)
         for _ in range(self._substeps):
@@ -273,7 +400,7 @@ class RobotEnv(gym.Env):
             candidate = distance < 0.045 and abs(cube[2] - 0.015) < 0.01 and released and slow
             reward = 0.25 * (1 - np.tanh(8 * hand_distance)) + 0.25 * float(cube[2] > 0.06) + 0.5 * (1 - np.tanh(5 * distance))
         self._success_steps = self._success_steps + 1 if candidate else 0
-        success = self._success_steps >= 5
+        success = self._success_steps >= self._settle_steps
         failed = cube[2] < -0.1
         terminated = bool(success or failed)
         truncated = bool(self._steps >= self.max_episode_steps and not terminated)
@@ -318,7 +445,7 @@ class RobotEnv(gym.Env):
             raise ValueError(f"Unknown camera {camera!r}; choose {self.camera_names}")
         return camera_metadata(self.camera_specs[camera], self.model, self.data, camera)
 
-    def render_camera(self, camera="front", *, native=False):
+    def render_camera(self, camera="overhead", *, native=False):
         """RGB from the configured lens; native=True matches physical frame size.
 
         Encoder views resize the native image using the physical Observer's
@@ -358,7 +485,7 @@ class RobotEnv(gym.Env):
         return rgb
 
     def render(self):
-        return self.render_camera("front")
+        return self.render_camera("overhead")
 
     def close(self):
         for renderer in self._renderers.values():

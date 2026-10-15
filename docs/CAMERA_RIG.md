@@ -1,42 +1,38 @@
 # Matching the simulated and physical camera rig
 
-The simulator has four sensor cameras in the same order as physical capture:
-`left_wrist`, `right_wrist`, `front`, `overhead`. The wrists attach to each
-follower's wrist-roll camera mount and move with it. The front camera has a
-visible housing and stand; overhead has a housing, bracket and gantry.
+The simulator has three sensor cameras in the same order as physical capture:
+`overhead`, `left_wrist`, `right_wrist`. The wrists attach to each follower's
+wrist-roll camera mount and move with it. The overhead camera hangs from a gantry
+0.70 m above the table, looking straight down, and plays the role of the paper's
+base view. There is no front camera in this rig.
 
-The final recommendation in the earlier purchase conversation was **four
-identical InnoMaker U20CAM-1080P modules with the 130° M12 lens**, Amazon ASIN
-`B0CNCSFQC1`, replacing the initial two-1080p/one-720p plan. Originally the fourth
-unit was a spare; this simulator uses all four as requested, adding a separate
-front view alongside the overhead view. The shipped
-[rig profile](../pi_sim/assets/so101_camera_rig.json) records the exact module
-identity for every view. Fixed-camera boards are represented by 32×32 mm
-proxies; the wrists retain the Menagerie mount geometry.
+All three are **Arducam B030401** modules: the Sony IMX708 sensor of the Raspberry
+Pi Camera Module 3 on a USB 2.0 UVC adapter, autofocus from 10 cm to infinity,
+75° diagonal lens (61° horizontal, 50° vertical), 32×32 mm board that fits the
+official SO-101 32×32 UVC wrist mount. The fixed-focus wide variant (B0305) focuses
+only from 1.5 m, which rules it out for wrist use. The shipped
+[rig profile](../pi_sim/assets/so101_camera_rig.json) records the module for every
+view at 640×480, 30 fps.
 
-**Optics and mounting poses remain `calibration_status: "nominal"`.** The
-[manufacturer manual](https://github.com/INNO-MAKER/U20CAM-1080P-S1/blob/main/U20CAM-1080P-S1%20UserManual-v1.1.pdf)
-lists 130° diagonal FOV, 106° horizontal in the technical table and 103°
-horizontal in its feature list. We use the technical table's 106° horizontal
-as a starting pinhole projection at 640×480, assuming no mode-dependent crop.
-This estimate cannot also reproduce the advertised diagonal angle or recover
-the real lens's barrel distortion; zero distortion values are explicitly
-unmeasured placeholders. Replace intrinsics/distortion with calibration of
-each actual camera. The front optical center is 45 cm above the tabletop,
-overhead is 85 cm above it, and wrist poses start from the pinned model.
+**Optics and mounting poses remain `calibration_status: "nominal"`.** The pinhole
+uses the 61° horizontal figure at 640×480 (fx = fy ≈ 543 px), which implies 47.8°
+vertical against the listed 50°; distortion is an unmeasured zero placeholder, and
+autofocus shifts the effective focal length with focus distance. Replace the
+intrinsics with a checkerboard calibration of each unit at its working focus, and
+lock the focus through the UVC focus control for the overhead camera.
 
-## See and capture all four views
+## See and capture all three views
 
 ```bash
 ./play.sh --view overhead
-# Press V to cycle: scene, left_wrist, right_wrist, front, overhead.
+# Press V to cycle: scene, overhead, left_wrist, right_wrist.
 
 conda activate mini-vla
 python -m pi_observe sim --output outputs/camera_rig_capture
 ```
 
-The capture directory contains native `left_wrist.png`, `right_wrist.png`,
-`front.png`, `overhead.png`, `encoder.npz`, and `metadata.json`, under `000000/`.
+The capture directory contains native `overhead.png`, `left_wrist.png`,
+`right_wrist.png`, `encoder.npz`, and `metadata.json`, under `000000/`.
 The initial native frames are **640×480 RGB**; encoder tensors retain the
 requested square size. Both simulation and physical capture use the same
 bilinear resize. Rendering directly into a square camera view would change the
@@ -53,7 +49,7 @@ with RobotEnv(camera_rig="configs/so101_camera_rig.local.json") as env:
     observer = Observer(SimSource(env), task="Pick up the red cube")
     capture = observer.read()                       # Reads every camera; no physics step.
     native = capture.images["left_wrist"]          # [H, W, 3], RGB uint8
-    encoder = capture.inputs["images"]             # [4, 448, 448, 3]
+    encoder = capture.inputs["images"]             # [3, 448, 448, 3]
     calibration = env.camera_calibration("left_wrist")
     # Existing Gym/batch APIs return resized images, preserving native optics:
     square = env.render_camera("left_wrist")
@@ -88,7 +84,7 @@ render, so lens warping does not introduce artificial black borders. Install
 not implemented by this RGB pipeline.
 
 Pose axes are MuJoCo's camera convention: X right, Y up, view along **−Z**.
-`front` and `overhead` poses are world-relative; world Z=0 is the tabletop.
+The `overhead` pose is world-relative; world Z=0 is the tabletop.
 The wrist poses are relative to `left_camera_mount`/`right_camera_mount`, fixed
 to their grippers. Use the optical center, rather than the outer housing center.
 For a measured OpenCV camera-to-parent rotation, convert with
@@ -103,7 +99,7 @@ python -m pi_observe sim --camera-rig configs/so101_camera_rig.local.json
 ```
 
 In `configs/so101_observe.local.json`, set
-`"camera_rig": "so101_camera_rig.local.json"` and keep the four camera device
+`"camera_rig": "so101_camera_rig.local.json"` and keep the three camera device
 IDs under `cameras`. Rig paths are relative to the hardware config. Width,
 height, FPS and rotation are taken from the shared profile; conflicting
 duplicate settings are rejected. Physical capture also rejects a driver's
@@ -129,7 +125,7 @@ mount's mass/contact model remains the upstream model. Lighting, exposure,
 white balance, focus blur, sensor noise, rolling shutter, USB latency and real
 exposure timing are not replicated. Sim captures share one frozen state;
 the real reader uses independently timed camera streams. The profile's 30 FPS
-does not change the simulator's 20 Hz control interval or emulate frame drops.
+does not change the simulator's 50 Hz control interval or emulate frame drops.
 
 Camera regression checks project a test object through unequal/off-center
 intrinsics and a distorted lens, verify wrist attachment, ensure fixed cameras

@@ -26,7 +26,7 @@ def main():
             cmd.add_argument("--config", type=Path, required=True)
         else:
             cmd.add_argument("--task", choices=("reach", "pick_place"), default="reach")
-            cmd.add_argument("--camera-rig", type=Path, help="Camera optics/poses JSON; uses the nominal four-camera rig by default")
+            cmd.add_argument("--camera-rig", type=Path, help="Camera optics/poses JSON; uses the nominal three-camera rig by default")
     commands.add_parser("devices", help="List serial devices only; never opens cameras or changes motor settings")
     args = parser.parse_args()
     if args.command == "devices":

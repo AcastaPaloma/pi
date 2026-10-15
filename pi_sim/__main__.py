@@ -18,13 +18,13 @@ def main():
     parser.add_argument("--headless", action="store_true", help="Run the demo without a window")
     parser.add_argument("--episodes", type=int, help="Episode count; 0 repeats until the window closes")
     parser.add_argument("--seed", type=int, default=0)
-    parser.add_argument("--steps", type=int, default=2000, help="Maximum steps per episode (100 seconds)")
-    parser.add_argument("--screenshot", type=Path, help="Save the final front-camera image")
+    parser.add_argument("--steps", type=int, default=5000, help="Maximum steps per episode (100 seconds at 50 Hz)")
+    parser.add_argument("--screenshot", type=Path, help="Save the final overhead-camera image")
     parser.add_argument("--object-shape", choices=("cube", "cylinder"), default="cube")
     parser.add_argument("--object-color", choices=("red", "green", "blue", "yellow"), default="red")
-    parser.add_argument("--camera-rig", type=Path, help="Camera optics/poses JSON; defaults to the nominal four-camera rig")
+    parser.add_argument("--camera-rig", type=Path, help="Camera optics/poses JSON; defaults to the nominal three-camera rig")
     parser.add_argument("--view", choices=("scene", *RobotEnv.camera_names), default="scene",
-                        help="Initial viewer camera; press V to cycle the scene and four sensor views")
+                        help="Initial viewer camera; press V to cycle the scene and three sensor views")
     args = parser.parse_args()
     episodes = args.episodes if args.episodes is not None else (1 if args.headless else 0)
     if episodes < 0 or args.steps < 1 or (args.headless and episodes == 0):
