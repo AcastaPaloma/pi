@@ -1,6 +1,6 @@
-import { artwork, macros, steps, details, annotations } from './content.js?v=20261014-editor-r1';
+import { artwork, macros, steps, details, annotations } from './content.js?v=20261014-r2';
 import { clamp, fitBounds, zoomAt, constrainCamera } from './camera.mjs';
-import { buildReadingEntries, readingIndex } from './reading.mjs?v=20261014-editor-r1';
+import { buildReadingEntries, readingIndex } from './reading.mjs?v=20261014-r2';
 
 import { validateCopy, renderNodes } from './rich-text.mjs';
 
@@ -18,6 +18,10 @@ let camera = { x: 0, y: 0, scale: 1 }, animation = 0, frame = 0;
 let hoverTimer = 0, leaveTimer = 0, suppressHoverUntil = 0, moved = false;
 let activeGesture = null, detached = false, overview = false;
 let scrollFrame = 0, jumpTarget = null, jumpTimer = 0, tops = [];
+// Component notes are folded under their main section until opened. Only open
+// passages take part in reading-position tracking.
+const expanded = new Set();
+let visible = entries;
 const pointers = new Map();
 world.style.width = `${artwork.width}px`;
 world.style.height = `${artwork.height}px`;
@@ -83,15 +87,17 @@ function activate(id, { historyMode = 'replace', animate = true, force = false }
   if (historyMode !== 'none') writeRoute(historyMode);
   if (changed) $('announcement').textContent = entry.title;
 }
+function isShown(entry) { return !entry.detail || expanded.has(steps[entry.stepIndex].id); }
 function measureReading() {
   const rect = reader.getBoundingClientRect();
-  tops = entries.map(entry => $(`title-${entry.id}`).getBoundingClientRect().top - rect.top + reader.scrollTop);
+  visible = entries.filter(isShown);
+  tops = visible.map(entry => $(`title-${entry.id}`).getBoundingClientRect().top - rect.top + reader.scrollTop);
 }
 function readingAnchor() { return Math.min(150, reader.clientHeight * .24); }
 function syncReading() {
   if (!ready || jumpTarget) return;
-  const entry = entries[readingIndex(tops, reader.scrollTop, readingAnchor())];
-  activate(entry.id);
+  const entry = visible[readingIndex(tops, reader.scrollTop, readingAnchor())];
+  if (entry) activate(entry.id);
 }
 function scheduleReading() {
   if (!scrollFrame) scrollFrame = requestAnimationFrame(() => { scrollFrame = 0; syncReading(); });
@@ -106,9 +112,11 @@ function finishJump() {
 function jumpTo(id, { historyMode = 'push', animate = true } = {}) {
   if (!entryById.has(id)) return;
   closeContents(); cancelJump();
+  const target = entryById.get(id);
+  if (target.detail) setExpanded(steps[target.stepIndex].id, true);
   activate(id, { historyMode, animate, force: true });
   measureReading();
-  const index = entries.findIndex(entry => entry.id === id);
+  const index = visible.findIndex(entry => entry.id === id);
   // Align to the same line the scroll observer uses, so a click and the next
   // wheel movement agree on which passage owns the camera.
   const top = Math.max(0, tops[index] - readingAnchor() + 4);
@@ -126,8 +134,14 @@ function readRoute() {
   const step = steps.find(item => item.id === id) ?? steps[0];
   jumpTo(detail && step.details.includes(detail) ? detail : step.id, { historyMode: 'none', animate: false });
 }
-function paragraph(text) {
-  if (text !== String.raw`\[\mathcal L_{\rm flow}.\]`) return make('p', text);
+function inline(element, text) {
+  // Only **bold** is interpreted; everything else stays literal text.
+  text.split(/\*\*(.+?)\*\*/).forEach((part, index) => {
+    if (part) element.append(index % 2 ? make('strong', part) : document.createTextNode(part));
+  });
+  return element;
+}
+function flowEquation() {
   const ns = 'http://www.w3.org/1998/Math/MathML';
   const math = document.createElementNS(ns, 'math'); math.setAttribute('display', 'block');
   const sub = document.createElementNS(ns, 'msub');
@@ -137,21 +151,113 @@ function paragraph(text) {
   sub.append(letter, label); math.append(sub, period);
   const holder = make('div'); holder.dataset.equation = 'flow-loss'; holder.contentEditable = 'false'; holder.append(math); return holder;
 }
+function paragraph(block) {
+  if (block === String.raw`\[\mathcal L_{\rm flow}.\]`) return flowEquation();
+  if (typeof block === 'string') return inline(make('p'), block);
+  if (block.list) {
+    const list = make('ul');
+    for (const item of block.list) list.append(inline(make('li'), item));
+    return list;
+  }
+  if (block.note) {
+    const note = make('blockquote', undefined, 'drawing-note');
+    const text = inline(make('p'), block.note);
+    text.prepend(make('strong', 'On the drawing: '));
+    note.append(text); return note;
+  }
+  if (block.placeholder) return inline(make('p', undefined, 'placeholder-note'), block.placeholder);
+  return make('p', String(block));
+}
+function previewRegion(id) { preview = id; renderSelection(); }
+function setExpanded(stepId, open) {
+  if (open) expanded.add(stepId); else expanded.delete(stepId);
+  const group = $(`components-${stepId}`), toggle = $(`toggle-${stepId}`);
+  if (!group) return;
+  group.hidden = !open;
+  toggle.setAttribute('aria-expanded', String(open));
+  toggle.querySelector('.toggle-label').textContent = `${open ? 'Hide' : 'Open'} the ${group.children.length} component notes`;
+  $('expand-all').checked = steps.every(step => !step.details.length || expanded.has(step.id));
+}
+function toggleGroup(stepId) {
+  const open = !expanded.has(stepId);
+  setExpanded(stepId, open);
+  if (!open && entryById.get(activeId)?.detail && steps[entryById.get(activeId).stepIndex].id === stepId) activate(stepId, { force: true });
+  measureReading(); scheduleReading();
+}
+export function expandAll(open = true) {
+  for (const step of steps) if (step.details.length) setExpanded(step.id, open);
+  measureReading(); scheduleReading();
+}
+function componentChips(step) {
+  // Each chip names one drawn component. Hover or focus outlines its exact
+  // region on the canvas; activation opens the notes and moves the camera there.
+  const row = make('div', undefined, 'component-chips');
+  for (const id of step.details) {
+    const chip = make('button', entryById.get(id).title, 'component-chip');
+    chip.type = 'button'; chip.dataset.target = id;
+    chip.addEventListener('pointerenter', () => previewRegion(id));
+    chip.addEventListener('focus', () => previewRegion(id));
+    chip.addEventListener('pointerleave', () => previewRegion(null));
+    chip.addEventListener('blur', () => previewRegion(null));
+    chip.addEventListener('click', () => { preview = null; jumpTo(id); });
+    row.append(chip);
+  }
+  return row;
+}
+function routeList(step) {
+  const nav = make('nav', undefined, 'reading-routes'); nav.setAttribute('aria-label', 'Reading routes');
+  nav.append(make('h3', 'Reading routes'));
+  for (const route of step.routes) {
+    const item = make('div', undefined, 'route');
+    item.append(make('p', route.title, 'route-title'), make('p', route.note, 'route-note'));
+    const links = make('ol', undefined, 'route-links');
+    for (const id of route.ids) {
+      const link = make('button', entryById.get(id).title, 'route-link'); link.type = 'button'; link.dataset.target = id;
+      link.addEventListener('pointerenter', () => previewRegion(id));
+      link.addEventListener('pointerleave', () => previewRegion(null));
+      link.addEventListener('click', () => { preview = null; jumpTo(id); });
+      const li = make('li'); li.append(link); links.append(li);
+    }
+    item.append(links); nav.append(item);
+  }
+  return nav;
+}
+function passage(entry) {
+  const block = make('section', undefined, `reading-block${entry.detail ? '' : ' is-major'}`);
+  block.id = `read-${entry.id}`; block.dataset.entry = entry.id;
+  block.dataset.placeholder = String(entry.isPlaceholder);
+  const heading = make(entry.detail ? 'h3' : 'h2', entry.title);
+  heading.id = `title-${entry.id}`; block.setAttribute('aria-labelledby', heading.id);
+  const body = make('div', undefined, 'passage-body'); body.dataset.section = entry.id;
+  body.append(...entry.paragraphs.map(paragraph));
+  block.append(heading, body);
+  return block;
+}
 function buildArticle() {
   const fragment = document.createDocumentFragment();
-  for (const entry of entries) {
-    const block = make('section', undefined, `reading-block${entry.detail ? '' : ' is-major'}`);
-    block.id = `read-${entry.id}`; block.dataset.entry = entry.id;
-    block.dataset.placeholder = String(entry.isPlaceholder);
-    const heading = make(entry.detail ? 'h3' : 'h2', entry.title);
-    heading.id = `title-${entry.id}`; block.setAttribute('aria-labelledby', heading.id);
-    const body = make('div', undefined, 'passage-body'); body.dataset.section = entry.id;
-    body.append(...entry.paragraphs.map(paragraph));
-    block.append(heading, body); fragment.append(block);
+  for (const step of steps) {
+    const major = passage(entryById.get(step.id));
+    if (step.routes) major.append(routeList(step));
+    fragment.append(major);
+    if (!step.details.length) continue;
+    const toggle = make('button', undefined, 'components-toggle');
+    toggle.type = 'button'; toggle.id = `toggle-${step.id}`;
+    toggle.setAttribute('aria-controls', `components-${step.id}`); toggle.setAttribute('aria-expanded', 'false');
+    toggle.append(make('span', '', 'toggle-label'), make('span', '', 'toggle-mark'));
+    toggle.addEventListener('click', () => toggleGroup(step.id));
+    const group = make('div', undefined, 'component-group');
+    group.id = `components-${step.id}`; group.hidden = true;
+    for (const id of step.details) group.append(passage(entryById.get(id)));
+    const fold = make('div', undefined, 'component-fold');
+    fold.append(componentChips(step), toggle);
+    major.append(fold);
+    fragment.append(group);
   }
   $('article').replaceChildren(fragment);
+  for (const step of steps) if (step.details.length) setExpanded(step.id, false);
 }
 function buildContents() {
+  $('expand-all').addEventListener('change', event => expandAll(event.target.checked));
   for (const macro of macros) {
     $('toc').append(make('h2', macro.title, 'toc-macro'));
     steps.forEach((step, index) => {
@@ -196,7 +302,10 @@ function buildHotspots() {
 function renderSelection() {
   const item = entryById.get(preview ?? (pinned ? activeId : null));
   $('detail-outline').hidden = !item || overview;
+  $('detail-outline').classList.toggle('is-preview', Boolean(preview));
   if (item) position($('detail-outline'), item.bounds);
+  // Mirror the canvas hover in the text: the chip or route link naming this region lights up.
+  for (const link of $('article').querySelectorAll('[data-target]')) link.classList.toggle('is-linked', link.dataset.target === preview);
 }
 function render() {
   world.classList.toggle('focused', !overview);
@@ -208,7 +317,7 @@ function render() {
   }
   $('start').firstChild.textContent = detached || overview ? 'Resume reading ' : 'Whole canvas ';
   $('chapter-label').textContent = macros.find(macro => macro.id === currentStep().macro).title;
-  for (const block of $('article').children) block.classList.toggle('is-current', block.dataset.entry === activeId);
+  for (const block of $('article').querySelectorAll('.reading-block')) block.classList.toggle('is-current', block.dataset.entry === activeId);
   for (const link of $('toc').querySelectorAll('button')) {
     if (link.dataset.entry === activeId) link.setAttribute('aria-current', 'location');
     else link.removeAttribute('aria-current');

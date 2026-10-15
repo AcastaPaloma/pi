@@ -14,18 +14,16 @@ test('every canvas destination has one reading passage in step/component order',
   }
 });
 
-test('author prose appears verbatim and lorem ipsum fills only unwritten destinations', async () => {
+test('author prose appears verbatim and no destination falls back to lorem ipsum', async () => {
   const supplied = JSON.parse(await readFile(new URL('../author-copy.json', import.meta.url), 'utf8'));
   for (const entry of entries) {
+    assert.equal(entry.isPlaceholder, false, entry.id);
+    assert.ok(!entry.paragraphs.some(p => placeholder.includes(p)), entry.id);
     if (supplied[entry.id]) {
-      assert.equal(entry.isPlaceholder, false);
-      assert.deepEqual(entry.paragraphs, supplied[entry.id]);
-    } else {
-      assert.equal(entry.isPlaceholder, true);
-      assert.ok(entry.paragraphs.every(p => placeholder.includes(p)));
+      const at = entry.paragraphs.indexOf(supplied[entry.id][0]);
+      assert.deepEqual(entry.paragraphs.slice(at, at + supplied[entry.id].length), supplied[entry.id]);
     }
   }
-  assert.equal(entries.filter(e => !e.isPlaceholder).length, Object.keys(supplied).length);
 });
 
 test('reading line remains deterministic for long passages, boundaries, and reverse scrolling', () => {

@@ -1,6 +1,6 @@
-import { applyCopy, focusPassage, previewPassage, refreshReadingMeasurements } from './app.js?v=20261014-editor-r1';
+import { applyCopy, expandAll, focusPassage, previewPassage, refreshReadingMeasurements } from './app.js?v=20261014-r2';
 import { serializeBody, validateCopy } from './rich-text.mjs';
-import { steps, details } from './content.js?v=20261014-editor-r1';
+import { steps, details } from './content.js?v=20261014-r2';
 
 const initialPassage = location.hash.slice(1).split('/').pop();
 const ids = new Set([...steps, ...details].map(item => item.id));
@@ -9,6 +9,8 @@ let saved, doc, sha, token, dirty = false, busy = false, activeBody, selection;
 let draftTimer, measureFrame;
 const notes = document.querySelector('.notes');
 document.body.classList.add('editing');
+// Every passage is editable, so every component note stays open in the editor.
+expandAll();
 const toolbar = document.createElement('div'); toolbar.className = 'editor-toolbar';
 toolbar.innerHTML = '<div class="editor-actions"><span class="editor-label">Text editor</span><a href="https://acastapaloma.github.io/pi/" target="_blank" rel="noopener">View live ↗</a><button id="save-live" disabled>Save to live</button></div><div class="format-tools" role="toolbar" aria-label="Text formatting"><button data-command="bold" title="Bold (⌘/Ctrl B)" aria-label="Bold"><strong>B</strong></button><button data-command="italic" title="Italic (⌘/Ctrl I)" aria-label="Italic"><em>I</em></button><button data-command="underline" title="Underline (⌘/Ctrl U)" aria-label="Underline"><u>U</u></button><select id="editor-font" aria-label="Font"><option value="Georgia">Serif</option><option value="Arial">Sans serif</option><option value="Courier New">Monospace</option></select><button data-command="indent" title="Indent paragraph" aria-label="Indent">Indent</button><button data-command="outdent" title="Outdent paragraph" aria-label="Outdent">Outdent</button><button data-command="insertUnorderedList" title="Bulleted list">List</button><button data-command="undo" title="Undo">Undo</button><button data-command="redo" title="Redo">Redo</button></div><div class="editor-feedback"><span id="save-status" role="status">Connecting to GitHub…</span><button id="download-draft" hidden>Download draft</button></div>';
 notes.insertBefore(toolbar, document.querySelector('#reader'));

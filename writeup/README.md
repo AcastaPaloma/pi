@@ -16,7 +16,8 @@ Run npm run dev in this directory, then open <http://127.0.0.1:4173/>. Any stati
 - Scrolling the reading panel focuses the diagram associated with the passage at the reading line. Long passages retain their diagram until the next heading crosses that line.
 - Drag or scroll over the canvas to explore freely. Pinch, Ctrl/Command-wheel, or + / − zooms. Camera tracking resumes when you return to the reading panel (pointer, focus, or reading scroll). Canvas scrolling never moves the article. The floating button also resumes reading or shows the whole canvas.
 - Clicking a diagram component scrolls to its matching article section. Hover outlines the target without changing the reading position.
-- Contents provides direct links to all 29 main sections and 81 components across ingestion, subgoal policy, and decision model.
+- Six chapters: Start here (preface, map, notation), Ingestion, Decision model, Training losses, High-level policy, World model. Contents links all 34 main sections and 85 component notes.
+- Component notes are folded under their main section. Their chips outline the exact drawn region on hover or focus; clicking a chip, a diagram component, or a Contents entry opens the notes and moves the camera. Hovering a drawn component highlights its chip. Contents has a switch to open every note. The map section lists reading routes.
 - Left/right arrows jump between main sections. Space, Page Up/Down, and up/down arrows scroll through the article. Escape closes contents, resumes a detached camera, or returns from a detail to its parent. F fits the current passage.
 - URLs such as #observation/patches restore both text and camera. Browser back/forward works. Reduced motion disables camera and article transitions.
 
@@ -34,17 +35,15 @@ The toolbar uses the browser's native contenteditable editing commands to retain
 
 The editor fetches current text from GitHub, so publishing does not modify or commit unrelated local work. After an editor save, use git pull --ff-only before making later code changes from this checkout.
 
-## Author commentary
+## Article prose
 
-author-copy.json preserves the supplied transcript; tests prevent unintended edits. Each destination has an explicit annotations entry in content.js. Supplied paragraphs appear verbatim until deliberately edited. Empty arrays render lorem ipsum from reading.mjs until the author supplies text. Published edits in text.json override individual section bodies; headings, diagram geometry, and section IDs stay fixed.
-
-Text is inserted as plain text. The supplied flow-loss expression is rendered with MathML. Do not draft extra explanatory prose.
+article.js holds every passage, written from the π0.7 paper and the work it cites. Blocks are paragraphs (with **bold**), lists, "On the drawing" notes for labels that differ from the paper, and placeholders (the Preface is reserved for the author). author-copy.json preserves the original transcript; tests check that it still appears verbatim and in order. Published edits in text.json override individual section bodies; headings, diagram geometry, and section IDs stay fixed. The flow-loss expression is rendered with MathML.
 
 The steps array defines major sections, macro ownership, focus bounds, optional camera frame, and component IDs. The details array defines smaller regions. reading.mjs turns these into one ordered article and chooses the active passage. Bounds are [x, y, width, height] on a 2048-wide logical canvas. Native coordinates convert by multiplying by 2048 / 4118.032888760241; layer translations/scales apply first. A step's frame can show context while its bounds identifies the highlighted drawing.
 
 ## Artwork
 
-The base full-backbone.svg preserves the original ingestion artwork. Its right-hand model is clipped out and replaced with decision-model.svg. loss-vlm.svg and loss-eam.svg sit beneath their branches. subgoal-generation.svg occupies the lower-left canvas and covers the high-level semantic subgoal policy: observation, visual encoding, text modalities, combined context, next subtask, and prediction/loss.
+world-model-placeholder.svg reserves the lower-right slot for the unfinished world-model (BAGEL) drawing, with five dashed component slots matching the article. The base full-backbone.svg preserves the original ingestion artwork. Its right-hand model is clipped out and replaced with decision-model.svg. loss-vlm.svg and loss-eam.svg sit beneath their branches. subgoal-generation.svg occupies the lower-left canvas and covers the high-level semantic subgoal policy: observation, visual encoding, text modalities, combined context, next subtask, and prediction/loss.
 
 Editor metadata was removed; vector paths, text, bundled fonts, and authored embedded images remain. Layers and focused crops share one inline SVG definition. Colors and typography follow the personal website and Genie article. See [RESEARCH.md](RESEARCH.md) for the original interaction research.
 
@@ -52,4 +51,4 @@ Editor metadata was removed; vector paths, text, bundled fonts, and authored emb
 
 Run npm test and node --check app.js. Browser verification is recorded in [VERIFICATION.md](VERIFICATION.md).
 
-For each new drawing, add named component bounds, contents destinations, and empty annotation arrays. Every destination automatically gets an article section with placeholder text. Place only verbatim supplied commentary at matching sections. Preserve IDs so shared links keep working. Bump entry, CSS, and content version queries together when publishing changes.
+For each new drawing, add named component bounds, contents destinations, and a passage in article.js. When the world-model drawing is ready, replace the placeholder layer and update the five wm-* bounds. Preserve IDs so shared links keep working. Bump entry, CSS, and content version queries together when publishing changes.

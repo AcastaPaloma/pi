@@ -42,11 +42,19 @@ test('route and inspection references are unique, valid, and inside the artwork'
   }
   for (const step of steps) for (const id of step.details) assert.ok(details.some(d => d.id === id), id);
   for (const detail of details) assert.ok(steps.some(s => s.id === detail.step), detail.id);
-  assert.deepEqual(steps.slice(1, 6).map(s => s.id), ['observation', 'subgoals', 'text', 'proprioception', 'together']);
+  assert.deepEqual(steps.filter(s => s.macro === 'ingestion').map(s => s.id),
+    ['context', 'observation', 'subgoals', 'text', 'proprioception', 'together']);
+});
+
+test('chapters follow the reading order: start, inputs, model, losses, prompt writers', () => {
+  const order = [...new Set(steps.map(s => s.macro))];
+  assert.deepEqual(order, ['start', 'ingestion', 'decision', 'training', 'subgoal-policy', 'world-model']);
+  assert.deepEqual(steps.filter(s => s.macro === 'start').map(s => s.id), ['preface', 'map', 'notation']);
+  assert.deepEqual(steps.filter(s => s.macro === 'world-model').map(s => s.id), ['world-model']);
 });
 
 test('decision walkthrough follows the authored macro-to-layer sequence', () => {
-  assert.deepEqual(steps.filter(s => s.macro === 'decision').map(s => s.id),
+  assert.deepEqual(steps.filter(s => ['decision', 'training'].includes(s.macro)).map(s => s.id),
     ['decision', 'vlm', 'flow', 'l1', 'l2', 'l33', 'l34', 'transformer',
       'eam-loss', 'eam-projection', 'flow-loss', 'vlm-loss', 'fast-input',
       'fast-transformer', 'token-probabilities', 'cross-entropy']);
@@ -58,13 +66,30 @@ test('decision walkthrough follows the authored macro-to-layer sequence', () => 
 });
 
 
-test('every component has an authoring slot; populated text matches the supplied transcript', async () => {
+test('every destination has written prose that keeps the supplied transcript verbatim and in order', async () => {
   const { readFile } = await import('node:fs/promises');
   const supplied = JSON.parse(await readFile(new URL('../author-copy.json', import.meta.url), 'utf8'));
-  const populated = Object.fromEntries(Object.entries(annotations).filter(([, paragraphs]) => paragraphs.length));
-  assert.deepEqual(populated, supplied);
-  for (const item of [...steps, ...details]) assert.ok(Array.isArray(annotations[item.id]), item.id);
+  for (const item of [...steps, ...details]) assert.ok(annotations[item.id]?.length, item.id);
   assert.equal(Object.keys(annotations).length, steps.length + details.length);
+  for (const [id, paragraphs] of Object.entries(supplied)) {
+    const body = annotations[id], at = body.indexOf(paragraphs[0]);
+    assert.ok(at >= 0, id);
+    assert.deepEqual(body.slice(at, at + paragraphs.length), paragraphs, id);
+  }
+  // The preface is reserved for the author; the world model notes its unfinished diagram.
+  const reserved = Object.entries(annotations).filter(([, blocks]) => blocks.some(b => b.placeholder)).map(([id]) => id);
+  assert.deepEqual(reserved.sort(), ['preface', 'world-model']);
+  assert.ok(annotations.preface.every(b => b.placeholder));
+});
+
+test('reading routes point at real sections', () => {
+  const ids = new Set([...steps, ...details].map(x => x.id));
+  const routed = steps.filter(s => s.routes);
+  assert.ok(routed.length);
+  for (const step of routed) for (const route of step.routes) {
+    assert.ok(route.title && route.note && route.ids.length, route.title);
+    for (const id of route.ids) assert.ok(ids.has(id), id);
+  }
 });
 
 test('composed SVG layers and all component bounds fit the extended canvas', async () => {
