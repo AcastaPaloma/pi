@@ -111,10 +111,10 @@ def gemma_loaded_fraction(report, model):
     return got / total if total else 0.0
 
 
-def save_checkpoint(path, model, *, config, extra=None):
+def save_checkpoint(path, model, *, config, extra=None, state_dict=None):
     path = Path(path)
     path.mkdir(parents=True, exist_ok=True)
-    torch.save(model.state_dict(), path / "model.pt")
+    torch.save(model.state_dict() if state_dict is None else state_dict, path / "model.pt")
     (path / "config.json").write_text(config.to_json())
     if extra:
         (path / "extra.json").write_text(json.dumps(extra, indent=2))

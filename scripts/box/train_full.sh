@@ -10,6 +10,6 @@ export MUJOCO_GL=osmesa OMP_NUM_THREADS=4
 mkdir -p logs
 nohup $PY -m torch.distributed.run --nproc_per_node 2 -m pi_model.train --data "$DATA" --config full \
     --gemma "$GEMMA" --tokenizer "$GEMMA/tokenizer.model" --out "$OUT" --steps "$STEPS" --batch-size 4 \
-    --grad-accum 4 --lr 5e-5 --warmup 1000 --bf16 --gradient-checkpointing --num-workers 12 \
-    --log-every 20 --save-every 1000 > "logs/train_$(basename "$OUT").log" 2>&1 &
+    --grad-accum 4 --lr 5e-5 --warmup 1000 --fsdp --gradient-checkpointing --num-workers 12 \
+    --log-every 10 --save-every 500 > "logs/train_$(basename "$OUT").log" 2>&1 &
 echo "launched; tail -f logs/train_$(basename "$OUT").log"

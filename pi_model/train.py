@@ -7,6 +7,12 @@ Multi-GPU (one process per GPU, batch size is per process):
 
     torchrun --nproc_per_node 2 -m pi_model.train --data ... --out ... --batch-size 32
 
+The paper-size model does not fit one 80 GB GPU with fp32 master weights and
+Adam states, so use --fsdp to shard parameters, gradients and optimizer states
+across the GPUs (bf16 compute, fp32 reductions and master weights):
+
+    torchrun --nproc_per_node 2 -m pi_model.train --config full --gemma ... --fsdp --gradient-checkpointing
+
 Knowledge insulation: the flow loss updates the expert only; cross-entropy on FAST
 tokens updates the VLM. Both are summed and stepped together.
 """
@@ -86,6 +92,7 @@ def main(argv=None):
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--max-steps-per-epoch", type=int)
     parser.add_argument("--gradient-checkpointing", action="store_true")
+    parser.add_argument("--fsdp", action="store_true", help="Shard parameters/grads/optimizer across GPUs (FSDP2)")
     args = parser.parse_args(argv)
 
     distributed = int(os.environ.get("WORLD_SIZE", "1")) > 1
@@ -112,7 +119,16 @@ def main(argv=None):
     if args.gradient_checkpointing:
         model.set_gradient_checkpointing(True)
     core = model
-    if distributed:
+    if args.fsdp:
+        if not distributed:
+            raise SystemExit("--fsdp needs torchrun with more than one process")
+        from torch.distributed.fsdp import MixedPrecisionPolicy, fully_shard
+        policy = MixedPrecisionPolicy(param_dtype=torch.bfloat16, reduce_dtype=torch.float32)
+        for layer in [*core.vision.layers, *core.backbone.layers, *core.expert.layers]:
+            fully_shard(layer, mp_policy=policy)
+        fully_shard(core, mp_policy=policy)
+        model = core
+    elif distributed:
         model = DistributedDataParallel(model, device_ids=[local_rank])
     params = core.parameter_report()
     args.out.mkdir(parents=True, exist_ok=True)
@@ -133,7 +149,8 @@ def main(argv=None):
         (no_decay if p.ndim < 2 or "norm" in name or "embedding" in name else decay).append(p)
     optimizer = torch.optim.AdamW([{"params": decay, "weight_decay": args.weight_decay},
                                    {"params": no_decay, "weight_decay": 0.0}], lr=args.lr, betas=(0.9, 0.95))
-    autocast = torch.autocast(device_type=device.type, dtype=torch.bfloat16, enabled=args.bf16 and device.type != "cpu")
+    autocast = torch.autocast(device_type=device.type, dtype=torch.bfloat16,
+                              enabled=args.bf16 and device.type != "cpu" and not args.fsdp)
     log = (args.out / "log.jsonl").open("a") if rank == 0 else None
     model.train()
     step, started, epoch = 0, time.monotonic(), 0
@@ -178,11 +195,16 @@ def main(argv=None):
                     log.flush()
                     print(" ".join(f"{k}={v:.4g}" if isinstance(v, float) else f"{k}={v}" for k, v in record.items()), flush=True)
             if step % args.save_every == 0 or step == args.steps:
+                state = None
+                if args.fsdp:
+                    from torch.distributed.checkpoint.state_dict import StateDictOptions, get_model_state_dict
+                    state = get_model_state_dict(core, options=StateDictOptions(full_state_dict=True, cpu_offload=True))
                 if rank == 0:
                     ckpt = args.out / f"step_{step:07d}"
-                    save_checkpoint(ckpt, core, config=cfg, extra={"step": step, "objective": args.objective,
-                                                                   "tokenizer": str(args.tokenizer) if args.tokenizer else None,
-                                                                   "meta_dir": str(meta_dir)})
+                    save_checkpoint(ckpt, core, config=cfg, state_dict=state,
+                                    extra={"step": step, "objective": args.objective,
+                                           "tokenizer": str(args.tokenizer) if args.tokenizer else None,
+                                           "meta_dir": str(meta_dir)})
                     shutil.copy(meta_dir / "stats.json", ckpt / "stats.json")
                     print(f"saved {ckpt}", flush=True)
                 if distributed:
