@@ -94,8 +94,13 @@ class Pi07Policy:
         cfg = self.cfg
         K = cfg.max_history
         state = np.zeros((K, cfg.state_dim), dtype=np.float32)
+        state_valid = np.asarray(valid, dtype=bool).copy()
+        if not cfg.state_history:
+            state_valid[:-1] = False
+        if cfg.state_dropout >= 1.0:  # trained without proprioception
+            state_valid[:] = False
         for k in range(K):
-            if valid[k]:
+            if state_valid[k]:
                 state[k, :ACTION_DIMS] = self.norm_state(states[k])
         text = prompt_ids(self.tokenizer, context, no_dropout())
         G = min(len(self.cameras), cfg.max_subgoals)
@@ -112,7 +117,7 @@ class Pi07Policy:
             "seconds_ago": torch.from_numpy(seconds[None]), "camera_valid": torch.ones(1, len(self.cameras), dtype=torch.bool),
             "subgoals": torch.from_numpy(goal[None]), "subgoal_valid": torch.from_numpy(goal_valid[None]),
             "text_ids": torch.tensor([text]), "text_valid": torch.ones(1, len(text), dtype=torch.bool),
-            "state": torch.from_numpy(state[None]), "state_valid": torch.from_numpy(valid[None]),
+            "state": torch.from_numpy(state[None]), "state_valid": torch.from_numpy(state_valid[None]),
         }
         return to_device(batch, self.device)
 

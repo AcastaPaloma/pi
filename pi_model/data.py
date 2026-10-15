@@ -201,8 +201,13 @@ class Pi07Dataset(Dataset):
                     images[v, k] = self.store.frame(episode, cam, s, S)
         seconds_ago = np.asarray([(K - 1 - k) * self.stride / self.store.hz for k in range(K)], dtype=np.float32)
         state = np.zeros((K, cfg.state_dim), dtype=np.float32)
+        state_valid = valid.copy()
+        if not cfg.state_history:
+            state_valid[:-1] = False
+        if self.train and cfg.state_dropout and rng.random() < cfg.state_dropout:
+            state_valid[:] = False
         for k, s in enumerate(frame_steps):
-            if valid[k]:
+            if state_valid[k]:
                 state[k, :ACTION_DIMS] = self.norm_state(episode.steps["state"][s])
 
         segment = episode.steps["segment_id"]
@@ -213,7 +218,7 @@ class Pi07Dataset(Dataset):
                                 control_mode="joint", speed_bin=self.speed_bin)
 
         sample = {"images": images, "frame_valid": valid, "seconds_ago": seconds_ago,
-                  "camera_valid": np.ones(len(self.cameras), dtype=bool), "state": state, "state_valid": valid,
+                  "camera_valid": np.ones(len(self.cameras), dtype=bool), "state": state, "state_valid": state_valid,
                   "episode": e, "t": t}
 
         G = len(self.subgoal_cameras)

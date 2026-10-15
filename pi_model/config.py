@@ -104,6 +104,11 @@ class Pi07Config:
     max_rtc_delay: int = 12        # training-time RTC: simulated delay 0..12 steps
     denoise_steps: int = 5
     control_hz: int = 50
+    # Proprioception shortcuts: with scripted demos the past joint states reveal where the arm is
+    # heading (and so where the object is), letting a policy ignore its cameras. state_history=False
+    # feeds only the current state; state_dropout zeroes all states for that fraction of samples.
+    state_history: bool = True
+    state_dropout: float = 0.0
     name: str = "full"
 
     @staticmethod

@@ -87,6 +87,8 @@ def main(argv=None):
     parser.add_argument("--gemma", type=Path, help="Gemma 3 4B safetensors directory (initialises the VLM)")
     parser.add_argument("--tokenizer", type=Path, help="Gemma tokenizer.model; byte fallback when omitted")
     parser.add_argument("--resume", type=Path, help="Checkpoint directory to warm-start from (weights only)")
+    parser.add_argument("--no-state-history", action="store_true", help="Feed only the current joint state")
+    parser.add_argument("--state-dropout", type=float, help="Fraction of samples trained with no joint state (1 = never)")
     parser.add_argument("--reset-action-io", action="store_true",
                         help="With --resume: re-initialise state/action input-output layers (new action statistics)")
     parser.add_argument("--out", type=Path, required=True)
@@ -121,6 +123,10 @@ def main(argv=None):
     cfg = Pi07Config.from_json(Path(args.config).read_text()) if args.config.endswith(".json") else Pi07Config.named(args.config)
     if args.image_size:
         cfg = cfg.with_(vision=cfg.vision.__class__(**{**cfg.vision.__dict__, "image_size": args.image_size}))
+    if args.no_state_history:
+        cfg = cfg.with_(state_history=False)
+    if args.state_dropout is not None:
+        cfg = cfg.with_(state_dropout=args.state_dropout)
     device = pick_device(args.device)
     meta_dir = args.meta or args.data / "pi07_meta"
     tokenizer = load_tokenizer(args.tokenizer, cfg.text.vocab)
