@@ -136,7 +136,9 @@ def run_episode(env: RobotEnv, policy: Pi07Policy, *, seed, execute, delay, cfg_
             observe(t)  # keep the one-second-stride history populated between inferences
         if terminated or truncated:
             break
-    extra = {"task_id": env.task_name, "side": env.side, "touched": info.get("touched")} if ladder else {}
+    extra = {"task_id": env.task_name, "side": env.side, "touched": info.get("touched"),
+             "final_cube_to_bin_m": round(float(np.linalg.norm(obs["cube_position"][:2] - obs["bin_position"][:2])), 4)}\
+        if ladder else {}
     return {**extra, "seed": seed, "success": bool(info["is_success"]), "steps": int(info["elapsed_steps"]),
             "failure": info["failure"], "inference_calls": inference_calls, "task": task, "subtask_mode": subtask,
             "object": f"{env.object_color} {env.object_shape}",
