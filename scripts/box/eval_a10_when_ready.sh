@@ -10,8 +10,9 @@ export MUJOCO_GL=${MUJOCO_GL:-osmesa} LP_NUM_THREADS=8
 for step in "$@"; do
   ckpt=$(printf "exports/%s/step_%07d" "$RUN" "$step")
   until [ -f "$ckpt/model.pt" ]; do sleep 60; done
+  while pgrep -f "pi_model.eval_sim" >/dev/null; do sleep 30; done  # one model at a time on the 24 GB GPU
   echo "=== $ckpt $(date) ==="
   ~/pi-venv/bin/python -m pi_model.eval_sim --checkpoint "$ckpt" --episodes "$EPISODES" --execute 25 --delay 6 \
       --device cuda --dtype bf16 --subtask oracle --out "outputs/eval_${RUN}_step$step" --placement wide 2>&1 \
-      | grep -E "^episode|success rate|Traceback|Error"
+      | grep --line-buffered -E "^episode|success rate|Traceback|Error"
 done

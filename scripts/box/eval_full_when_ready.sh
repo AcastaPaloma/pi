@@ -13,5 +13,5 @@ for step in "$@"; do
   echo "=== $ckpt $(date) ==="
   ~/pi-venv/bin/python -m pi_model.eval_sim --checkpoint "$ckpt" --episodes "$EPISODES" --execute 25 --delay 6 \
       --device cpu --subtask oracle --out "outputs/eval_$(basename "$RUN")_step$step" --placement wide 2>&1 \
-      | grep -E "^episode|success rate|Traceback|Error"
+      | grep --line-buffered -E "^episode|success rate|Traceback|Error"
 done
