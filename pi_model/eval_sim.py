@@ -48,6 +48,8 @@ def run_episode(env: RobotEnv, policy: Pi07Policy, *, seed, execute, delay, cfg_
     chunk = policy.act(history, context, cfg_beta=cfg_beta, generator=generator)
     cursor = 0
     inference_calls = 1
+    closest = float("inf")
+    lifted = 0.0
     while True:
         if cursor >= execute:
             # A new chunk is requested now; the `delay` actions executed while the
@@ -63,13 +65,18 @@ def run_episode(env: RobotEnv, policy: Pi07Policy, *, seed, execute, delay, cfg_
         obs, reward, terminated, truncated, info = env.step(action)
         cursor += 1
         t += 1
+        closest = min(closest, float(np.linalg.norm(obs["ee_pose"][:3] - obs["cube_position"])))
+        lifted = max(lifted, float(obs["cube_position"][2]))
         if t % observe_every == 0 and cursor < execute:
             observe(t)  # keep the one-second-stride history populated between inferences
         if terminated or truncated:
             break
     return {"seed": seed, "success": bool(info["is_success"]), "steps": int(info["elapsed_steps"]),
             "failure": info["failure"], "inference_calls": inference_calls, "task": task,
-            "object": f"{env.object_color} {env.object_shape}"}
+            "object": f"{env.object_color} {env.object_shape}",
+            "closest_hand_to_cube_m": round(closest, 4), "max_cube_height_m": round(lifted, 4),
+            "lifted": bool(lifted > 0.045),
+            "final_cube_to_goal_m": round(float(np.linalg.norm(obs["cube_position"] - obs["goal_position"])), 4)}
 
 
 def write_video(frames, path, fps=10):
@@ -133,16 +140,18 @@ def main(argv=None):
                              video_frames=frames, generator=generator)
         results.append(result)
         print(f"episode {i}: {result['object']:<14} success={result['success']} steps={result['steps']} "
-              f"failure={result['failure']} calls={result['inference_calls']}", flush=True)
+              f"failure={result['failure']} calls={result['inference_calls']} closest={result['closest_hand_to_cube_m']:.3f}m "
+              f"lifted={result['lifted']} final_to_goal={result['final_cube_to_goal_m']:.3f}m", flush=True)
         if args.video and args.out:
             write_video(frames, args.out / f"episode_{i:03d}.mp4")
     for env in envs.values():
         env.close()
     rate = float(np.mean([r["success"] for r in results])) if results else 0.0
-    summary = {"checkpoint": str(args.checkpoint), "episodes": len(results), "success_rate": rate,
+    lift_rate = float(np.mean([r["lifted"] for r in results])) if results else 0.0
+    summary = {"checkpoint": str(args.checkpoint), "episodes": len(results), "success_rate": rate, "lift_rate": lift_rate,
                "execute": args.execute, "delay": args.delay, "cfg_beta": args.cfg_beta, "denoise_steps": args.denoise_steps,
                "elapsed_s": round(time.monotonic() - started, 1), "results": results}
-    print(f"success rate {rate:.2%} over {len(results)} episodes")
+    print(f"success rate {rate:.2%}, lift rate {lift_rate:.2%}, over {len(results)} episodes")
     if args.out:
         (args.out / "results.json").write_text(json.dumps(summary, indent=2) + "\n")
     return summary
