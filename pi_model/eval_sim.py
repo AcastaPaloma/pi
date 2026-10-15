@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 from pathlib import Path
 import time
 
@@ -39,6 +40,9 @@ def run_episode(env: RobotEnv, policy: Pi07Policy, *, seed, execute, delay, cfg_
         if video_frames is not None:
             video_frames.append(images[policy.cameras[0]])
 
+    # Frames are only needed at inference times and at one-second strides before
+    # them, so observing every gcd(execute, stride) steps loses nothing.
+    observe_every = math.gcd(execute, policy.stride)
     t = 0
     observe(t)
     chunk = policy.act(history, context, cfg_beta=cfg_beta, generator=generator)
@@ -59,7 +63,7 @@ def run_episode(env: RobotEnv, policy: Pi07Policy, *, seed, execute, delay, cfg_
         obs, reward, terminated, truncated, info = env.step(action)
         cursor += 1
         t += 1
-        if t % max(1, env.control_hz // 10) == 0 and cursor < execute:
+        if t % observe_every == 0 and cursor < execute:
             observe(t)  # keep the one-second-stride history populated between inferences
         if terminated or truncated:
             break
