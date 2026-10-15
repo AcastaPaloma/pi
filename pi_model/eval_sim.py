@@ -79,18 +79,28 @@ def run_episode(env: RobotEnv, policy: Pi07Policy, *, seed, execute, delay, cfg_
 
     context = make_context()
 
+    timing = {"policy_s": 0.0, "observe_s": 0.0}
+
     def observe(step):
+        t0 = time.monotonic()
         images = {cam: policy.prepare_image(env.render_camera(cam, native=True)) for cam in policy.cameras}
         history.append(step, images, obs["state"])
         if video_frames is not None:
             video_frames.append(images[policy.cameras[0]])
+        timing["observe_s"] += time.monotonic() - t0
+
+    def act(**kwargs):
+        t0 = time.monotonic()
+        chunk = policy.act(history, context, cfg_beta=cfg_beta, generator=generator, **kwargs)
+        timing["policy_s"] += time.monotonic() - t0
+        return chunk
 
     # Frames are only needed at inference times and at one-second strides before
     # them, so observing every gcd(execute, stride) steps loses nothing.
     observe_every = math.gcd(execute, policy.stride)
     t = 0
     observe(t)
-    chunk = policy.act(history, context, cfg_beta=cfg_beta, generator=generator)
+    chunk = act()
     cursor = 0
     inference_calls = 1
     closest = float("inf")
@@ -104,7 +114,7 @@ def run_episode(env: RobotEnv, policy: Pi07Policy, *, seed, execute, delay, cfg_
             prefix = chunk[cursor:cursor + delay] if delay else None
             if delay and len(prefix) < delay:
                 prefix = np.concatenate([prefix, np.repeat(prefix[-1:], delay - len(prefix), axis=0)])
-            chunk = policy.act(history, context, prefix_actions=prefix, delay=delay, cfg_beta=cfg_beta, generator=generator)
+            chunk = act(prefix_actions=prefix, delay=delay)
             cursor = 0
             inference_calls += 1
         action = chunk[min(cursor, len(chunk) - 1)]
@@ -122,7 +132,8 @@ def run_episode(env: RobotEnv, policy: Pi07Policy, *, seed, execute, delay, cfg_
             "object": f"{env.object_color} {env.object_shape}",
             "closest_hand_to_cube_m": round(closest, 4), "max_cube_height_m": round(lifted, 4),
             "lifted": bool(lifted > 0.045),
-            "final_cube_to_goal_m": round(float(np.linalg.norm(obs["cube_position"] - obs["goal_position"])), 4)}
+            "final_cube_to_goal_m": round(float(np.linalg.norm(obs["cube_position"] - obs["goal_position"])), 4),
+            "policy_s": round(timing["policy_s"], 1), "observe_s": round(timing["observe_s"], 1)}
 
 
 def write_video(frames, path, fps=10):
@@ -187,7 +198,8 @@ def main(argv=None):
         results.append(result)
         print(f"episode {i}: {result['object']:<14} success={result['success']} steps={result['steps']} "
               f"failure={result['failure']} calls={result['inference_calls']} closest={result['closest_hand_to_cube_m']:.3f}m "
-              f"lifted={result['lifted']} final_to_goal={result['final_cube_to_goal_m']:.3f}m", flush=True)
+              f"lifted={result['lifted']} final_to_goal={result['final_cube_to_goal_m']:.3f}m "
+              f"policy={result['policy_s']:.0f}s observe={result['observe_s']:.0f}s", flush=True)
         if args.video and args.out:
             write_video(frames, args.out / f"episode_{i:03d}.mp4")
     for env in envs.values():
