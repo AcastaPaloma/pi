@@ -166,6 +166,8 @@ def main(argv=None):
     parser.add_argument("--subtask", help="Subtask instruction: a fixed string, 'oracle' (scripted phase from sim state), or omit for none")
     parser.add_argument("--denoise-steps", type=int, default=5)
     parser.add_argument("--device", default="auto")
+    parser.add_argument("--dtype", choices=("fp32", "bf16"), default="fp32",
+                        help="Inference weights; bf16 lets the paper-size model fit a 24 GB GPU")
     parser.add_argument("--tokenizer", type=Path)
     parser.add_argument("--colors", default="red,green,blue,yellow")
     parser.add_argument("--shapes", default="cube")
@@ -176,7 +178,8 @@ def main(argv=None):
     parser.add_argument("--video", action="store_true")
     args = parser.parse_args(argv)
 
-    policy = Pi07Policy(args.checkpoint, device=args.device, tokenizer=args.tokenizer, denoise_steps=args.denoise_steps)
+    policy = Pi07Policy(args.checkpoint, device=args.device, tokenizer=args.tokenizer, denoise_steps=args.denoise_steps,
+                        dtype=args.dtype)
     image_size = policy.cfg.vision.image_size
     colors = [c for c in args.colors.split(",") if c in COLORS]
     shapes = [s for s in args.shapes.split(",") if s in ("cube", "cylinder")]
@@ -208,7 +211,7 @@ def main(argv=None):
     lift_rate = float(np.mean([r["lifted"] for r in results])) if results else 0.0
     summary = {"checkpoint": str(args.checkpoint), "episodes": len(results), "success_rate": rate, "lift_rate": lift_rate,
                "subtask": args.subtask,
-               "execute": args.execute, "delay": args.delay, "cfg_beta": args.cfg_beta, "denoise_steps": args.denoise_steps,
+               "execute": args.execute, "delay": args.delay, "cfg_beta": args.cfg_beta, "denoise_steps": args.denoise_steps, "dtype": args.dtype,
                "elapsed_s": round(time.monotonic() - started, 1), "results": results}
     print(f"success rate {rate:.2%}, lift rate {lift_rate:.2%}, over {len(results)} episodes")
     if args.out:

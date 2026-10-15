@@ -87,6 +87,8 @@ Rendering there is CPU-side OSMesa, parallelised over 24 processes;
 | `small` from scratch | 0.3B, 224 px, batch 32 per GPU, bf16 autocast | Fits comfortably; two GPUs with DDP via `torchrun`. |
 | `full` from Gemma 3 4B | 5.2B, 448 px | Runs with FSDP2 on both GPUs (`--fsdp`, bf16 parameters, fp32 reductions) plus `--gradient-checkpointing`, batch 4 per GPU with 4 accumulation steps, 77–80 GB per GPU and about 10 s per step (3 samples/s), so 10k steps take 28–30 h. Gated weights: accept the Gemma license, then `hf download google/gemma-3-4b-pt --local-dir weights/gemma-3-4b-pt`. |
 
+**Evaluation GPU.** Closed-loop evaluation of the 5.2B model on the training box's CPU takes about 14 minutes per 20-second episode (40 policy calls of ~20 s each), and the H100s are full while training. A separate 1× A10 24 GB (`ssh ubuntu@129.213.124.160`, $1.29/h) evaluates instead: `scripts/relay_checkpoints.sh`, run on a machine that can reach both boxes, exports each checkpoint as bf16 (10.3 GB, `scripts/box/export_bf16.py`) and streams it across, and `scripts/box/eval_a10_when_ready.sh` on the A10 evaluates each one with `--device cuda --dtype bf16`, 20 episodes, oracle subtasks. The A10 needs `libnvidia-gl-580-server` (matching the driver) for NVIDIA EGL and `libosmesa6` for Mesa; evaluation renders with Mesa because the training data was rendered that way.
+
 Lambda on-demand prices for reference (2026-10-14, per GPU-hour, plus tax): 1× H100 PCIe 3.29, 1× H100 SXM 4.29, 8× H100 SXM 3.99, 8× A100 80 GB 2.79, 1× A100 40 GB 1.99, 1× A10 24 GB 1.29.
 
 ## 6. Plan and exit criteria

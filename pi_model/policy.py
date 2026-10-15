@@ -52,7 +52,7 @@ class HistoryBuffer:
 
 
 class Pi07Policy:
-    def __init__(self, checkpoint, *, device="auto", tokenizer=None, denoise_steps=None, cameras=None):
+    def __init__(self, checkpoint, *, device="auto", tokenizer=None, denoise_steps=None, cameras=None, dtype="fp32"):
         checkpoint = Path(checkpoint)
         self.cfg = Pi07Config.from_json((checkpoint / "config.json").read_text())
         self.stats = json.loads((checkpoint / "stats.json").read_text())
@@ -62,6 +62,10 @@ class Pi07Policy:
         self.device = torch.device(device)
         self.model = Pi07(self.cfg)
         self.model.load_state_dict(torch.load(checkpoint / "model.pt", map_location="cpu"))
+        if dtype not in ("fp32", "bf16"):
+            raise ValueError(f"dtype must be fp32 or bf16, got {dtype}")
+        if dtype == "bf16":
+            self.model.to(torch.bfloat16)  # 5.2B parameters: 10.3 GB instead of 20.7 GB, fits a 24 GB GPU
         self.model.to(self.device).eval()
         self.tokenizer = load_tokenizer(tokenizer or extra.get("tokenizer"), self.cfg.text.vocab)
         self.norm_state = Normalizer(self.stats["state_q01"], self.stats["state_q99"])
