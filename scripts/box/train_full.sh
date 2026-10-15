@@ -3,7 +3,7 @@
 #   hf download google/gemma-3-4b-pt --local-dir weights/gemma-3-4b-pt   (after accepting the license)
 #   bash scripts/box/train_full.sh data/sim_v1 runs/full_v1 30000
 set -euo pipefail
-DATA=${1:-data/sim_v1}; OUT=${2:-runs/full_v1}; STEPS=${3:-30000}
+DATA=${1:-data/sim_v1}; OUT=${2:-runs/full_v1}; STEPS=${3:-10000}
 GEMMA=${GEMMA:-weights/gemma-3-4b-pt}
 PY=${PY:-$HOME/pi-venv/bin/python}
 export MUJOCO_GL=osmesa OMP_NUM_THREADS=4

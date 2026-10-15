@@ -126,7 +126,7 @@ class MemVisionEncoder(nn.Module):
 
     def embed(self, images):
         """images [N, 3, H, W] in [-1, 1] -> [N, P, D]."""
-        x = self.patch_embedding(images).flatten(2).transpose(1, 2)
+        x = self.patch_embedding(images.to(self.patch_embedding.weight.dtype)).flatten(2).transpose(1, 2)
         return x + self.position_embedding.weight[None]
 
     def forward(self, images, seconds_ago=None, frame_valid=None):

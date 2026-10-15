@@ -45,7 +45,7 @@ class ActionExpert(nn.Module):
     def forward(self, noisy_actions, tau, rope_local, rope_global, prefix_kvs, mask_local, mask_global, sliding):
         """noisy_actions [B, H, A]; tau [B, H] per-token flow timesteps; returns velocity [B, H, A]."""
         cond = self.time(tau)
-        x = self.action_in(noisy_actions)
+        x = self.action_in(noisy_actions.to(self.action_in.weight.dtype))
         for layer, (pk, pv), is_sliding in zip(self.layers, prefix_kvs, sliding):
             cos, sin = rope_local if is_sliding else rope_global
             mask = mask_local if is_sliding else mask_global

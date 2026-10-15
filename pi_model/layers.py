@@ -65,7 +65,8 @@ class TimestepEmbedding(nn.Module):
         self.mlp = nn.Sequential(nn.Linear(dim, dim), nn.SiLU(), nn.Linear(dim, dim))
 
     def forward(self, tau):
-        return self.mlp(sinusoidal_embedding(tau, self.dim, self.min_period, self.max_period))
+        features = sinusoidal_embedding(tau, self.dim, self.min_period, self.max_period)
+        return self.mlp(features.to(self.mlp[0].weight.dtype))
 
 
 def rope_cos_sin(positions: torch.Tensor, head_dim: int, theta: float, scaling: float = 1.0):

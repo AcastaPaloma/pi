@@ -104,7 +104,7 @@ class Pi07(nn.Module):
 
         state = batch.get("state")                     # [B, K, state_dim]
         if state is not None and state.shape[1] > 0:
-            pieces.append((self.state_proj(state), batch["state_valid"], STATE, None))
+            pieces.append((self.state_proj(state.to(self.state_proj.weight.dtype)), batch["state_valid"], STATE, None))
 
         fast_ids = batch.get("fast_ids")
         if fast_ids is not None and fast_ids.shape[1] > 0:
