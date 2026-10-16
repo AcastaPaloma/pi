@@ -363,3 +363,4 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   libnvidia-gl-580-server installed), so the on-box evaluation in pi05_dagger1/pi05_dagger2 would have
   crashed. Removed it; their checkpoints are relayed from the Mac to A10#1 instead
   (`relay_checkpoints.sh` + `eval_ladder_when_ready.sh`, 8 episodes per rung, the same protocol as pi05_v1).
+- **2026-10-16 08:32** [scheduler] launch of pi05_dagger1 on 192.222.52.191:0 failed: job tag SCHEDJOB_pi05_dagger1 not seen on 192.222.52.191 within 3 minutes
