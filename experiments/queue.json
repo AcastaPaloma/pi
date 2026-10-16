@@ -151,7 +151,7 @@
     {
       "name": "pi05_lr5e5",
       "hypothesis": "H5: the two-arm mix is under-trained at 2.5e-5; 5e-5 learns faster without destabilising",
-      "status": "queued",
+      "status": "running",
       "prep_on_main": "rsync -a -e 'ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes' data/sim_recover2_v1 ubuntu@{HOST}:~/pi/data/",
       "setup": "mkdir -p data/sim_mixrec2_v1 && cd data/sim_mixrec2_v1 && for d in ../sim_mix_v1/episode_*; do ln -sfn $d $(basename $d); done && for d in ../sim_recover2_v1/episode_*; do ln -sfn $d episode_rec2_$(basename $d | cut -d_ -f2); done",
       "train": "LR=5e-5 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixrec2_v1 runs/{RUN} 12000",
@@ -167,7 +167,9 @@
         "requires_on_host": [
           "data/sim_recover2_v1"
         ]
-      }
+      },
+      "host": "209.20.157.232:0",
+      "started": "2026-10-16T18:47"
     },
     {
       "name": "pi05_2arm_ema",
