@@ -133,3 +133,10 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   lift 2/8; 10–19 mm everywhere — grasps and lifts are learned, placing is not yet. Next for two-arm:
   a warm start from pi05_single step 6000 plus recover2 data is the strongest candidate (H1a + H2);
   it needs a GPU, so either replace a run that loses on the leaderboard or rent one more H100.
+- **2026-10-16 ~02:30** Steps: pi05_v1 7560, pi05_single 6900, warm2arm 2240, recover 2060, easy 2080; no
+  errors. Step-1000 scores of the three experiments are all 0–1/16 per rung (lifts 0–19%), the same as
+  pi05_v1 at step 1000 — no early separation; H1a/H1b/H2 still open, decided at steps 3000–4000.
+  **Decision (compute):** pi05_single reached its goal (93% at step 6000). If its 30-episode score at
+  step 7000 confirms ≥ 85%, its GPU goes to **pi05_2arm_v2**: warm start from the best pi05_single
+  checkpoint on two-arm data + 6,000 recover2 episodes (data/sim_mixrec2_v1). This reassigns a finished
+  run rather than stopping an experiment early. recover2 generation at 5,494/6,000.
