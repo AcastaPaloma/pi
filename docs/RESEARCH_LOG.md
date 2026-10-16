@@ -467,3 +467,4 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   reset, so they were never affected. This explains the 62% parked DAgger data and plausibly pi05_dagger1's
   collapse. Queued **dagger7_fixed** (A10#1, 150 per task from pi05_v1 step 20000, takeover 1–15 s);
   pi05_dagger_clean now also takes v7.
+- **2026-10-16 10:42** [scheduler] 129.213.124.160 was idle; launched **dagger7_fixed** (H13 fixed: the DAgger teacher took the hand position at takeover as each arm's rest pose, deadlocking two_bins mid-carry and handover lower/raise takeovers (0/8 each; 8/8 after the fix). Regenerate DAgger from the best policy (pi05_v1 step 20000, 83/120) with the fixed teacher)

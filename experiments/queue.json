@@ -287,12 +287,14 @@
     {
       "name": "dagger7_fixed",
       "hypothesis": "H13 fixed: the DAgger teacher took the hand position at takeover as each arm's rest pose, deadlocking two_bins mid-carry and handover lower/raise takeovers (0/8 each; 8/8 after the fix). Regenerate DAgger from the best policy (pi05_v1 step 20000, 83/120) with the fixed teacher",
-      "status": "queued",
+      "status": "running",
       "prefer_host": "129.213.124.160",
       "requires_on_host": [
         "exports/pi05_v1/step_0020000/model.pt"
       ],
-      "eval": "MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.dagger --checkpoint exports/pi05_v1/step_0020000 --episodes-per-task 150 --takeover-min 1 --takeover-max 15 --out data/sim_dagger_v7 --seed 999000"
+      "eval": "MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.dagger --checkpoint exports/pi05_v1/step_0020000 --episodes-per-task 150 --takeover-min 1 --takeover-max 15 --out data/sim_dagger_v7 --seed 999000",
+      "host": "129.213.124.160",
+      "started": "2026-10-16T10:42"
     }
   ]
 }
