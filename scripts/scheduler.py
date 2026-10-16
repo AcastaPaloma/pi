@@ -72,6 +72,10 @@ def resolve(text, host, run):
 def requirements_met(entry, host):
     if host in entry.get("avoid_hosts", []):  # e.g. the main box, which cannot render with EGL
         return False
+    for other, path in entry.get("requires_elsewhere", []):  # e.g. a checkpoint relayed to the other A10
+        code, out = ssh(other, f"test -e ~/pi/{path} && echo ok")
+        if "ok" not in out:
+            return False
     for path in entry.get("requires_on_host", []):
         code, out = ssh(host, f"test -e ~/pi/{path} && echo ok")
         if "ok" not in out:

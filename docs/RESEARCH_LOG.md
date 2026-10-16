@@ -606,3 +606,10 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   pi05_dagger_clean vs pi05_dagger_clean_lr1e5 pair test the two. pi05_v1_cont (same data, LR 1e-5) is the control
   that so far holds its level. All GPUs busy; no alerts.
 - **2026-10-16 15:18** [scheduler] 129.213.124.160 was idle; launched **dagger10_fixed** (H2b next round: fixed-teacher DAgger from the best checkpoint so far (pi05_dagger1 step 7000, 27/32), whose failure states differ from pi05_v1's; data for the round after pi05_dagger2)
+- **2026-10-16 19:30 UTC** **v1_rec2_final_confirm30 final: 24/20/16/13 = 73/120** (baseline 83): the recover2
+  continuation is confirmed worse. Scoreboard of continuations from pi05_v1 step 20000 on the 30 shared seeds:
+  dagger1 step 7000 85, step 8000 80, rec2 step 8000 73; baseline 83. Nothing has beaten the baseline yet. Pending:
+  dagger_clean (3260), v1_cont (2900, low LR), rec2_trim (3840), dagger_clean_lr1e5 and dagger2 (queued).
+  `scripts/scheduler.py` gained `requires_elsewhere` (wait for a file on another host), so a confirmation can
+  wait for a checkpoint relayed to the other A10. Queued **v1_cont_4000_confirm30**. DAgger v10 running (40/42
+  successful so far). All GPUs busy.
