@@ -267,3 +267,8 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   partial recovery from 0/12 at 3000 (H8: dip then recovery). Queued **v1_13000_confirm30** (30 episodes per
   rung on pi05_v1 step 13000, the two-arm demo candidate) for the first A10 after dagger3. Steps: pi05_v1
   14260, 2arm_v2 5260, warm2arm 6020, recover 5760, easy 6020; no errors. dagger2 335/600, dagger3 159/600.
+- **2026-10-16 ~11:30** **pi05_v1 step 14000 confirms the breakthrough:** pick_place_any 7/8, bin 4/8,
+  handover 4/8 (both arms 6/8), two_bins 4/8 (steps 13000+14000 pooled: 13/16, 9/16, 10/16, 9/16, all with
+  lifts). The two-arm sim policy works on every rung roughly half to most of the time. pi05_warm2arm step
+  6000: pick 10/16, bin 6/16, handover 4/16 (recovered from the step-5000 dip). pi05_easy step 6000: pick
+  10/16, bin 8/16. The 30-episode confirmation of step 13000 is queued for the first A10.
