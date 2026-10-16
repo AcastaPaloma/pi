@@ -7,6 +7,7 @@ RUN=$1; shift
 PY=${PY:-$HOME/lerobot-venv/bin/python}; GPU=${GPU:-1}; EPISODES=${EPISODES:-10}; TASKS=${TASKS:-${TASK:-pick_place}}
 DELAY=${DELAY:-0}; NAME=${NAME:-$(basename "$RUN")}
 export MUJOCO_GL=${MUJOCO_GL:-osmesa} LP_NUM_THREADS=8 CUDA_VISIBLE_DEVICES=$GPU
+mkdir -p outputs logs
 for step in "$@"; do
   ckpt=$(printf "%s/step_%07d" "$RUN" "$step")
   until [ -f "$ckpt/model.pt" ]; do sleep 60; done
