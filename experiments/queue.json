@@ -25,9 +25,17 @@
     },
     {
       "name": "pi05_dagger1",
-      "hypothesis": "H2b: DAgger \u2014 label states the policy actually visits with the privileged teacher, so compounding errors are covered",
+      "hypothesis": "H2b: DAgger \u2014 teacher continuations from the states the policy actually reaches fix compounding errors; fine-tune pi05_v1 on mix + recover2 + DAgger data",
       "status": "blocked",
-      "blocked_on": "pi_sim DAgger recorder (teacher action from arbitrary state via sync_from_state) not written yet"
+      "blocked_on": "data/sim_dagger_v1 being generated on the first A10 (queue entry dagger1_generate); set to queued when done",
+      "prep_on_main": "ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@129.213.124.160 'tar cf - -C ~/pi/data sim_dagger_v1' | tar xf - -C data && rsync -a -e 'ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes' data/sim_recover2_v1 data/sim_dagger_v1 ubuntu@{HOST}:~/pi/data/ 2>/dev/null; true",
+      "setup": "mkdir -p data/sim_mixdag_v1 && cd data/sim_mixdag_v1 && for d in ../sim_mix_v1/episode_*; do ln -sfn $d $(basename $d); done && for d in ../sim_recover2_v1/episode_*; do ln -sfn $d episode_rec2_$(basename $d | cut -d_ -f2); done && for d in ../sim_dagger_v1/episode_*; do ln -sfn $d episode_dag_$(basename $d | cut -d_ -f2); done",
+      "train": "RESUME={LATEST:runs/pi05_v1} META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdag_v1 runs/{RUN} 8000",
+      "requires_on_host": [
+        "runs/pi05_v1"
+      ],
+      "prefer_host": "192.222.52.191",
+      "eval": "GPU=0 NAME={RUN} EPISODES=16 TASKS='pick_place_any bin handover two_bins' MUJOCO_GL=egl bash scripts/box/eval_when_ready.sh runs/{RUN} 1000 2000 3000 4000 5000 6000 7000 8000"
     }
   ],
   "a10": [
@@ -42,6 +50,16 @@
       "eval": "for E in 10 15 40; do MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.eval_sim --checkpoint exports/pi05_single/step_0006000 --episodes 30 --episode-seconds 20 --execute $E --delay 0 --device cuda --subtask oracle --seed 1000 --out outputs/eval_single6000exec${E}_step6000_pick_place; done",
       "host": "132.145.199.243",
       "started": "2026-10-16T01:56"
+    },
+    {
+      "name": "dagger1_generate",
+      "hypothesis": "H2b data: policy rollout (pi05_v1 step 8000) then teacher takeover, 150 episodes per rung",
+      "status": "queued",
+      "prefer_host": "129.213.124.160",
+      "requires_on_host": [
+        "exports/pi05_v1/step_0008000/model.pt"
+      ],
+      "eval": "MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.dagger --checkpoint exports/pi05_v1/step_0008000 --episodes-per-task 150 --out data/sim_dagger_v1"
     }
   ]
 }

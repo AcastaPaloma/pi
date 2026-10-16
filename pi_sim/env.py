@@ -328,7 +328,9 @@ class RobotEnv(gym.Env):
         action[i, -1] = opening
         return np.clip(action.ravel(), self.action_space.low, self.action_space.high)
 
-    def _solve_ik(self, arm, position, quaternion):
+    def _solve_ik(self, arm, position, quaternion, downward=None):
+        """downward=True keeps the finger axis pointing down with free yaw (default in ee_delta mode)."""
+        downward = self.control_mode == "ee_delta" if downward is None else downward
         d = self._ik_data
         d.qpos[:] = self.data.qpos
         d.qvel[:] = 0
@@ -343,7 +345,7 @@ class RobotEnv(gym.Env):
             mujoco.mju_mat2Quat(q, d.site_xmat[arm.site_id])
             mujoco.mju_subQuat(rotation_error, quaternion, q)
             rotation_world = d.site_xmat[arm.site_id].reshape(3, 3) @ rotation_error
-            if self.control_mode == "ee_delta":
+            if downward:
                 # Keep the finger approach axis downward; leave yaw unconstrained.
                 axis = d.site_xmat[arm.site_id].reshape(3, 3)[:, 0]
                 rotation_world = np.cross(axis, [0., 0., -1.])
@@ -352,7 +354,7 @@ class RobotEnv(gym.Env):
                 break
             mujoco.mj_jacSite(self.model, d, jp, jr, arm.site_id)
             angular_jac = jr[:, arm.dof_ids]
-            if self.control_mode == "ee_delta":
+            if downward:
                 angular_jac = (np.eye(3) - np.outer(axis, axis)) @ angular_jac
             jac = np.vstack([jp[:, arm.dof_ids], angular_jac * 0.08])
             dq = jac.T @ np.linalg.solve(jac @ jac.T + 1e-4 * np.eye(6), error)
