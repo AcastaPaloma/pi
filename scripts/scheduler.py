@@ -47,7 +47,9 @@ def gpu_busy(slot):
 def a10_busy(host):
     """Busy if a scheduler job already runs there, or the GPU is too full for one more model (~9 GB).
     Checkpoint evaluations may run alongside a scheduler job."""
-    code, out = ssh(host, "pgrep -f '[S]CHEDJOB_' >/dev/null && echo busy; "
+    # Match only the job shell itself (its command line starts with ": SCHEDJOB_"); the remote launcher
+    # shell that started it can linger after the job ends and also contains the tag.
+    code, out = ssh(host, "pgrep -f '^bash -c : SCHEDJOB_' >/dev/null && echo busy; "
                           "nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits | head -1")
     if "busy" in out:
         return True
@@ -108,7 +110,7 @@ def launch(entry, host, gpu=None):
                      stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
     for _ in range(12):  # setup (symlinks) can take a minute before the job starts
         time.sleep(15)
-        code, out = ssh(host, f"pgrep -f '[S]CHEDJOB_{run}' >/dev/null && echo started")
+        code, out = ssh(host, f"pgrep -f '^bash -c : SCHEDJOB_{run}' >/dev/null && echo started")
         if "started" in out:
             return 0, "started"
     return 1, f"job tag SCHEDJOB_{run} not seen on {host} within 3 minutes"
