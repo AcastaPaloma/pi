@@ -78,6 +78,15 @@ between saves. π0-family and diffusion policies are usually evaluated with aver
 2arm_v2 recipe with EMA 0.999) second in the H100 queue. If its curve is smoother and higher, make EMA the
 default for every run.
 
+### H10: two_bins is the weakest two-arm rung (watching, since 2026-10-16 ~13:00)
+30-episode confirmation of pi05_v1 step 13000: two_bins 9/30 (30%) vs 57–90% on the other rungs; lifts are
+high (8-episode runs show 6–8/8), so the failures are after the grasp. Seen on video earlier: the second
+arm drops its cube outside the rim and then hovers over the bin instead of re-grasping (recovery), and
+the oracle deadlock (fixed). Possible changes: DAgger data on two_bins specifically (aggregated in
+pi05_dagger1), more two_bins teacher episodes with the right arm placing first as well (the teacher always
+places left first), a wider container. Decide after pi05_dagger1's first scores and a two_bins video review
+of step 17000.
+
 ### H4: single-arm failures now happen after the grasp (weakened 2026-10-16 00:30; see entry)
 pi05_single step 3000 lifts the cube in 8/10 episodes but succeeds in 5/10: the remaining failures
 are in carrying, placing or releasing, not in reaching. Possible changes: (a) longer training (the
@@ -287,3 +296,6 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   DAgger v2 done (570 kept, only 171 teacher-successful: generated during 2arm_v2's dip); dagger4 (from
   pi05_v1 step 15000) launched on the second A10.
 - **2026-10-16 06:48** [scheduler] 129.213.124.160 was idle; launched **v1_17000_confirm30** (Confirm pi05_v1 step 17000 (8/8, 6/8, 7/8, 3/8 on 8 episodes; best checkpoint) with 30 episodes per rung)
+- **2026-10-16 ~13:00** **30-episode confirmation of pi05_v1 step 13000 (strict): pick_place_any 27/30 (90%),
+  bin 22/30 (73%), handover 17/30 (57%), two_bins 9/30 (30%) — 75/120 overall.** Step 17000 (8/8, 6/8, 7/8,
+  3/8 on 8 episodes) is now being confirmed on 30. Opened H10 (two_bins weakest).
