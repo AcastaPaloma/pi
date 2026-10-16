@@ -299,3 +299,4 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
 - **2026-10-16 ~13:00** **30-episode confirmation of pi05_v1 step 13000 (strict): pick_place_any 27/30 (90%),
   bin 22/30 (73%), handover 17/30 (57%), two_bins 9/30 (30%) — 75/120 overall.** Step 17000 (8/8, 6/8, 7/8,
   3/8 on 8 episodes) is now being confirmed on 30. Opened H10 (two_bins weakest).
+- **2026-10-16 07:24** [scheduler] 129.213.124.160 was idle; launched **v1_17000_twobins_video** (H10 evidence: watch how step-17000 two_bins episodes fail)

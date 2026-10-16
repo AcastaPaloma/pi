@@ -3,10 +3,10 @@
   "h100": [
     {
       "name": "pi05_dagger1",
-      "hypothesis": "H2b: DAgger aggregated from three policies (pi05_v1 step 8000, pi05_2arm_v2, pi05_warm2arm step 4000; ~1,600 teacher continuations) fixes compounding errors; fine-tune pi05_v1 on mix + recover2 + DAgger",
+      "hypothesis": "H2b: DAgger aggregated from four policies (pi05_v1 step 15000 added; pi05_v1 step 8000, pi05_2arm_v2, pi05_warm2arm step 4000; ~1,600 teacher continuations) fixes compounding errors; fine-tune pi05_v1 on mix + recover2 + DAgger",
       "status": "queued",
-      "prep_on_main": "ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@129.213.124.160 'tar cf - -C ~/pi/data sim_dagger_v1 sim_dagger_v3' | tar xf - -C data; ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@132.145.199.243 'tar cf - -C ~/pi/data sim_dagger_v2' | tar xf - -C data 2>/dev/null; rsync -a -e 'ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes' data/sim_recover2_v1 data/sim_dagger_v1 data/sim_dagger_v2 data/sim_dagger_v3 ubuntu@{HOST}:~/pi/data/ 2>/dev/null; true",
-      "setup": "mkdir -p data/sim_mixdag_v1 && cd data/sim_mixdag_v1 && for d in ../sim_mix_v1/episode_*; do ln -sfn $d $(basename $d); done && for d in ../sim_recover2_v1/episode_*; do ln -sfn $d episode_rec2_$(basename $d | cut -d_ -f2); done && for v in 1 2 3; do for d in ../sim_dagger_v$v/episode_*; do [ -e $d/meta.json ] && ln -sfn $d episode_dag${v}_$(basename $d | cut -d_ -f2); done; done; true",
+      "prep_on_main": "ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@129.213.124.160 'tar cf - -C ~/pi/data sim_dagger_v1 sim_dagger_v3' | tar xf - -C data; ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@132.145.199.243 'tar cf - -C ~/pi/data sim_dagger_v2 sim_dagger_v4' | tar xf - -C data 2>/dev/null; rsync -a -e 'ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes' data/sim_recover2_v1 data/sim_dagger_v1 data/sim_dagger_v2 data/sim_dagger_v3 data/sim_dagger_v4 ubuntu@{HOST}:~/pi/data/ 2>/dev/null; true",
+      "setup": "mkdir -p data/sim_mixdag_v1 && cd data/sim_mixdag_v1 && for d in ../sim_mix_v1/episode_*; do ln -sfn $d $(basename $d); done && for d in ../sim_recover2_v1/episode_*; do ln -sfn $d episode_rec2_$(basename $d | cut -d_ -f2); done && for v in 1 2 3 4; do for d in ../sim_dagger_v$v/episode_*; do [ -e $d/meta.json ] && ln -sfn $d episode_dag${v}_$(basename $d | cut -d_ -f2); done; done; true",
       "train": "RESUME={LATEST:runs/pi05_v1} META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdag_v1 runs/{RUN} 8000",
       "requires_on_host": [
         "runs/pi05_v1"
@@ -133,14 +133,15 @@
     {
       "name": "v1_17000_confirm30",
       "hypothesis": "Confirm pi05_v1 step 17000 (8/8, 6/8, 7/8, 3/8 on 8 episodes; best checkpoint) with 30 episodes per rung",
-      "status": "running",
+      "status": "done",
       "prefer_host": "129.213.124.160",
       "requires_on_host": [
         "exports/pi05_v1/step_0017000/model.pt"
       ],
       "eval": "for T in pick_place_any bin handover two_bins; do MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.eval_sim --checkpoint exports/pi05_v1/step_0017000 --task $T --episodes 30 --episode-seconds 30 --execute 25 --delay 0 --device cuda --subtask oracle --seed 4000 --out outputs/eval_v1confirm30_step17000_$T; done",
       "host": "129.213.124.160",
-      "started": "2026-10-16T06:48"
+      "started": "2026-10-16T06:48",
+      "result": "strict 23/22/16/15 of 30 (76/120) vs step 13000 75/120: tie overall, but pick -4 and two_bins +6"
     },
     {
       "name": "twobins_mixed_generate",
@@ -151,12 +152,21 @@
     {
       "name": "v1_17000_twobins_video",
       "hypothesis": "H10 evidence: watch how step-17000 two_bins episodes fail",
-      "status": "queued",
+      "status": "running",
       "prefer_host": "129.213.124.160",
       "requires_on_host": [
         "exports/pi05_v1/step_0017000/model.pt"
       ],
-      "eval": "MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.eval_sim --checkpoint exports/pi05_v1/step_0017000 --task two_bins --episodes 6 --episode-seconds 30 --execute 25 --delay 0 --device cuda --subtask oracle --seed 5000 --out outputs/video_v1_17000_two_bins --video --full-video 2"
+      "eval": "MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.eval_sim --checkpoint exports/pi05_v1/step_0017000 --task two_bins --episodes 6 --episode-seconds 30 --execute 25 --delay 0 --device cuda --subtask oracle --seed 5000 --out outputs/video_v1_17000_two_bins --video --full-video 2",
+      "host": "129.213.124.160",
+      "started": "2026-10-16T07:24"
+    },
+    {
+      "name": "v1_soup_confirm30",
+      "hypothesis": "H9b: checkpoints trade skills (13000 vs 17000: pick 27 vs 23, two_bins 9 vs 15 of 30). A uniform average of pi05_v1 steps 13000-18000 should keep both, beating each single checkpoint on the same seeds",
+      "status": "queued",
+      "prep_on_main": "ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@{HOST} 'mkdir -p ~/pi/exports/pi05_v1_soup' && rsync -a -e 'ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes' exports/pi05_v1_soup/step_0018000 ubuntu@{HOST}:~/pi/exports/pi05_v1_soup/",
+      "eval": "for T in pick_place_any bin handover two_bins; do MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.eval_sim --checkpoint exports/pi05_v1_soup/step_0018000 --task $T --episodes 30 --episode-seconds 30 --execute 25 --delay 0 --device cuda --subtask oracle --seed 4000 --out outputs/eval_v1soup30_step18000_$T; done"
     }
   ]
 }
