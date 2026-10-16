@@ -121,3 +121,9 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   success 70–85% with 4–8 bumps and 1–2.5 misses per episode. Generating 6,000 episodes on the second A10.
   Infra: the setup script had failed to install NVIDIA EGL on the four new machines (software rendering,
   0.9 s/frame); fixed (3 ms/frame) and the script now verifies the render path.
+- **2026-10-16 ~01:30** pi05_single step 5000: **23/30 (0.59–0.88)** on 30 episodes, 7/10 on 10
+  (33% → 63% → 70% → 77% over steps 2000–5000). pi05_v1 step 6000 (first scores with the state-based
+  oracle): handover lift 5/8 at 11 mm, two_bins lift 2/8. New runs at step 1000 (16/rung):
+  pi05_recover pick_place_any 1/16, pi05_warm2arm 0/16 (lift 2/16), pi05_easy 0/16 — too early to read.
+  recover2 generation was crawling because 11 orphaned workers from the software-rendering attempt kept
+  running (load 66 on 30 cores); killed. No decisions: every run keeps training.
