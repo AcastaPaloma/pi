@@ -544,3 +544,9 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   checkpoints get 30-seed confirmations (dagger1_final_confirm30 queued). DAgger v9 at handover 120/150 (217/248
   successful). rec2_trim at 1500 (it shares its GPU with on-node evaluation, so it runs slower). No errors.
 - **2026-10-16 13:33** [scheduler] 192.222.52.191:0 was idle; launched **pi05_dagger_clean** (H2b done right (H12 corollary): pi05_dagger1 collapsed (22/32 at resume -> 7/32 -> 3/32) on data where 38% of DAgger continuations are teacher failures and 62% of DAgger steps are parked tails. Resume pi05_v1 step 20000 on mix + recover2 + only teacher-successful DAgger (v1-v6) and mixed-order two_bins demos, with PI_TRIM_STILL_TAIL_S=1; plus DAgger v7 from the fixed teacher | 16:35 UTC: made main-box native (the step-20000 video shows the remaining two_bins failures are arms hovering off-centre without grasping, the states fixed-teacher DAgger labels); evaluation relayed to A10#1)
+- **2026-10-16 17:35 UTC** pi05_dagger1 finished (step 8000 relayed to A10#1; its 30-seed confirmation runs when
+  dagger9 frees that A10). **pi05_dagger_clean is training** on main GPU0: 14,170 episodes (mix 4,800 +
+  recover2 5,994 + teacher-successful DAgger v1–v7/v9 2,272 + mixed-order two_bins 1,104), 1,474 failed tails
+  trimmed. It resumes from pi05_v1 step 20000, and prep took ~8 min to pull 14 GB from the A10s. pi05_v1_rec2 step
+  7000: 5/8 (4 lifted), 8/8, 2/8, 3/8; it ends at 8000, and main GPU1 then takes pi05_v1_cont. DAgger v9 at two_bins
+  80/150 (287/336 successful). curriculum2 2080, rec2_trim 1880, recover 14400. No errors.
