@@ -358,3 +358,8 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   Steps: pi05_v1 19900 (dagger1 launches next), 2arm_v2 10940, warm2arm 9220, recover 9000, easy 9460; no
   errors. DAgger v4 at two_bins 60/150.
 - **2026-10-16 08:13** [scheduler] 129.213.124.160 was idle; launched **dagger5_twobins** (H11: the second arm is the two_bins bottleneck (first cube in bin 28/30, second 15/30 for the pi05_v1 soup); the policy moves both arms at once, reaching right-arm states the wait-then-go teacher never shows. DAgger on two_bins only from step 17000, takeover 2-18 s to cover second-arm failures)
+- **2026-10-16 12:25 UTC** **pi05_v1 step 19000: 7/8, 5/8, 5/8, 5/8**; the run finished at 20000. dagger5_twobins
+  launched on A10#1. Caught before launch: the main box still cannot render with EGL (EGLError even with
+  libnvidia-gl-580-server installed), so the on-box evaluation in pi05_dagger1/pi05_dagger2 would have
+  crashed. Removed it; their checkpoints are relayed from the Mac to A10#1 instead
+  (`relay_checkpoints.sh` + `eval_ladder_when_ready.sh`, 8 episodes per rung, the same protocol as pi05_v1).
