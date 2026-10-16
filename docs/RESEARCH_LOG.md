@@ -558,3 +558,10 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   success-only data) is the next candidate to beat it.
 - **2026-10-16 13:47** [scheduler] 192.222.52.191:1 was idle; launched **pi05_v1_cont** by hand at the user's request (H16: pi05_v1 was still improving at its last step (30-seed strict 75 -> 76 -> 83/120 at 13k/17k/20k). Plain continuation)
 - **2026-10-16 13:48** [scheduler] 129.213.124.160 was idle; launched **dagger1_7000_confirm30** by hand at the user's request (H2b: pi05_dagger1 step 7000 scored 27/32 on the 8-episode ladder (8, 8, 7, 4), the best yet; confirm on the 30 shared se)
+- **2026-10-16 17:50 UTC** All GPUs busy (user asked to arm idle ones). pi05_v1_cont is on main GPU1 (420 of
+  sim_mix_v1's failed episodes trimmed; LR 1e-5), and dagger1_7000_confirm30 is on A10#1. DAgger v9 done: 395
+  kept, 334 successful (85%). pi05_v1_rec2 finished at 8000. Queue restocked: **pi05_dagger2** unblocked and
+  repurposed to resume the best checkpoint (pi05_dagger1 step 7000) on pi05_dagger_clean's cleaned data. It
+  avoids the main box and evaluates on its node, so dagger_clean vs dagger2 separates the effect of the resume
+  point. Also queued **v1_rec2_final_confirm30** (its export is copied from A10#2 to A10#1 in prep). H100
+  runnable: dagger2, lr5e5, 2arm_ema; A10: two confirmations.
