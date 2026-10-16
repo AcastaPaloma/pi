@@ -599,3 +599,9 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   pi05_v1 step 20000: 83). DAgger round 1 is confirmed as no gain; pi05_v1 step 20000 stays the reference and the demo
   model. v1_rec2_final_confirm30 running on A10#1. Steps: dagger_clean 2140, v1_cont 1760, rec2_trim 3140, curriculum2
   3240, recover 15760. No idle GPUs; queue has 4 H100 and 1 A10 runnable (dagger10_fixed).
+- **2026-10-16 19:10 UTC** **v1_rec2_final_confirm30 (pi05_v1_rec2 step 8000), 3 of 4 rungs: pick_place_any 24/30,
+  bin 20/30, handover 16/30** against the baseline's 26/26/19. Continuing the best policy on mix + recover2 at full LR
+  made it worse (−11 on three rungs), despite its 22/32 ladder peak at step 6000. This fits H12 (recover2 is ~half
+  failed demos with parked tails) and H14 (full-LR restart). The pi05_v1_rec2_trim A/B (step 3480) and the
+  pi05_dagger_clean vs pi05_dagger_clean_lr1e5 pair test the two. pi05_v1_cont (same data, LR 1e-5) is the control
+  that so far holds its level. All GPUs busy; no alerts.
