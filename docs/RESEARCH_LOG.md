@@ -446,3 +446,8 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   successful DAgger v1–v6 + successful mixed-order two_bins demos; `PI_TRIM_STILL_TAIL_S=1`) is queued second
   for nodes. pi05_dagger2 (which would resume the collapsing run) is blocked. pi05_dagger1 keeps running to ≥ 4
   checkpoints per the protocol.
+- **2026-10-16 14:10 UTC** **pi05_v1 step 20000 on the 30 shared seeds (3 of 4 rungs): pick_place_any 26/30,
+  bin 26/30, handover 19/30**, against step 13000's 27/22/17 and 17000's 23/22/16. The final checkpoint is the best
+  pi05_v1 so far, and it is the resume point of every running continuation, so it is their baseline. two_bins
+  still running. Steps: dagger1 2780, v1_rec2 2040, warm2arm 11220, recover 10940, easy 11580; DAgger v6 at bin
+  60/100. No errors.
