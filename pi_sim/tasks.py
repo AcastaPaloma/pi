@@ -227,7 +227,8 @@ class ArmPickPlace:
 
     PHASES = ("approach", "lower", "grasp", "lift", "transfer", "lower to goal", "release", "retreat", "home")
 
-    def __init__(self, env: TaskEnv, arm, body, dest_xy, dest_z, dest_name, *, rng, noise=0.0, carry_z=0.075):
+    def __init__(self, env: TaskEnv, arm, body, dest_xy, dest_z, dest_name, *, rng, noise=0.0, carry_z=0.075,
+                 perturb_rate=0.0):
         self.env, self.arm, self.body = env, arm, body
         self.i = ARMS.index(arm)
         self.dest = np.r_[dest_xy, dest_z]
@@ -238,6 +239,10 @@ class ArmPickPlace:
         self._last = env.robot[arm].position
         self.home = env.robot[arm].position
         self.wait_for = None  # another ArmPickPlace that must finish before this one carries
+        # Recovery data: knock the target off course for ~0.5 s at `perturb_rate` events per second
+        # during free-space phases; that stretch is labelled a mistake, the correction afterwards is clean.
+        self.perturb_rate, self._perturb_left, self._perturb_offset = perturb_rate, 0, np.zeros(3)
+        self.perturbations = 0
         self.obj = env.object_position(body)
         self._offset = rng.normal(0, noise, 2) if noise else np.zeros(2)
         hz = env.control_hz
@@ -271,6 +276,19 @@ class ArmPickPlace:
         if self.waiting:
             return np.r_[c, self.carry_z], 0.0
         tgt = targets[self.phase]
+        hz = self.env.control_hz
+        if self._perturb_left > 0:
+            self._perturb_left -= 1
+            if self._perturb_left == 0:
+                self.mistake_active = False
+            return tgt + self._perturb_offset, opening
+        if self.perturb_rate and self.phase in (0, 1, 4, 5) and self.rng.random() < self.perturb_rate / hz:
+            angle, dist = self.rng.uniform(0, 2 * np.pi), self.rng.uniform(0.015, 0.04)
+            self._perturb_offset = np.r_[dist * np.cos(angle), dist * np.sin(angle), self.rng.uniform(0.0, 0.02)]
+            self._perturb_left = int(round(self.rng.uniform(0.3, 0.7) * hz))
+            self.mistake_active = True
+            self.perturbations += 1
+            return tgt + self._perturb_offset, opening
         self.ticks += 1
         hand = self.env.robot[self.arm].position
         err = np.linalg.norm(hand - tgt)
@@ -297,7 +315,7 @@ class ArmPickPlace:
 class TaskTeacher:
     """Scripted demonstrator for every rung; works in ee_delta control."""
 
-    def __init__(self, env: TaskEnv, *, rng=None, speed=1.0, noise=0.0, observe_only=False):
+    def __init__(self, env: TaskEnv, *, rng=None, speed=1.0, noise=0.0, observe_only=False, perturb_rate=0.0):
         """observe_only: track the scripted phase from true state while something else (a policy)
         moves the arms; `observe()` advances it and `subtask` gives the oracle label."""
         if env.control_mode != "ee_delta" and not observe_only:
@@ -309,18 +327,18 @@ class TaskTeacher:
         far = "right" if near == "left" else "left"
         if t == "pick_place_any":
             g = env.goal_position
-            self.stages = [[ArmPickPlace(env, near, "cube", g[:2], 0.022, "green disk", rng=rng, noise=noise)]]
+            self.stages = [[ArmPickPlace(env, near, "cube", g[:2], 0.022, "green disk", rng=rng, noise=noise, perturb_rate=perturb_rate)]]
         elif t == "bin":
             b = env.bin_position
-            self.stages = [[ArmPickPlace(env, near, "cube", b[:2], 0.06, "bin", rng=rng, noise=noise)]]
+            self.stages = [[ArmPickPlace(env, near, "cube", b[:2], 0.06, "bin", rng=rng, noise=noise, perturb_rate=perturb_rate)]]
         elif t == "handover":
             b = env.bin_position
-            self.stages = [[ArmPickPlace(env, near, "cube", RELAY, 0.022, "grey pad", rng=rng, noise=noise)],
-                           ["handover", lambda: ArmPickPlace(env, far, "cube", b[:2], 0.06, "bin", rng=rng, noise=noise)]]
+            self.stages = [[ArmPickPlace(env, near, "cube", RELAY, 0.022, "grey pad", rng=rng, noise=noise, perturb_rate=perturb_rate)],
+                           ["handover", lambda: ArmPickPlace(env, far, "cube", b[:2], 0.06, "bin", rng=rng, noise=noise, perturb_rate=perturb_rate)]]
         else:
             b = env.bin_position
-            first = ArmPickPlace(env, "left", "cube", b[:2] + [-0.022, 0], 0.055, "bin", rng=rng, noise=noise)
-            second = ArmPickPlace(env, "right", "cube2", b[:2] + [0.022, 0], 0.055, "bin", rng=rng, noise=noise)
+            first = ArmPickPlace(env, "left", "cube", b[:2] + [-0.022, 0], 0.055, "bin", rng=rng, noise=noise, perturb_rate=perturb_rate)
+            second = ArmPickPlace(env, "right", "cube2", b[:2] + [0.022, 0], 0.055, "bin", rng=rng, noise=noise, perturb_rate=perturb_rate)
             second.wait_for = first  # both pick at once; the right arm carries once the left has left the bin
             self.stages = [[first, second]]
         self.k = 0

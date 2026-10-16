@@ -24,13 +24,14 @@ STYLE_CYCLE = ("clean", "clean", "slow", "sloppy", "slow_sloppy")
 def _jobs(args):
     tasks = [t.strip() for t in args.tasks.split(",") if t.strip()]
     shapes = [s.strip() for s in args.shapes.split(",") if s.strip()]
+    styles = [s.strip() for s in args.styles.split(",") if s.strip()]
     for ti, task in enumerate(tasks):
         for i in range(args.episodes_per_task):
             index = ti * 100000 + i
             color, second = COLOR_PAIRS[i % len(COLOR_PAIRS)]
             shape = shapes[(i // len(COLOR_PAIRS)) % len(shapes)]
             yield dict(task=task, index=index, seed=args.seed + index, color=color, second=second, shape=shape,
-                       style=STYLE_CYCLE[i % len(STYLE_CYCLE)])
+                       style=styles[i % len(styles)])
 
 
 def _worker(queue, results, args_dict):
@@ -70,6 +71,8 @@ def main(argv=None):
     ap.add_argument("--tasks", default="pick_place_any,bin,handover,two_bins")
     ap.add_argument("--episodes-per-task", type=int, default=100)
     ap.add_argument("--shapes", default="cube,cylinder")
+    ap.add_argument("--styles", default=",".join(STYLE_CYCLE),
+                    help="Style cycle; 'recover' knocks the teacher off course (recovery data, mistake-labelled)")
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--workers", type=int, default=max(1, (os.cpu_count() or 2) // 2))
     ap.add_argument("--image-size", type=int, default=448)

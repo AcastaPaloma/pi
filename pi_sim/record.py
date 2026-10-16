@@ -33,6 +33,11 @@ STYLES = {
 }
 
 
+# Styles whose teacher is knocked off course (recovery data); events per second during free-space phases.
+PERTURB = {"recover": 1.0}
+STYLES["recover"] = (0.85, 0.004, 3)
+
+
 def quality_label(success: bool, style: str, mistakes: int) -> int:
     """1–5 like the paper's overall quality score; a documented local rule."""
     if not success:
@@ -57,7 +62,8 @@ def record_episode(env: RobotEnv, out_dir: Path, *, seed: int, style: str = "cle
     speed, noise, _ = STYLES[style]
     obs, info = env.reset(seed=seed, options={"randomize": True, "visual_randomization": visual_randomization,
                                               "placement_range": placement_range})
-    demo = teacher(env, rng=rng, speed=speed, noise=noise)
+    extra_kw = {"perturb_rate": PERTURB[style]} if style in PERTURB else {}
+    demo = teacher(env, rng=rng, speed=speed, noise=noise, **extra_kw)
     for cam in env.camera_names:
         (out_dir / "frames" / cam).mkdir(parents=True)
     states, actions, subtasks, mistakes, phases, cube, goal, ee = [], [], [], [], [], [], [], []
