@@ -127,3 +127,9 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   pi05_recover pick_place_any 1/16, pi05_warm2arm 0/16 (lift 2/16), pi05_easy 0/16 — too early to read.
   recover2 generation was crawling because 11 orphaned workers from the software-rendering attempt kept
   running (load 66 on 30 cores); killed. No decisions: every run keeps training.
+- **2026-10-16 ~02:00** **pi05_single step 6000: 28/30 success (≈0.79–0.98), lift 27/30** on 30
+  held-out episodes — the single-arm sim policy works (33% → 63% → 70% → 77% → 93% over steps 2000–6000).
+  pi05_v1 step 6000 fully scored: bin 1/8 (lift 5/8), handover lift 5/8, pick_place_any and two_bins
+  lift 2/8; 10–19 mm everywhere — grasps and lifts are learned, placing is not yet. Next for two-arm:
+  a warm start from pi05_single step 6000 plus recover2 data is the strongest candidate (H1a + H2);
+  it needs a GPU, so either replace a run that loses on the leaderboard or rent one more H100.
