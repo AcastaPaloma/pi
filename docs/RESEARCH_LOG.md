@@ -618,3 +618,4 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   **pi05_dagger_clean_lr1e5** launches first, and **pi05_dagger2 now also uses LR 1e-5** (so the pair isolates
   the resume point instead of repeating a likely-harmful LR).
 - **2026-10-16 16:52** [scheduler] 129.213.124.160 was idle; launched **v1_cont_4000_confirm30** (H16/H14: does the low-LR continuation of pi05_v1 on its own data (no dip, 21 and 19/32 on the ladder) improve on the 83/120 baseline by step 4000? Same 30 seeds)
+- **2026-10-16 18:22** [scheduler] 192.222.52.191:0 was idle; launched **pi05_dagger_clean_lr1e5** (H14 test: pi05_v1_cont (same data, LR 1e-5) showed no post-resume dip (21/32 at step 1000), while every LR-2.5e-5 continuation fell to 7-12/32. Same as pi05_dagger_clean (resume pi05_v1 step 20000, cleaned DAgger data, trimmed) but LR 1e-5, which separates the LR effect from the new-data effect)
