@@ -424,3 +424,25 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   as their baseline.
 - **2026-10-16 09:50** [scheduler] 129.213.124.160 was idle; launched **v1_20000_confirm30** (Baseline for H2b/H12: pi05_v1 step 20000 (the resume point of pi05_dagger1, pi05_v1_rec2 and pi05_v1_rec2_trim) on the same 30 seeds, with per-object two_bins metrics, so their final checkpoints can be compared episode for episode)
 - **2026-10-16 09:51** [scheduler] 132.145.199.243 was idle; launched **dagger6_generate** (H2b/H11 data diversity: DAgger rollouts from a second, differently trained policy (pi05_2arm_v2 final step 12000: 8/12, 6/12, 5/12, 5/12) for pi05_dagger2)
+- **2026-10-16 14:05 UTC** **pi05_dagger1 is collapsing: 22/32 at its resume point → 7/32 (step 1000) → 3/32
+  (step 2000: 1/8, 1/8, 1/8, 0/8), with the hand stopping 12–16 mm from the cube instead of 5–8 mm.**
+  pi05_v1_rec2, resumed from the same checkpoint with the same warmup, only dipped to 9/32 at step 1000, so the
+  warmup alone (H8) does not explain it. Audit of the DAgger sets it added:
+
+  | set | episodes | teacher failed | parked share of steps |
+  | --- | --- | --- | --- |
+  | v1 (pi05_v1 8000) | 532 | 19% | 36% |
+  | v2 (2arm_v2 in its dip) | 570 | 70% | 81% |
+  | v3 (warm2arm 4000) | 546 | 14% | 27% |
+  | v4 (pi05_v1 15000) | 436 | 52% | 72% |
+  | all | 2,084 | 38% | **62%** |
+
+  Two_bins continuations failed 100% (v2) and 95% (v4). So the joint-space DAgger teacher often cannot recover
+  from the policy's states, and those failures then park until the time limit. With the base data's own parked
+  tails (H12), roughly a quarter of pi05_dagger1's samples show still hands. **H13 (open):** the DAgger
+  teacher, not DAgger itself, is the problem. Implied changes: (a) train only on teacher-successful
+  continuations, with parked tails trimmed; (b) fix the takeover, e.g. re-sync the teacher's phases from state
+  before it acts. Acting on (a) now: **pi05_dagger_clean** (resumes pi05_v1 step 20000; mix + recover2 +
+  successful DAgger v1–v6 + successful mixed-order two_bins demos; `PI_TRIM_STILL_TAIL_S=1`) is queued second
+  for nodes. pi05_dagger2 (which would resume the collapsing run) is blocked. pi05_dagger1 keeps running to ≥ 4
+  checkpoints per the protocol.
