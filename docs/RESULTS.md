@@ -1,4 +1,4 @@
-# Closed-loop results (generated 2026-10-16 10:39)
+# Closed-loop results (generated 2026-10-16 10:50)
 
 Success with Wilson 95% interval; strict = success with the object lifted (rules out pushing it into place); lift = object raised; closest = median hand-to-object distance.
 
@@ -107,6 +107,7 @@ Success with Wilson 95% interval; strict = success with the object lifted (rules
 | pi05_easy | bin | 9000 | 13/16 | 13/16 | 0.57–0.93 | 13/16 | 9 mm | 0/16 | 209.20.158.194 |
 | pi05_easy | bin | 10000 | 14/16 | 14/16 | 0.64–0.97 | 14/16 | 8 mm | 0/16 | 209.20.158.194 |
 | pi05_easy | bin | 11000 | 11/16 | 11/16 | 0.44–0.86 | 11/16 | 8 mm | 0/16 | 209.20.158.194 |
+| pi05_easy | bin | 12000 | 15/16 | 15/16 | 0.72–0.99 | 15/16 | 9 mm | 0/16 | 209.20.158.194 |
 | pi05_easy | pick_place_any | 1000 | 0/16 | 0/16 | 0.00–0.19 | 0/16 | 50 mm | 0/16 | 209.20.158.194 |
 | pi05_easy | pick_place_any | 2000 | 3/16 | 3/16 | 0.07–0.43 | 3/16 | 19 mm | 0/16 | 209.20.158.194 |
 | pi05_easy | pick_place_any | 3000 | 2/16 | 2/16 | 0.03–0.36 | 3/16 | 21 mm | 0/16 | 209.20.158.194 |
@@ -343,7 +344,7 @@ Success with Wilson 95% interval; strict = success with the object lifted (rules
 
 | Run | Task | Checkpoints | Best | Last four |
 | --- | --- | --- | --- | --- |
-| pi05_easy | bin | 11 | step 10000: 14/16 (0.64–0.97) | 10/16 → 13/16 → 14/16 → 11/16 |
+| pi05_easy | bin | 12 | step 12000: 15/16 (0.72–0.99) | 13/16 → 14/16 → 11/16 → 15/16 |
 | pi05_v1 | bin | 20 | step 18000: 7/8 (0.53–0.98) | 6/8 → 7/8 → 5/8 → 7/8 |
 | v1confirm30 | bin | 3 | step 20000: 26/30 (0.70–0.95) | 22/30 → 22/30 → 26/30 |
 | pi05_2arm_v2 | bin | 12 | step 7000: 9/12 (0.47–0.91) | 8/12 → 7/12 → 8/12 → 6/12 |

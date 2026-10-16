@@ -468,3 +468,9 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   collapse. Queued **dagger7_fixed** (A10#1, 150 per task from pi05_v1 step 20000, takeover 1–15 s);
   pi05_dagger_clean now also takes v7.
 - **2026-10-16 10:42** [scheduler] 129.213.124.160 was idle; launched **dagger7_fixed** (H13 fixed: the DAgger teacher took the hand position at takeover as each arm's rest pose, deadlocking two_bins mid-carry and handover lower/raise takeovers (0/8 each; 8/8 after the fix). Regenerate DAgger from the best policy (pi05_v1 step 20000, 83/120) with the fixed teacher)
+- **2026-10-16 14:50 UTC** pi05_easy finished: step 12000 pick_place_any 11/16, bin 15/16. pi05_curriculum2
+  launched on its node (prep still copying the 47 GB recover2 set, so that GPU is briefly idle). **DAgger v7
+  with the fixed teacher: 31 of the first 33 kept continuations succeed (94%)**, against 19–70% teacher
+  failure in v1–v4. That supports H13's fix in production as well as in the diagnostic. dagger6 (old teacher) at
+  two_bins 20/100. Steps: dagger1 3880, v1_rec2 3140, warm2arm 11880 (ends at 12000; its node then takes
+  pi05_v1_rec2_trim), recover 11560. No errors.
