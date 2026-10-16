@@ -594,3 +594,4 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   7–12/32 at step 1000. pi05_dagger_clean step 1000: 6/8, 4/8, 1/8, 1/8 (12/32). **H14 revived:** the full-LR restart
   (and/or the new data) causes the dip. Queued **pi05_dagger_clean_lr1e5** (same as dagger_clean at LR 1e-5)
   ahead of lr5e5/ema; it runs on main or a node. H100 runnable: dagger2, dagger_clean_lr1e5, lr5e5, 2arm_ema.
+- **2026-10-16 14:47** [scheduler] 129.213.124.160 was idle; launched **v1_rec2_final_confirm30** (H2: pi05_v1_rec2 final (step 8000) vs its resume point (83/120) on the 30 shared seeds)
