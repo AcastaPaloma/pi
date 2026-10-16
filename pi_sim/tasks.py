@@ -298,14 +298,18 @@ class ArmPickPlace:
         # Held: closed around the object and either off the table or already carried (a placed cube is
         # back at table height while still in the gripper).
         held = closed and np.linalg.norm(hand - obj) < 0.04 and (obj[2] > 0.02 or getattr(self, "_was_lifted", False))
-        if dest_xy and not held and obj[2] < self.dest[2] + 0.01 and not closed:
-            # Object placed: release until fully open, retreat until clear, then this arm is done.
-            if opening < 0.95 and np.linalg.norm(hand - obj) < 0.035:
+        if dest_xy and not held and obj[2] < self.dest[2] + 0.01 and (not closed or self.phase >= 6):
+            # Object placed: release until fully open, raise to carrying height, return to the rest pose,
+            # then this arm is done — the teacher's labels (a second arm only carries after this one is
+            # home; prompting "done" while it still hovers deadlocked two_bins, see H7).
+            if opening < 0.95 and np.linalg.norm(hand - obj) < 0.035 and self.phase <= 6:
                 self.phase = 6
-            elif np.linalg.norm(hand - obj) > 0.06:
-                self.phase = len(self.PHASES)
-            else:
+            elif hand[2] < self.carry_z - 0.01 and np.linalg.norm(hand[:2] - self.home[:2]) > 0.03:
                 self.phase = 7
+            elif np.linalg.norm(hand - self.home) > 0.03:
+                self.phase = 8
+            else:
+                self.phase = len(self.PHASES)
         elif held:
             if not hand_at_dest:
                 self.phase = 3 if obj[2] < self.carry_z - 0.015 and self.phase <= 3 else 4

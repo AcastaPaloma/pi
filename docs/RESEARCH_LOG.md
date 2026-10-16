@@ -48,6 +48,19 @@ Rungs use 8 episodes, 30 s, both sides of the table and container walls; the sin
 the original placement. Not a model problem, but it changes how to read 0/8. Check by scoring
 pi05_single and pi05_v1 on the same task (pick_place_any, left side only) once both have ~3000 steps.
 
+### H7: two_bins fails after the grasp (closed 2026-10-16 ~07:40 — oracle deadlock, fixed)
+Video of pi05_v1 step 10000 (6 two_bins episodes, 0 successes, lift 6/6): the left arm drops its cube in
+the bin by ~3 s (cube 1.4–2.6 cm from centre in 5/6) but then hovers over the bin; the right arm holds its
+cube and never carries it. In the teacher's demos the right arm carries only after the left arm is back
+at rest, labelled "Move the left arm back to its rest position". The state oracle declared the left arm
+done 6 cm from its cube and prompted "Carry the blue cube" while the left arm still hovered — a
+combination never seen in training. Fix: after placing, the oracle keeps the arm in raise-away until it
+is back at carrying height and in return-home until its hand is within 3 cm of its rest pose. Same
+checkpoint and seeds: first two_bins success, video-verified (both grasp, left places and goes home,
+right carries and places beside it, 6.4 s). Remaining failure seen: the right arm drops its cube outside
+the rim and then hovers over the bin instead of re-grasping (recovery, H2). Two_bins scores before this
+fix understate the policy.
+
 ### H4: single-arm failures now happen after the grasp (weakened 2026-10-16 00:30; see entry)
 pi05_single step 3000 lifts the cube in 8/10 episodes but succeeds in 5/10: the remaining failures
 are in carrying, placing or releasing, not in reaching. Possible changes: (a) longer training (the
@@ -195,3 +208,6 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   a cube lands on the rim/other cube. Recording 6 two_bins + 6 handover full videos of step 10000 on the
   easy-rungs H100 to decide. pi05_2arm_v2 (warm start from single-arm 6000 + recover2) step 1000:
   pick_place_any 2/12, bin 2/12 — the best step-1000 two-arm start so far.
+- **2026-10-16 ~07:40** H7 closed (see above): oracle deadlock in two_bins fixed and deployed to every
+  evaluator; first video-verified two_bins success. pi05_easy step 4000: **pick_place_any 6/16, bin 7/16**
+  (pi05_v1 had 0/8 and 1/8 at step 4000) — strong support for H1b (curriculum); its stage 2 is queued.
