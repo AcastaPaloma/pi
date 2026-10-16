@@ -34,6 +34,8 @@ from .prompt import PromptContext
 TASKS = ("pick_place_any", "bin", "handover", "two_bins")
 COLORS = ("red", "green", "blue", "yellow")
 EXECUTE = 25
+MAX_STREAMS = 40   # concurrent MJPEG streams (each open page holds two)
+MAX_BODY = 16384   # bytes; placement and camera requests are tiny
 FRAME_EVERY = 4  # render the views every 4 control steps (12.5 frames per simulated second)
 VIEW_W, VIEW_H = 1152, 648  # the free 3D camera
 DEFAULT_VIEW = {"azimuth": 245.0, "elevation": -24.0, "distance": 0.85, "lookat": [0.0, -0.07, 0.05]}
@@ -335,7 +337,7 @@ document.getElementById('stop').onclick=()=>send('/stop');
 async function poll(){try{const s=await (await fetch('/state')).json();
  const el=document.getElementById('status'); el.textContent=s.status.message+(s.status.t?`  ·  t=${s.status.t}s`:'');
  el.className=s.status.success===true?'ok':(s.status.state==='done'||s.status.state==='error')?'bad':'';
- document.getElementById('sub').textContent=s.status.subtask?('prompted: '+s.status.subtask):'';
+ document.getElementById('sub').textContent=(s.status.subtask?('prompted: '+s.status.subtask+'  ·  '):'')+(s.viewers>1?`${s.viewers} people watching (one shared simulator: Run restarts it for everyone)`:'');
  if(s.placement&&s.placement.cube&&!drag&&s.status.state!=='running'&&s.placement.task===P.task){P.cube=s.placement.cube;P.dest=s.placement.dest;if(s.placement.cube2)P.cube2=s.placement.cube2;draw();}
 }catch(e){} setTimeout(poll,500);}
 // ---- orbit the free 3D camera
@@ -360,7 +362,12 @@ def make_handler(demo: Demo):
                 .replace("__CENTER_BIN__", json.dumps([float(v) for v in CENTER_BIN]))
                 .replace("__RELAY__", json.dumps([float(v) for v in RELAY]))).encode()
 
+    streams = threading.BoundedSemaphore(MAX_STREAMS)
+    viewers = {"n": 0}
+
     class Handler(BaseHTTPRequestHandler):
+        timeout = 30  # seconds to receive a request; a stalled client cannot hold a thread forever
+
         def log_message(self, *args):
             pass
 
@@ -381,9 +388,14 @@ def make_handler(demo: Demo):
                 self.wfile.write(page)
             elif self.path == "/state":
                 with demo.lock:
-                    self._json({"status": demo.status, "placement": demo.placement, "view": demo.view})
+                    self._json({"status": demo.status, "placement": demo.placement, "view": demo.view,
+                                "viewers": viewers["n"]})
             elif self.path.startswith("/stream"):
                 which = "view" if self.path.startswith("/stream3d") else "frame"
+                if not streams.acquire(blocking=False):
+                    return self._json({"error": "too many viewers right now, try again shortly"}, 503)
+                if which == "view":
+                    viewers["n"] += 1
                 self.send_response(200)
                 self.send_header("Content-Type", "multipart/x-mixed-replace; boundary=frame")
                 self.send_header("Cache-Control", "no-cache")
@@ -398,14 +410,29 @@ def make_handler(demo: Demo):
                                              + str(len(jpg)).encode() + b"\r\n\r\n" + jpg + b"\r\n")
                             last = fid
                         time.sleep(0.04)
-                except (BrokenPipeError, ConnectionResetError):
+                except (BrokenPipeError, ConnectionResetError, TimeoutError, OSError):
                     return
+                finally:
+                    streams.release()
+                    if which == "view":
+                        viewers["n"] -= 1
             else:
                 self._json({"error": "not found"}, 404)
 
         def do_POST(self):
-            n = int(self.headers.get("Content-Length") or 0)
-            body = json.loads(self.rfile.read(n) or b"{}")
+            try:
+                n = int(self.headers.get("Content-Length") or 0)
+                if n > MAX_BODY:
+                    return self._json({"error": "request too large"}, 413)
+                body = json.loads(self.rfile.read(n) or b"{}")
+                if not isinstance(body, dict):
+                    raise ValueError("expected a JSON object")
+                if self.path in ("/place",) and not isinstance(body.get("placement"), dict):
+                    raise ValueError("missing placement")
+            except (ValueError, json.JSONDecodeError) as exc:
+                return self._json({"error": f"bad request: {exc}"}, 400)
+            if self.path in ("/place", "/randomize", "/run") and demo.commands.qsize() > 6:
+                return self._json({"error": "busy, try again in a moment"}, 429)
             if self.path == "/place":
                 demo.stop_flag.set()
                 demo.commands.put({"op": "place", "placement": _validated(body["placement"])})
@@ -414,13 +441,21 @@ def make_handler(demo: Demo):
                 demo.commands.put({"op": "randomize", "task": _task(body.get("task")), "color": _color(body.get("color"))})
             elif self.path == "/run":
                 demo.stop_flag.set()
-                if body.get("placement"):
+                if isinstance(body.get("placement"), dict):
                     demo.commands.put({"op": "place", "placement": _validated(body["placement"])})
                 demo.commands.put({"op": "run"})
             elif self.path == "/stop":
                 demo.stop_flag.set()
             elif self.path == "/view":
                 v = body.get("view") or {}
+                if not isinstance(v, dict):
+                    return self._json({"error": "bad request: view must be an object"}, 400)
+                try:
+                    _ = [float(v[k]) for k in ("azimuth", "elevation", "distance") if k in v]
+                    if "lookat" in v:
+                        _ = [float(x) for x in v["lookat"]]
+                except (TypeError, ValueError):
+                    return self._json({"error": "bad request: view values must be numbers"}, 400)
                 with demo.lock:
                     if v.get("reset"):
                         demo.view = dict(DEFAULT_VIEW)
@@ -466,6 +501,8 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--checkpoint", type=Path, required=True)
     ap.add_argument("--port", type=int, default=8765)
+    ap.add_argument("--host", default="127.0.0.1",
+                    help="127.0.0.1 = tunnel only; 0.0.0.0 = anyone who can reach this machine (no authentication)")
     ap.add_argument("--device", default="cuda")
     ap.add_argument("--dtype", choices=("fp32", "bf16"), default="bf16")
     ap.add_argument("--denoise-steps", type=int, default=5)
@@ -473,8 +510,9 @@ def main(argv=None):
     args = ap.parse_args(argv)
     demo = Demo(args.checkpoint, args.device, args.dtype, args.denoise_steps, args.episode_seconds)
     threading.Thread(target=demo.worker, daemon=True).start()
-    server = ThreadingHTTPServer(("127.0.0.1", args.port), make_handler(demo))
-    print(f"live demo on http://127.0.0.1:{args.port}  (tunnel: ssh -N -L {args.port}:localhost:{args.port} <host>)", flush=True)
+    server = ThreadingHTTPServer((args.host, args.port), make_handler(demo))
+    server.daemon_threads = True
+    print(f"live demo on http://{args.host}:{args.port}  (tunnel: ssh -N -L {args.port}:localhost:{args.port} <host>)", flush=True)
     server.serve_forever()
 
 
