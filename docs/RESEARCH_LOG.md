@@ -240,3 +240,7 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
 - **2026-10-16 ~09:20** pi05_v1 step 12000: pick 5/8, bin 3/8, handover 1/8, two_bins 1/8 — flat within
   noise since step 9000 (plateau). pi05_2arm_v2 step 3000: 0/12 on every rung after 4/12, 6/12 at step
   2000; reproduced on fixed seeds; opened H8.
+- **2026-10-16 ~09:40** DAgger data v1 done: 532 episodes (430 teacher-successful; 68 skipped because the
+  policy finished or failed before the takeover). **pi05_dagger1 unblocked** and moved to the front of the
+  H100 queue (fine-tune pi05_v1 on mix + recover2 + DAgger). Queued **dagger3_generate** for the idle first
+  A10 from pi05_warm2arm step 4000 (the strongest two-arm policy). dagger2 at 194/600. No errors.
