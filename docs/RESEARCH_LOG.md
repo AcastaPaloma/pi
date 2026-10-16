@@ -216,3 +216,10 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   pi05_v1 at 351/600. Queued **dagger2_generate** (rollouts of pi05_2arm_v2) for the idle second A10.
   Steps: pi05_v1 11580, 2arm_v2 2560, warm2arm 4420, recover 4240, easy 4380; no errors.
 - **2026-10-16 03:20** [scheduler] 132.145.199.243 was idle; launched **dagger2_generate** (H2b data, second policy: rollouts of pi05_2arm_v2 (warm start + recover2) finished by the teacher; aggregates mistakes from a different policy)
+- **2026-10-16 ~08:30** **pi05_v1 step 11000 (first ladder scores with the H7 oracle fix): two_bins 3/8**
+  (0/8 at every earlier step; lift 8/8), pick_place_any 5/8, bin 5/8, handover 1/8 (lift 7/8) — every
+  rung now has successes, all with a lift. **pi05_2arm_v2 step 2000: pick_place_any 4/12, bin 6/12** —
+  the best step-2000 result of any run (warm start from single-arm + recover2). pi05_recover step 4000
+  (4th checkpoint): 1/16, 4/16, 0, 0 — behind pi05_easy at the same step but its intervals still
+  overlap at equal steps and on bin vs the leader, so not clearly beaten; keep, re-check at 5000–6000.
+  dagger2_generate launched on the second A10 (03:19).
