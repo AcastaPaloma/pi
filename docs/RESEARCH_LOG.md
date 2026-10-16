@@ -371,3 +371,4 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   to 15 minutes and accept a filled GPU as proof of launch; status corrected; scheduler restarted (dry run
   clean). Its checkpoints relay to A10#1. Others: 2arm_v2 11500, warm2arm 9540, recover 9280, easy 9820; no
   errors. DAgger v4 at two_bins 100/150; dagger5_twobins 60/400 (33 teacher successes of 43 kept).
+- **2026-10-16 08:49** [scheduler] 132.145.199.243 was idle; launched **twobins_mixed_generate** (H10 data: two_bins demos with either arm placing first (half also with recover2 knocks), 1,500 episodes (deprioritised 11:30 UTC: the video shows failures are missed-grasp recovery, not arm order; the recover2 half of this data still helps))

@@ -184,8 +184,10 @@
     {
       "name": "twobins_mixed_generate",
       "hypothesis": "H10 data: two_bins demos with either arm placing first (half also with recover2 knocks), 1,500 episodes (deprioritised 11:30 UTC: the video shows failures are missed-grasp recovery, not arm order; the recover2 half of this data still helps)",
-      "status": "queued",
-      "eval": "MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_sim.record_tasks --out data/sim_twobins_mixed_v1 --tasks two_bins --episodes-per-task 1500 --styles mixed_order,mixed_order_recover2 --workers 12 --seed 1100000 --episode-seconds 40"
+      "status": "running",
+      "eval": "MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_sim.record_tasks --out data/sim_twobins_mixed_v1 --tasks two_bins --episodes-per-task 1500 --styles mixed_order,mixed_order_recover2 --workers 12 --seed 1100000 --episode-seconds 40",
+      "host": "132.145.199.243",
+      "started": "2026-10-16T08:48"
     },
     {
       "name": "v1_17000_twobins_video",
