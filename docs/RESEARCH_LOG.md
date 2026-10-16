@@ -422,3 +422,4 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   leader). pi05_easy step 11000: 12/16, 11/16. dagger5_twobins done (293 kept, 210 teacher successes). Queued
   **v1_20000_confirm30** on A10#1: the resume point of the DAgger, recover2 and trim runs, on the 30 shared seeds,
   as their baseline.
+- **2026-10-16 09:50** [scheduler] 129.213.124.160 was idle; launched **v1_20000_confirm30** (Baseline for H2b/H12: pi05_v1 step 20000 (the resume point of pi05_dagger1, pi05_v1_rec2 and pi05_v1_rec2_trim) on the same 30 seeds, with per-object two_bins metrics, so their final checkpoints can be compared episode for episode)
