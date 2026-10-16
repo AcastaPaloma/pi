@@ -33,7 +33,7 @@ from torch.utils.data import DataLoader, DistributedSampler
 
 from .config import Pi07Config
 from .data import Pi07Dataset, collate, to_device
-from .model import Pi07
+from .model import Pi07, make_model
 from .tokenizer import load_tokenizer
 from .weights import gemma_loaded_fraction, load_gemma3, save_checkpoint
 
@@ -66,8 +66,13 @@ def reset_action_io(model):
 
 
 def build_model(cfg, *, gemma=None, device=torch.device("cpu"), checkpoint=None, reset_io=False):
-    model = Pi07(cfg)
     report = None
+    if cfg.backbone == "pi05":
+        model = make_model(cfg, pretrained=checkpoint is None)
+        if checkpoint is not None:
+            model.load_state_dict(torch.load(Path(checkpoint) / "model.pt", map_location="cpu"))
+        return model.to(device), {"pi05_base": checkpoint is None}
+    model = Pi07(cfg)
     if checkpoint is not None:
         model.load_state_dict(torch.load(Path(checkpoint) / "model.pt", map_location="cpu"))
         if reset_io:
@@ -88,6 +93,8 @@ def main(argv=None):
     parser.add_argument("--tokenizer", type=Path, help="Gemma tokenizer.model; byte fallback when omitted")
     parser.add_argument("--resume", type=Path, help="Checkpoint directory to warm-start from (weights only)")
     parser.add_argument("--no-state-history", action="store_true", help="Feed only the current joint state")
+    parser.add_argument("--no-knowledge-insulation", action="store_true",
+                        help="Let the flow loss train the backbone and vision encoder (no stop-gradient)")
     parser.add_argument("--state-dropout", type=float, help="Fraction of samples trained with no joint state (1 = never)")
     parser.add_argument("--reset-action-io", action="store_true",
                         help="With --resume: re-initialise state/action input-output layers (new action statistics)")
@@ -127,6 +134,8 @@ def main(argv=None):
         cfg = cfg.with_(state_history=False)
     if args.state_dropout is not None:
         cfg = cfg.with_(state_dropout=args.state_dropout)
+    if args.no_knowledge_insulation:
+        cfg = cfg.with_(knowledge_insulation=False)
     device = pick_device(args.device)
     meta_dir = args.meta or args.data / "pi07_meta"
     tokenizer = load_tokenizer(args.tokenizer, cfg.text.vocab)

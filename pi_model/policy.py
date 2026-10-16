@@ -10,8 +10,8 @@ import torch
 
 from .config import Pi07Config
 from .data import ACTION_DIMS, Normalizer, speed_prompt_value, to_device
-from .model import Pi07
-from .prompt import PromptContext, no_dropout, prompt_ids
+from .model import Pi07, make_model
+from .prompt import PromptContext, no_dropout, pi05_prompt_ids, prompt_ids
 from .tokenizer import load_tokenizer
 
 
@@ -60,11 +60,11 @@ class Pi07Policy:
         if device == "auto":
             device = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
         self.device = torch.device(device)
-        self.model = Pi07(self.cfg)
+        self.model = make_model(self.cfg)
         self.model.load_state_dict(torch.load(checkpoint / "model.pt", map_location="cpu"))
         if dtype not in ("fp32", "bf16"):
             raise ValueError(f"dtype must be fp32 or bf16, got {dtype}")
-        if dtype == "bf16":
+        if dtype == "bf16" and self.cfg.backbone != "pi05":  # π0.5 keeps its own bf16/fp32 split
             self.model.to(torch.bfloat16)  # 5.2B parameters: 10.3 GB instead of 20.7 GB, fits a 24 GB GPU
         self.model.to(self.device).eval()
         self.tokenizer = load_tokenizer(tokenizer or extra.get("tokenizer"), self.cfg.text.vocab)
@@ -102,7 +102,11 @@ class Pi07Policy:
         for k in range(K):
             if state_valid[k]:
                 state[k, :ACTION_DIMS] = self.norm_state(states[k])
-        text = prompt_ids(self.tokenizer, context, no_dropout())
+        if cfg.backbone == "pi05":
+            cur = self.norm_state(states[-1]) if state_valid[-1] else None
+            text = pi05_prompt_ids(self.tokenizer, context, no_dropout(), cur)
+        else:
+            text = prompt_ids(self.tokenizer, context, no_dropout())
         G = min(len(self.cameras), cfg.max_subgoals)
         S = frames.shape[2]
         goal = np.zeros((G, S, S, 3), dtype=np.uint8)

@@ -12,7 +12,7 @@ to [-1, 1] by per-dimension 1st/99th percentiles computed by `prepare`.
 from __future__ import annotations
 
 import argparse
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 import json
 from pathlib import Path
 
@@ -23,7 +23,7 @@ from torch.utils.data import Dataset
 
 from .config import Pi07Config
 from .fast import FastTokenizer, fast_to_vocab
-from .prompt import PromptContext, no_dropout, prompt_ids, sample_dropout
+from .prompt import PromptContext, no_dropout, pi05_prompt_ids, prompt_ids, sample_dropout
 from .vision import preprocess_images
 
 ACTION_DIMS = 12  # two SO-101 arms: 5 joints + gripper each
@@ -188,6 +188,8 @@ class Pi07Dataset(Dataset):
         rng = self._rng(index)
         cfg = self.cfg
         plan = sample_dropout(rng) if self.train else no_dropout()
+        if cfg.max_subgoals == 0 and plan.subgoals:  # no subgoal images: never drop the subtask for one
+            plan = replace(plan, subgoals=False, subtask=True)
         K, H = cfg.max_history, cfg.action_horizon
         frame_steps = [t - (K - 1 - k) * self.stride for k in range(K)]
         valid = np.asarray([s >= 0 for s in frame_steps])
@@ -234,7 +236,11 @@ class Pi07Dataset(Dataset):
         sample["subgoal_valid"] = np.full(G, plan.subgoals, dtype=bool)
 
         if self.objective == "action":
-            text = prompt_ids(self.tokenizer, context, plan)
+            if cfg.backbone == "pi05":
+                cur = self.norm_state(episode.steps["state"][t]) if state_valid[-1] else None
+                text = pi05_prompt_ids(self.tokenizer, context, plan, cur)
+            else:
+                text = prompt_ids(self.tokenizer, context, plan)
             sample["text_ids"] = np.asarray(text, dtype=np.int64)
             sample["text_targets"] = np.full(len(text), -1, dtype=np.int64)
             chunk = episode.steps["action"][t:t + H]

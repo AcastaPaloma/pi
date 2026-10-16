@@ -144,7 +144,7 @@ class Pi07(nn.Module):
         """Expert velocity for noisy actions [B, H, A] at per-token tau [B, H]; prefix KV are detached (KI)."""
         pos_a, mask_local, mask_global = self.expert_masks(prefix)
         rope_local, rope_global = self.backbone.rope(pos_a)
-        insulated = [(k.detach(), v.detach()) for k, v in kvs]
+        insulated = [(k.detach(), v.detach()) for k, v in kvs] if self.cfg.knowledge_insulation else list(kvs)
         sliding = [layer.sliding for layer in self.backbone.layers]
         return self.expert(noisy_actions, tau, rope_local, rope_global, insulated, mask_local, mask_global, sliding)
 
@@ -275,3 +275,11 @@ class Pi07(nn.Module):
                                        ("state_proj", self.state_proj), ("expert", self.expert))}
         counts["total"] = sum(counts.values())
         return counts
+
+
+def make_model(cfg: Pi07Config, *, pretrained: bool = False):
+    """Build the model for `cfg.backbone`; pretrained loads π0.5 weights for the pi05 backbone."""
+    if cfg.backbone == "pi05":
+        from .pi05_backbone import Pi05Backbone
+        return Pi05Backbone(cfg, pretrained=pretrained)
+    return Pi07(cfg)

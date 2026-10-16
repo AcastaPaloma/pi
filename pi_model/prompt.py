@@ -89,3 +89,11 @@ def prompt_ids(tokenizer, context: PromptContext, plan: DropoutPlan, *, bos=True
                         include_quality=plan.quality, include_mistake=plan.mistake) + ACTION_MARKER
     ids = tokenizer.encode(text)
     return ([tokenizer.bos_id] if bos else []) + ids
+
+
+def pi05_prompt_ids(tokenizer, context: PromptContext, plan: DropoutPlan, norm_state=None) -> list[int]:
+    """π0.5 layout: "Task: <π0.7 metadata text>, State: <256-bin ints>;\nAction: " (state optional)."""
+    from .pi05_backbone import pi05_prompt, pi05_state_text
+    text = context.text(include_subtask=plan.subtask, include_speed=plan.speed,
+                        include_quality=plan.quality, include_mistake=plan.mistake)
+    return [tokenizer.bos_id] + tokenizer.encode(pi05_prompt(text, pi05_state_text(norm_state)))

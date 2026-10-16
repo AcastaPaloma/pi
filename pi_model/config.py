@@ -109,6 +109,12 @@ class Pi07Config:
     # feeds only the current state; state_dropout zeroes all states for that fraction of samples.
     state_history: bool = True
     state_dropout: float = 0.0
+    # Knowledge insulation (paper): the expert reads the backbone through a stop-gradient, so only
+    # the FAST cross-entropy trains the VLM. False lets the flow loss train the backbone and vision too.
+    knowledge_insulation: bool = True
+    # "pi07": our Gemma 3 4B implementation. "pi05": π0.5's pretrained PaliGemma + action expert
+    # (pi_model/pi05_backbone.py), with π0.7's data, prompts and evaluation.
+    backbone: str = "pi07"
     name: str = "full"
 
     @staticmethod
@@ -136,11 +142,21 @@ class Pi07Config:
             name="small")
 
     @staticmethod
+    def pi05() -> "Pi07Config":
+        """π0.7 data and prompting on π0.5's pretrained VLM and expert (current frame, 224 px)."""
+        return Pi07Config(
+            vision=VisionConfig(image_size=224, pool=1),
+            text=TextConfig(vocab=257152),
+            max_history=1, max_subgoals=0, state_history=False, state_dropout=0.3,
+            knowledge_insulation=False, denoise_steps=10, backbone="pi05", name="pi05")
+
+    @staticmethod
     def named(name: str) -> "Pi07Config":
         try:
-            return {"full": Pi07Config.full, "tiny": Pi07Config.tiny, "small": Pi07Config.small}[name]()
+            return {"full": Pi07Config.full, "tiny": Pi07Config.tiny, "small": Pi07Config.small,
+                    "pi05": Pi07Config.pi05}[name]()
         except KeyError:
-            raise ValueError(f"Unknown config {name!r}; choose full, small or tiny") from None
+            raise ValueError(f"Unknown config {name!r}; choose full, small, tiny or pi05") from None
 
     def to_json(self) -> str:
         return json.dumps(asdict(self), indent=2)

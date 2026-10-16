@@ -123,3 +123,29 @@ Training prompts contain a subtask about 92% of the time (it is dropped only in 
 
 `scripts/box/` holds the launch scripts used on the two-H100 machine. Tests:
 `python -m unittest tests.test_model tests.test_pipeline`.
+
+## Diagnosis log, 2026-10-15: blind policies and the π0.5 backbone
+
+Closed-loop success stayed at 0–10% for every model trained here (0.3B from scratch, 5.2B from
+Gemma 3 4B, one-arm and two-arm data) while training losses kept falling. Findings, in order:
+
+1. **The data is correct.** Replaying recorded action labels in joint control reproduces the recorded
+   success in 17 of 18 episodes (`scripts/diagnose_policy.py replay`).
+2. **The policies ignore their cameras.** Replacing every frame with black or another episode's frames
+   moves predicted joints by under 0.05° (`scripts/vision_probe.py`), and inside the training path the
+   flow and FAST losses are unchanged when images are shuffled across a batch
+   (`scripts/vision_flow_probe.py`). The policies predict an average reach from text and joint state,
+   which ends 2–5 cm from the object.
+3. **Removing the proprioceptive shortcut is not enough.** Current-state-only training with 30% state
+   dropout, no state at all, and turning knowledge insulation off all stayed blind after 500–2000
+   steps of the 0.3B model: the vision features of different scenes are nearly identical (cosine
+   0.98–0.9995), so the encoder never learned to localise objects from a few thousand scripted episodes.
+4. **Switch to a robot-pretrained backbone.** `Pi07Config.pi05()` (`pi_model/pi05_backbone.py`) keeps
+   this repository's data, π0.7 prompt metadata and evaluation, and runs them on π0.5's PaliGemma VLM
+   and 300M action expert (LeRobot's port of openpi `pi05_base`, trained on 10k+ hours of robot data).
+   Before any fine-tuning its loss already differs with shuffled images (0.460 vs 0.470). Trade-off:
+   Gemma 2B instead of the paper's Gemma 3 4B, the current frame instead of MEM history, state as
+   prompt text, no FAST loss or stop-gradient (LeRobot's fine-tuning recipe). Launch with
+   `scripts/box/train_pi05.sh` in a LeRobot venv.
+
+Config switches added along the way: `state_history`, `state_dropout`, `knowledge_insulation`, `backbone`.
