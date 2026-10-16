@@ -495,3 +495,9 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   additions), synced to all hosts, and pi05_curriculum2 relaunched by hand on 209.20.158.194 (step 20, loss
   normal). The crashed log is kept as `logs/train_pi05_curriculum2.crashed_frame_step`. Lesson: a compile check
   is not a test. Loader edits now get a short real training run before launch.
+- **2026-10-16 15:36 UTC** pi05_v1_rec2_trim launched on 209.20.159.198 (prep copying the step-20000 checkpoint
+  and recover2). pi05_curriculum2 is training (step 140). DAgger v6 done with the old teacher (329 kept, 157
+  successful). DAgger v7 with the fixed teacher is at handover 120/150, with 243 of 273 kept continuations
+  successful (89%; was 47–81% failure in v2/v4). Queued **dagger8_fixed** on A10#2 (from pi05_v1 step 15000,
+  whose export is already there), which also feeds pi05_dagger_clean. Steps: dagger1 5180, v1_rec2 4460, recover
+  12300. No errors.
