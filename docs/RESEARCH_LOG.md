@@ -211,3 +211,7 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
 - **2026-10-16 ~07:40** H7 closed (see above): oracle deadlock in two_bins fixed and deployed to every
   evaluator; first video-verified two_bins success. pi05_easy step 4000: **pick_place_any 6/16, bin 7/16**
   (pi05_v1 had 0/8 and 1/8 at step 4000) — strong support for H1b (curriculum); its stage 2 is queued.
+- **2026-10-16 ~07:55** **H6 closed (no):** pi05_single step 6000 with execute 10/15/25/40 actions per chunk:
+  strict 21/26/26/27 of 30 — re-planning more often does not help; keep execute 25. DAgger data from
+  pi05_v1 at 351/600. Queued **dagger2_generate** (rollouts of pi05_2arm_v2) for the idle second A10.
+  Steps: pi05_v1 11580, 2arm_v2 2560, warm2arm 4420, recover 4240, easy 4380; no errors.
