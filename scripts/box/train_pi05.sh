@@ -16,6 +16,7 @@ if [ "$NPROC" -gt 1 ]; then LAUNCH=($PY -m torch.distributed.run --nproc_per_nod
 EXTRA=()
 [ -n "${RESUME:-}" ] && EXTRA+=(--resume "$RESUME")
 [ -n "${META:-}" ] && EXTRA+=(--meta "$META")
+[ -n "${EMA:-}" ] && EXTRA+=(--ema-decay "$EMA")
 nohup "${LAUNCH[@]}" -m pi_model.train --data "$DATA" --config pi05 --tokenizer weights/paligemma/tokenizer.model "${EXTRA[@]}" \
     --out "$OUT" --steps "$STEPS" --batch-size ${BATCH:-32} --grad-accum 1 --lr ${LR:-2.5e-5} --warmup 1000 --bf16 \
     --gradient-checkpointing --device cuda:0 --num-workers 16 --log-every 20 --save-every ${SAVE_EVERY:-1000} \

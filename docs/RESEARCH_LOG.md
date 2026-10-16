@@ -70,6 +70,14 @@ opposite curve of pi05_warm2arm, weak at 1000–2000 and strong at 4000). Possib
 recover: lower LR or a longer warmup for warm starts, or mix in single-arm data to anchor the skill.
 Decide after steps 4000–5000.
 
+### H9: raw-weight checkpoints oscillate; an EMA of the weights stabilises them (watching, since ~09:55)
+pi05_warm2arm: 11/16, 9/16 at step 4000 then 5/16, 5/16 at step 5000; pi05_2arm_v2: 4/12, 6/12 at 2000 then
+0/12 at 3000 (reproduced). Training losses are smooth, so the swings come from where the raw weights sit
+between saves. π0-family and diffusion policies are usually evaluated with averaged weights. Added
+`--ema-decay` (train.py; model.pt = averaged weights, model_raw.pt = raw) and queued **pi05_2arm_ema** (the
+2arm_v2 recipe with EMA 0.999) second in the H100 queue. If its curve is smoother and higher, make EMA the
+default for every run.
+
 ### H4: single-arm failures now happen after the grasp (weakened 2026-10-16 00:30; see entry)
 pi05_single step 3000 lifts the cube in 8/10 episodes but succeeds in 5/10: the remaining failures
 are in carrying, placing or releasing, not in reaching. Possible changes: (a) longer training (the
@@ -244,3 +252,5 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   policy finished or failed before the takeover). **pi05_dagger1 unblocked** and moved to the front of the
   H100 queue (fine-tune pi05_v1 on mix + recover2 + DAgger). Queued **dagger3_generate** for the idle first
   A10 from pi05_warm2arm step 4000 (the strongest two-arm policy). dagger2 at 194/600. No errors.
+- **2026-10-16 ~09:55** pi05_warm2arm step 5000: pick 5/16, bin 5/16 (from 11/16, 9/16), handover 2/16.
+  Opened H9 (EMA); implemented and smoke-tested `--ema-decay`; queued pi05_2arm_ema.

@@ -93,6 +93,8 @@ def main(argv=None):
     parser.add_argument("--tokenizer", type=Path, help="Gemma tokenizer.model; byte fallback when omitted")
     parser.add_argument("--resume", type=Path, help="Checkpoint directory to warm-start from (weights only)")
     parser.add_argument("--no-state-history", action="store_true", help="Feed only the current joint state")
+    parser.add_argument("--ema-decay", type=float, default=0.0,
+                        help="Keep an exponential moving average of the weights (e.g. 0.999); checkpoints store it as model.pt")
     parser.add_argument("--no-knowledge-insulation", action="store_true",
                         help="Let the flow loss train the backbone and vision encoder (no stop-gradient)")
     parser.add_argument("--state-dropout", type=float, help="Fraction of samples trained with no joint state (1 = never)")
@@ -179,6 +181,11 @@ def main(argv=None):
         (no_decay if p.ndim < 2 or "norm" in name or "embedding" in name else decay).append(p)
     optimizer = torch.optim.AdamW([{"params": decay, "weight_decay": args.weight_decay},
                                    {"params": no_decay, "weight_decay": 0.0}], lr=args.lr, betas=(0.9, 0.95))
+    ema = None
+    if args.ema_decay > 0:
+        if args.fsdp:
+            raise SystemExit("--ema-decay is not supported with --fsdp")
+        ema = {name: param.detach().clone().float() for name, param in core.named_parameters() if param.requires_grad}
     autocast = torch.autocast(device_type=device.type, dtype=torch.bfloat16,
                               enabled=args.bf16 and device.type != "cpu" and not args.fsdp)
     log = (args.out / "log.jsonl").open("a") if rank == 0 else None
@@ -208,6 +215,14 @@ def main(argv=None):
             optimizer.step()
             optimizer.zero_grad(set_to_none=True)
             step += 1
+            if ema is not None:
+                # Exponential moving average of the weights (H9): evaluated checkpoints oscillate a lot
+                # between saves; π0-style policies are usually evaluated with averaged weights.
+                d = min(args.ema_decay, (1 + step) / (10 + step))
+                with torch.no_grad():
+                    for name, param in core.named_parameters():
+                        if name in ema:
+                            ema[name].mul_(d).add_(param.detach().to(ema[name].dtype), alpha=1 - d)
             if step % args.log_every == 0 or step == 1:
                 n = args.log_every * args.grad_accum if step > 1 else args.grad_accum
                 averaged = {k: v / n for k, v in running.items()}
@@ -231,6 +246,11 @@ def main(argv=None):
                     state = get_model_state_dict(core, options=StateDictOptions(full_state_dict=True, cpu_offload=True))
                 if rank == 0:
                     ckpt = args.out / f"step_{step:07d}"
+                    if ema is not None and state is None:
+                        # model.pt holds the averaged weights (what evaluators load); model_raw.pt the raw ones.
+                        raw = core.state_dict()
+                        torch.save(raw, (ckpt.mkdir(parents=True, exist_ok=True), ckpt / "model_raw.pt")[1])
+                        state = {k: (ema[k].to(v.dtype) if k in ema else v) for k, v in raw.items()}
                     save_checkpoint(ckpt, core, config=cfg, state_dict=state,
                                     extra={"step": step, "objective": args.objective,
                                            "tokenizer": str(args.tokenizer) if args.tokenizer else None,

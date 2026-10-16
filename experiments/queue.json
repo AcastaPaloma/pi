@@ -15,6 +15,15 @@
       "eval": "GPU=0 NAME={RUN} EPISODES=16 TASKS='pick_place_any bin handover two_bins' MUJOCO_GL=egl bash scripts/box/eval_when_ready.sh runs/{RUN} 1000 2000 3000 4000 5000 6000 7000 8000"
     },
     {
+      "name": "pi05_2arm_ema",
+      "hypothesis": "H8/H9: checkpoint-to-checkpoint swings (pi05_2arm_v2 4/12\u21920/12, pi05_warm2arm 11/16\u21925/16) come from raw weights; an EMA (0.999) of the 2arm_v2 recipe stabilises them",
+      "status": "queued",
+      "prep_on_main": "ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@{HOST} 'mkdir -p ~/pi/runs/pi05_single' && rsync -a -e 'ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes' runs/pi05_single/step_0006000 ubuntu@{HOST}:~/pi/runs/pi05_single/ && rsync -a -e 'ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes' data/sim_recover2_v1 ubuntu@{HOST}:~/pi/data/",
+      "setup": "mkdir -p data/sim_mixrec2_v1 && cd data/sim_mixrec2_v1 && for d in ../sim_mix_v1/episode_*; do ln -sfn $d $(basename $d); done && for d in ../sim_recover2_v1/episode_*; do ln -sfn $d episode_rec2_$(basename $d | cut -d_ -f2); done",
+      "train": "EMA=0.999 RESUME=runs/pi05_single/step_0006000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixrec2_v1 runs/{RUN} 10000",
+      "eval": "GPU=0 NAME={RUN} EPISODES=16 TASKS='pick_place_any bin handover two_bins' MUJOCO_GL=egl bash scripts/box/eval_when_ready.sh runs/{RUN} 1000 2000 3000 4000 5000 6000 7000 8000 9000 10000"
+    },
+    {
       "name": "pi05_curriculum2",
       "hypothesis": "H1b: easy rungs first learns fastest; stage 2 adds handover and two_bins plus recover2 data",
       "status": "queued",
