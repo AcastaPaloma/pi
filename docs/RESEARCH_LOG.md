@@ -48,7 +48,7 @@ Rungs use 8 episodes, 30 s, both sides of the table and container walls; the sin
 the original placement. Not a model problem, but it changes how to read 0/8. Check by scoring
 pi05_single and pi05_v1 on the same task (pick_place_any, left side only) once both have ~3000 steps.
 
-### H4: single-arm failures now happen after the grasp (watching, since 2026-10-15 23:30)
+### H4: single-arm failures now happen after the grasp (weakened 2026-10-16 00:30; see entry)
 pi05_single step 3000 lifts the cube in 8/10 episodes but succeeds in 5/10: the remaining failures
 are in carrying, placing or releasing, not in reaching. Possible changes: (a) longer training (the
 place phase is the last to be learned); (b) more place/release supervision via recovery episodes
@@ -92,3 +92,11 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   up from 10/30 at step 2000 — the leading model. pi05_v1 step 4000 pick_place_any: 0/8, lift 2/8,
   closest 21 mm (holding the step-3000 gains). H4 (post-grasp failures) still open: lift 80% vs
   success 63%.
+- **2026-10-16 ~00:30** pi05_v1 step 4000 fully scored: first two-arm success (bin 1/8); every rung now
+  13–24 mm from the object (was 46–76 mm at step 2000) — converging, slower than single-arm (H1, keep).
+  Video review of pi05_single step 3000 (10 episodes, 6/10 success): of 4 failures, 3 never lifted
+  (gripper within 1–2 cm) and 1 lifted then lost the cube; in both reviewed failures the arm makes
+  repeated small re-grasps that nudge the cube, ending in a retry loop near the arm's base. **H4
+  weakened**: the dominant failure is grasp precision plus poor recovery once the cube moves, which is
+  **H2**'s prediction; pi05_recover tests it directly. Decision: no change yet; watch pi05_single at
+  steps 4000–5000 (still rising: 10/30 → 19/30) and pi05_recover's first scores.
