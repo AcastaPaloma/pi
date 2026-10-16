@@ -617,3 +617,4 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   other 2.5e-5 continuation (5 of 5), while pi05_v1_cont at 1e-5 stays at 21 → 19/32. Acting on H14: queue reordered so
   **pi05_dagger_clean_lr1e5** launches first, and **pi05_dagger2 now also uses LR 1e-5** (so the pair isolates
   the resume point instead of repeating a likely-harmful LR).
+- **2026-10-16 16:52** [scheduler] 129.213.124.160 was idle; launched **v1_cont_4000_confirm30** (H16/H14: does the low-LR continuation of pi05_v1 on its own data (no dip, 21 and 19/32 on the ladder) improve on the 83/120 baseline by step 4000? Same 30 seeds)

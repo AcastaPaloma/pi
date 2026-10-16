@@ -461,7 +461,7 @@
     {
       "name": "v1_cont_4000_confirm30",
       "hypothesis": "H16/H14: does the low-LR continuation of pi05_v1 on its own data (no dip, 21 and 19/32 on the ladder) improve on the 83/120 baseline by step 4000? Same 30 seeds",
-      "status": "queued",
+      "status": "running",
       "prefer_host": "129.213.124.160",
       "requires_on_host": [],
       "eval": "for T in pick_place_any bin handover two_bins; do MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.eval_sim --checkpoint exports/pi05_v1_cont/step_0004000 --task $T --episodes 30 --episode-seconds 30 --execute 25 --delay 0 --device cuda --subtask oracle --seed 4000 --out outputs/eval_v1contconfirm30_step4000_$T; done",
@@ -471,7 +471,9 @@
           "132.145.199.243",
           "exports/pi05_v1_cont/step_0004000/model.pt"
         ]
-      ]
+      ],
+      "host": "129.213.124.160",
+      "started": "2026-10-16T16:50"
     }
   ]
 }
