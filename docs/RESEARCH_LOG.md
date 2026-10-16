@@ -153,3 +153,11 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   leads; H1a (warm start from the 50% single-arm checkpoint) and H2 v1 (target-knock recovery only)
   show no gain yet — keep watching to step 4000 per the stop rule. recover2 data (bumps + missed
   grasps) is on the main box as data/sim_mixrec2_v1 (10,794 episodes), ready for pi05_2arm_v2.
+- **2026-10-16 ~04:00** **pi05_v1 step 8000: first two-arm handover successes** — handover 3/8 (lift 8/8,
+  both arms touched 4/8), pick_place_any 4/8 (lift 7/8), two_bins 0/8 (lift 5/8, both arms 3/8), bin
+  0/8 (lift 0/8; was 4/8 at step 7000 — watch for a regression vs. 8-episode noise). Video check on the
+  original seeds: 1/8 handover succeeded on replay (GPU nondeterminism); frame by frame it is a genuine
+  handover — right arm grasps (0.18), lifts to 6.3 cm, sets the cube on the relay pad, retreats; left
+  arm grasps from the pad (0.17), lifts to 6.2 cm, releases inside the container; both grippers
+  touched; success at 11.3 s. Copied to ~/Downloads/pi_sim_videos for the user. Cosmetic oracle quirk:
+  after the final release the caption reverts to "Move the left gripper above the cube".
