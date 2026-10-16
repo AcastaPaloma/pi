@@ -101,7 +101,9 @@ def launch(entry, host, gpu=None):
                 cmd = cmd.replace("GPUS=0", f"GPUS={gpu}").replace("GPU=0", f"GPU={gpu}")
             log = f"logs/{key}_{run}.log" if key == "train" else f"logs/eval_{run}.log"
             # shlex.quote keeps $VARS for the job's own shell (json.dumps let the login shell expand them).
-            tagged = f": SCHEDJOB_{run}; {cmd}"
+            # Trailing "; true" stops bash from exec-ing into the last command, so the tagged shell
+            # stays alive for the whole job and pgrep can find it.
+            tagged = f": SCHEDJOB_{run}; {cmd}; true"
             steps.append(f"setsid nohup bash -c {shlex.quote(tagged)} < /dev/null > {log} 2>&1 &")
     # Fire and forget: a remote shell that backgrounds jobs can keep the ssh channel open for hours,
     # which used to block the whole scheduler. Start it detached here and verify by the job tag instead.
