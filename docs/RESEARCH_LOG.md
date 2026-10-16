@@ -383,3 +383,28 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   warm start match pi05_v1 on the same 30 seeds — decides the base for later DAgger rounds.
 - **2026-10-16 08:58** [scheduler] 192.222.52.191:1 was idle; launched **pi05_v1_rec2** (H2 on the best model: continue pi05_v1 (6/8 and 5/8 at step 9000) on the two-arm mix plus recover2 (bumps, missed grasps) | 11:30 UTC: promoted — the step-17000 two_bins video shows missed grasps with no retry, which recover2's deliberate missed grasps teach)
 - **2026-10-16 09:09** [scheduler] 132.145.199.243 was idle; launched **v2arm_11000_confirm30** (H1a/H8: does the warm-started pi05_2arm_v2 (step 11000: 8/12, 8/12, 4/12, 4/12 at 11k steps) match pi05_v1 (75-76/120 at 13-17k) on the same 30 seeds? Decides the base for later DAgger rounds)
+- **2026-10-16 13:45 UTC** pi05_2arm_v2 final step 12000: 8/12, 6/12, 5/12, 5/12 (two_bins 5/12 is its best).
+  twobins_mixed_generate done: clean mixed-order demos succeed 748/750 with either arm first, but the
+  mixed_order_recover2 style only 356/750. **Correction to H11:** the teacher does move both arms at once
+  during approach and grasp (recorded subtasks pair "Lower the left…" with "Close the right…"). Only the carry
+  waits, so "the policy runs both arms in parallel" is not out of distribution by itself.
+  **New H12 (data): failed scripted demos end with the hands parked until the time limit.** Measured on
+  sim_mix_v1 + sim_recover2_v1 (both hands within 1 cm of their final position):
+
+  | task | failed demos | parked > 10 s |
+  | --- | --- | --- |
+  | two_bins | 962 | 425 |
+  | handover | 668 | 179 |
+  | pick_place_any | 288 | 94 |
+  | bin | 295 | 85 |
+
+  Successful demos almost never park (≤ 7 per task). Parked tails are **13.2% of all training samples and
+  20% of two_bins steps**. In two_bins recover2 timeouts the teacher's last subtask is mostly "Hold still"
+  for ~25 s. The quality label marks these episodes low, but the prompt-dropout plan sometimes hides it. A
+  policy that learned "park and wait" from them would produce exactly the hover in the step-17000 video.
+  Change implied: sample at most 1 s of a failed episode's parked tail. Implemented as
+  `PI_TRIM_STILL_TAIL_S` in `pi_model/data.py` (`trim_still_tail`, tests in `tests/test_trim.py`; on
+  sim_mixrec2_v1 it trims 1,474 failed episodes). Queued **pi05_v1_rec2_trim**, an exact A/B twin of the
+  running pi05_v1_rec2 (same resume step 20000, data and 8000 steps) with trimming on, first for the next
+  free node. pi05_dagger2 now also takes the 1,500 mixed-order two_bins demos and **dagger6_generate** (A10,
+  from pi05_2arm_v2 step 12000). Trimming will be applied to everything else only if the A/B supports it.

@@ -14,6 +14,7 @@ from __future__ import annotations
 import argparse
 from dataclasses import dataclass, replace
 import json
+import os
 from pathlib import Path
 
 import numpy as np
@@ -43,10 +44,36 @@ class Episode:
     def frame_stride(self) -> int:
         return int(self.meta.get("frame_stride", 1))
 
+    sample_steps: int | None = None  # set by trim_still_tail: sample only the first sample_steps timesteps
+
     @property
     def samples(self) -> int:
         """Timesteps that have a camera frame (the sampling points)."""
-        return (self.length + self.frame_stride - 1) // self.frame_stride
+        n = self.length if self.sample_steps is None else self.sample_steps
+        return (n + self.frame_stride - 1) // self.frame_stride
+
+
+def still_tail_steps(steps: dict, tol_m: float = 0.01) -> int:
+    """Timesteps at the end of an episode during which both hands stay within tol_m of their final position."""
+    ee = steps.get("ee_pose")
+    if ee is None or len(ee) == 0:
+        return 0
+    dev = np.maximum(np.linalg.norm(ee[:, 0:3] - ee[-1, 0:3], axis=1), np.linalg.norm(ee[:, 7:10] - ee[-1, 7:10], axis=1))
+    moving = np.nonzero(dev > tol_m)[0]
+    return len(ee) - (int(moving[-1]) + 1 if len(moving) else 0)
+
+
+def trim_still_tail(episode: "Episode", keep_s: float) -> bool:
+    """H12: failed scripted demos often end with both hands parked for 10-25 s until the time limit (44% of
+    failed two_bins demos). Sampling those frames teaches the policy to stop. Keep only keep_s of the tail."""
+    if episode.meta.get("success", True):
+        return False
+    hz = int(episode.meta["control_hz"])
+    still = still_tail_steps(episode.steps)
+    if still <= keep_s * hz:
+        return False
+    episode.sample_steps = max(1, episode.length - still + int(keep_s * hz))
+    return True
 
     def frame_step(self, t: int) -> int:
         """Nearest recorded frame at or before t."""
@@ -67,6 +94,10 @@ class EpisodeStore:
             with np.load(d / "steps.npz") as z:
                 steps = {k: z[k] for k in z.files}
             self.episodes.append(Episode(d, meta, steps))
+        trim = os.environ.get("PI_TRIM_STILL_TAIL_S")  # e.g. "1": see trim_still_tail (H12)
+        if trim:
+            trimmed = sum(trim_still_tail(e, float(trim)) for e in self.episodes)
+            print(f"trimmed still tails of {trimmed}/{len(self.episodes)} failed episodes to {trim} s", flush=True)
         self.cameras = list(self.episodes[0].meta["cameras"])
         self.hz = int(self.episodes[0].meta["control_hz"])
         self.lengths = np.asarray([e.length for e in self.episodes])
