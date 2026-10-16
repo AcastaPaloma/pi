@@ -340,3 +340,20 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   within noise of both, no gain yet; handover and two_bins (the rung where 13000 and 17000 disagreed most, 9 vs
   15) decide H9b. Steps: pi05_v1 19320, 2arm_v2 10360, warm2arm 8920, recover 8640, easy 9100; no errors.
   DAgger v4 at handover 140/150 (two_bins next). Queue unchanged: 5 runnable H100 entries, 1 A10.
+- **2026-10-16 12:15 UTC** **H9b refuted: the pi05_v1 checkpoint average (steps 13000–18000) scores 24/21/14/15
+  of 30 = 74/120**, no better than step 13000 (75) or 17000 (76) on the same seeds. Averaging neither adds nor
+  keeps skills, so the step-to-step swings are mostly sampling noise plus checkpoints failing different
+  episodes. EMA is now expected to add little: pi05_2arm_ema moved to the end of the H100 queue.
+  **New per-object metrics (first run with them) locate the two_bins bottleneck: the first (left-arm) cube
+  reaches the bin 28/30, the second (right-arm) cube 15/30.** Of 13 second-cube-only failures, 8 never lift it
+  (the hover seen on video) and 5 lift it but fail to place. A spatial check looked striking for the soup
+  (second cube spawned farther from the bases, y ≥ 0.01: 5/19; nearer: 10/11) but **does not replicate** on
+  steps 13000 (3/11 near vs 6/19 far) or 17000 (7/11 vs 8/19), so position is not the cause.
+  **H11 (open):** the policy drives both arms at once, while every teacher demo makes the second arm wait
+  above its cube until the first is home, so the right arm meets states the data never shows. Implied changes:
+  (a) DAgger restricted to two_bins with later takeovers, which labels exactly those states: queued
+  **dagger5_twobins** (400 episodes from step 17000, takeover 2–18 s) on A10#1 and **pi05_dagger2** (resumes
+  pi05_dagger1 with complete DAgger v4 + v5); (b) if DAgger does not lift the second cube, a teacher style
+  where both arms move concurrently (needs collision handling at the shared bin). Watching (a) first.
+  Steps: pi05_v1 19900 (dagger1 launches next), 2arm_v2 10940, warm2arm 9220, recover 9000, easy 9460; no
+  errors. DAgger v4 at two_bins 60/150.

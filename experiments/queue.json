@@ -24,13 +24,17 @@
       "eval": "GPU=0 NAME={RUN} EPISODES=16 TASKS='pick_place_any bin handover two_bins' MUJOCO_GL=egl bash scripts/box/eval_when_ready.sh runs/{RUN} 1000 2000 3000 4000 5000 6000 7000 8000"
     },
     {
-      "name": "pi05_2arm_ema",
-      "hypothesis": "H8/H9: checkpoint-to-checkpoint swings (pi05_2arm_v2 4/12\u21920/12, pi05_warm2arm 11/16\u21925/16) come from raw weights; an EMA (0.999) of the 2arm_v2 recipe stabilises them",
+      "name": "pi05_dagger2",
+      "hypothesis": "H2b/H11 second DAgger round: continue pi05_dagger1 with the complete DAgger v4 and the two_bins-only v5 (second-arm failure states) added",
       "status": "queued",
-      "prep_on_main": "ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@{HOST} 'mkdir -p ~/pi/runs/pi05_single' && rsync -a -e 'ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes' runs/pi05_single/step_0006000 ubuntu@{HOST}:~/pi/runs/pi05_single/ && rsync -a -e 'ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes' data/sim_recover2_v1 ubuntu@{HOST}:~/pi/data/",
-      "setup": "mkdir -p data/sim_mixrec2_v1 && cd data/sim_mixrec2_v1 && for d in ../sim_mix_v1/episode_*; do ln -sfn $d $(basename $d); done && for d in ../sim_recover2_v1/episode_*; do ln -sfn $d episode_rec2_$(basename $d | cut -d_ -f2); done",
-      "train": "EMA=0.999 RESUME=runs/pi05_single/step_0006000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixrec2_v1 runs/{RUN} 10000",
-      "eval": "GPU=0 NAME={RUN} EPISODES=16 TASKS='pick_place_any bin handover two_bins' MUJOCO_GL=egl bash scripts/box/eval_when_ready.sh runs/{RUN} 1000 2000 3000 4000 5000 6000 7000 8000 9000 10000"
+      "prefer_host": "192.222.52.191",
+      "requires_on_host": [
+        "runs/pi05_dagger1/step_0008000"
+      ],
+      "prep_on_main": "ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@132.145.199.243 'tar cf - -C ~/pi/data sim_dagger_v4' | tar xf - -C data; ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@129.213.124.160 'tar cf - -C ~/pi/data sim_dagger_v5' | tar xf - -C data 2>/dev/null; true",
+      "setup": "mkdir -p data/sim_mixdag_v2 && cd data/sim_mixdag_v2 && for d in ../sim_mix_v1/episode_*; do ln -sfn $d $(basename $d); done && for d in ../sim_recover2_v1/episode_*; do ln -sfn $d episode_rec2_$(basename $d | cut -d_ -f2); done && for v in 1 2 3 4 5; do for d in ../sim_dagger_v$v/episode_*; do [ -e $d/meta.json ] && ln -sfn $d episode_dag${v}_$(basename $d | cut -d_ -f2); done; done; true",
+      "train": "RESUME={LATEST:runs/pi05_dagger1} META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdag_v2 runs/{RUN} 6000",
+      "eval": "GPU=0 NAME={RUN} EPISODES=16 TASKS='pick_place_any bin handover two_bins' MUJOCO_GL=egl bash scripts/box/eval_when_ready.sh runs/{RUN} 1000 2000 3000 4000 5000 6000"
     },
     {
       "name": "pi05_curriculum2",
@@ -53,6 +57,15 @@
       "setup": "mkdir -p data/sim_mixrec2_v1 && cd data/sim_mixrec2_v1 && for d in ../sim_mix_v1/episode_*; do ln -sfn $d $(basename $d); done && for d in ../sim_recover2_v1/episode_*; do ln -sfn $d episode_rec2_$(basename $d | cut -d_ -f2); done",
       "train": "LR=5e-5 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixrec2_v1 runs/{RUN} 12000",
       "eval": "GPU=0 NAME={RUN} EPISODES=16 TASKS='pick_place_any bin handover two_bins' MUJOCO_GL=egl bash scripts/box/eval_when_ready.sh runs/{RUN} 1000 2000 3000 4000 5000 6000 7000 8000 9000 10000 11000 12000"
+    },
+    {
+      "name": "pi05_2arm_ema",
+      "hypothesis": "H8/H9: checkpoint-to-checkpoint swings (pi05_2arm_v2 4/12\u21920/12, pi05_warm2arm 11/16\u21925/16) come from raw weights; an EMA (0.999) of the 2arm_v2 recipe stabilises them | 12:15 UTC: demoted \u2014 averaging pi05_v1 steps 13000-18000 gave no gain (74/120 vs 75/76), so EMA is expected to help little",
+      "status": "queued",
+      "prep_on_main": "ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@{HOST} 'mkdir -p ~/pi/runs/pi05_single' && rsync -a -e 'ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes' runs/pi05_single/step_0006000 ubuntu@{HOST}:~/pi/runs/pi05_single/ && rsync -a -e 'ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes' data/sim_recover2_v1 ubuntu@{HOST}:~/pi/data/",
+      "setup": "mkdir -p data/sim_mixrec2_v1 && cd data/sim_mixrec2_v1 && for d in ../sim_mix_v1/episode_*; do ln -sfn $d $(basename $d); done && for d in ../sim_recover2_v1/episode_*; do ln -sfn $d episode_rec2_$(basename $d | cut -d_ -f2); done",
+      "train": "EMA=0.999 RESUME=runs/pi05_single/step_0006000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixrec2_v1 runs/{RUN} 10000",
+      "eval": "GPU=0 NAME={RUN} EPISODES=16 TASKS='pick_place_any bin handover two_bins' MUJOCO_GL=egl bash scripts/box/eval_when_ready.sh runs/{RUN} 1000 2000 3000 4000 5000 6000 7000 8000 9000 10000"
     }
   ],
   "a10": [
@@ -146,11 +159,22 @@
     {
       "name": "v1_soup_confirm30",
       "hypothesis": "H9b: checkpoints trade skills (13000 vs 17000: pick 27 vs 23, two_bins 9 vs 15 of 30). A uniform average of pi05_v1 steps 13000-18000 should keep both, beating each single checkpoint on the same seeds",
-      "status": "running",
+      "status": "done",
       "prep_on_main": "ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@{HOST} 'mkdir -p ~/pi/exports/pi05_v1_soup' && rsync -a -e 'ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes' exports/pi05_v1_soup/step_0018000 ubuntu@{HOST}:~/pi/exports/pi05_v1_soup/",
       "eval": "for T in pick_place_any bin handover two_bins; do MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.eval_sim --checkpoint exports/pi05_v1_soup/step_0018000 --task $T --episodes 30 --episode-seconds 30 --execute 25 --delay 0 --device cuda --subtask oracle --seed 4000 --out outputs/eval_v1soup30_step18000_$T; done",
       "host": "129.213.124.160",
-      "started": "2026-10-16T07:34"
+      "started": "2026-10-16T07:34",
+      "result": "strict 24/21/14/15 of 30 (74/120): no gain over steps 13000 (75) or 17000 (76); H9b refuted. two_bins: first cube in bin 28/30, second 15/30"
+    },
+    {
+      "name": "dagger5_twobins",
+      "hypothesis": "H11: the second arm is the two_bins bottleneck (first cube in bin 28/30, second 15/30 for the pi05_v1 soup); the policy moves both arms at once, reaching right-arm states the wait-then-go teacher never shows. DAgger on two_bins only from step 17000, takeover 2-18 s to cover second-arm failures",
+      "status": "queued",
+      "prefer_host": "129.213.124.160",
+      "requires_on_host": [
+        "exports/pi05_v1/step_0017000/model.pt"
+      ],
+      "eval": "MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.dagger --checkpoint exports/pi05_v1/step_0017000 --tasks two_bins --episodes-per-task 400 --takeover-min 2 --takeover-max 18 --out data/sim_dagger_v5 --seed 995000"
     },
     {
       "name": "twobins_mixed_generate",
