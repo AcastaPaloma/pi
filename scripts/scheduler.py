@@ -70,6 +70,8 @@ def resolve(text, host, run):
 
 
 def requirements_met(entry, host):
+    if host in entry.get("avoid_hosts", []):  # e.g. the main box, which cannot render with EGL
+        return False
     for path in entry.get("requires_on_host", []):
         code, out = ssh(host, f"test -e ~/pi/{path} && echo ok")
         if "ok" not in out:
@@ -115,11 +117,19 @@ def launch(entry, host, gpu=None):
     for _ in range(60):
         time.sleep(15)
         code, out = ssh(host, f"pgrep -f '^bash -c : SCHEDJOB_{run}' >/dev/null && echo started")
-        if "started" in out:
+        if "started" in out or (gpu is not None and gpu_busy(f"{host}:{gpu}")):
+            after_launch(entry, host, run)
             return 0, "started"
-        if gpu is not None and gpu_busy(f"{host}:{gpu}"):
-            return 0, "started (GPU busy)"
     return 1, f"job tag SCHEDJOB_{run} not seen and GPU not busy on {host} within 15 minutes"
+
+
+def after_launch(entry, host, run):
+    """Optional Mac-side follow-up, e.g. relay a main-box run's checkpoints to an A10 for evaluation."""
+    if entry.get("mac_after_launch"):
+        cmd = resolve(entry["mac_after_launch"], host, run)
+        log = (ROOT / "outputs" / f"after_launch_{run}.log").open("w")
+        subprocess.Popen(["bash", "-c", cmd], cwd=ROOT, stdin=subprocess.DEVNULL, stdout=log, stderr=log,
+                         start_new_session=True)
 
 
 def main():

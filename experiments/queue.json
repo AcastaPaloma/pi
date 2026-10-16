@@ -21,10 +21,14 @@
       "name": "pi05_v1_rec2",
       "hypothesis": "H2 on the best model: continue pi05_v1 (6/8 and 5/8 at step 9000) on the two-arm mix plus recover2 (bumps, missed grasps) | 11:30 UTC: promoted \u2014 the step-17000 two_bins video shows missed grasps with no retry, which recover2's deliberate missed grasps teach",
       "status": "queued",
-      "prep_on_main": "L=$(ls -d runs/pi05_v1/step_* | sort | tail -1); ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@{HOST} 'mkdir -p ~/pi/runs/pi05_v1_snap' && rsync -a -e 'ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes' $L ubuntu@{HOST}:~/pi/runs/pi05_v1_snap/ && rsync -a -e 'ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes' data/sim_recover2_v1 ubuntu@{HOST}:~/pi/data/",
       "setup": "mkdir -p data/sim_mixrec2_v1 && cd data/sim_mixrec2_v1 && for d in ../sim_mix_v1/episode_*; do ln -sfn $d $(basename $d); done && for d in ../sim_recover2_v1/episode_*; do ln -sfn $d episode_rec2_$(basename $d | cut -d_ -f2); done",
-      "train": "RESUME={LATEST:runs/pi05_v1_snap} META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixrec2_v1 runs/{RUN} 8000",
-      "eval": "GPU=0 NAME={RUN} EPISODES=16 TASKS='pick_place_any bin handover two_bins' MUJOCO_GL=egl bash scripts/box/eval_when_ready.sh runs/{RUN} 1000 2000 3000 4000 5000 6000 7000 8000"
+      "train": "RESUME=runs/pi05_v1/step_0020000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixrec2_v1 runs/{RUN} 8000",
+      "prefer_host": "192.222.52.191",
+      "requires_on_host": [
+        "runs/pi05_v1/step_0020000",
+        "data/sim_mixrec2_v1"
+      ],
+      "mac_after_launch": "EVAL=ubuntu@132.145.199.243 RUN={RUN} EVAL_KEY='~/.ssh/id_ed25519_evalbox' nohup bash scripts/relay_checkpoints.sh 1000 2000 3000 4000 5000 6000 7000 8000 > outputs/relay_{RUN}.log 2>&1 & ssh -n -o BatchMode=yes ubuntu@132.145.199.243 'cd ~/pi && (RUN={RUN} PY=~/lerobot-venv/bin/python DELAY=0 setsid nohup bash scripts/box/eval_ladder_when_ready.sh 1000 2000 3000 4000 5000 6000 7000 8000 > logs/eval_ladder_{RUN}.log 2>&1 < /dev/null &)'"
     },
     {
       "name": "pi05_dagger2",
@@ -37,7 +41,8 @@
       "prep_on_main": "ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@132.145.199.243 'tar cf - -C ~/pi/data sim_dagger_v4' | tar xf - -C data; ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@129.213.124.160 'tar cf - -C ~/pi/data sim_dagger_v5' | tar xf - -C data 2>/dev/null; true",
       "setup": "mkdir -p data/sim_mixdag_v2 && cd data/sim_mixdag_v2 && for d in ../sim_mix_v1/episode_*; do ln -sfn $d $(basename $d); done && for d in ../sim_recover2_v1/episode_*; do ln -sfn $d episode_rec2_$(basename $d | cut -d_ -f2); done && for v in 1 2 3 4 5; do for d in ../sim_dagger_v$v/episode_*; do [ -e $d/meta.json ] && ln -sfn $d episode_dag${v}_$(basename $d | cut -d_ -f2); done; done; true",
       "train": "RESUME={LATEST:runs/pi05_dagger1} META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdag_v2 runs/{RUN} 6000",
-      "eval_note": "main box has no working EGL (12:20 UTC check): checkpoints are relayed from the Mac to an A10 with scripts/relay_checkpoints.sh + scripts/box/eval_ladder_when_ready.sh, as for pi05_v1"
+      "eval_note": "main box has no working EGL (12:20 UTC check): checkpoints are relayed from the Mac to an A10 with scripts/relay_checkpoints.sh + scripts/box/eval_ladder_when_ready.sh, as for pi05_v1",
+      "mac_after_launch": "EVAL=ubuntu@129.213.124.160 RUN={RUN} EVAL_KEY='~/.ssh/id_ed25519_evalbox' nohup bash scripts/relay_checkpoints.sh 1000 2000 3000 4000 5000 6000 > outputs/relay_{RUN}.log 2>&1 & ssh -n -o BatchMode=yes ubuntu@129.213.124.160 'cd ~/pi && (RUN={RUN} PY=~/lerobot-venv/bin/python DELAY=0 setsid nohup bash scripts/box/eval_ladder_when_ready.sh 1000 2000 3000 4000 5000 6000 > logs/eval_ladder_{RUN}.log 2>&1 < /dev/null &)'"
     },
     {
       "name": "pi05_curriculum2",
@@ -50,7 +55,10 @@
       "prep_on_main": "rsync -a -e 'ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes' data/sim_recover2_v1 ubuntu@{HOST}:~/pi/data/",
       "setup": "mkdir -p data/sim_mixrec2_v1 && cd data/sim_mixrec2_v1 && for d in ../sim_mix_v1/episode_*; do ln -sfn $d $(basename $d); done && for d in ../sim_recover2_v1/episode_*; do ln -sfn $d episode_rec2_$(basename $d | cut -d_ -f2); done",
       "train": "RESUME={LATEST:runs/pi05_easy} META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixrec2_v1 runs/{RUN} 10000",
-      "eval": "GPU=0 NAME={RUN} EPISODES=16 TASKS='pick_place_any bin handover two_bins' MUJOCO_GL=egl bash scripts/box/eval_when_ready.sh runs/{RUN} 1000 2000 3000 4000 5000 6000 7000 8000 9000 10000"
+      "eval": "GPU=0 NAME={RUN} EPISODES=16 TASKS='pick_place_any bin handover two_bins' MUJOCO_GL=egl bash scripts/box/eval_when_ready.sh runs/{RUN} 1000 2000 3000 4000 5000 6000 7000 8000 9000 10000",
+      "avoid_hosts": [
+        "192.222.52.191"
+      ]
     },
     {
       "name": "pi05_lr5e5",
@@ -59,7 +67,10 @@
       "prep_on_main": "rsync -a -e 'ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes' data/sim_recover2_v1 ubuntu@{HOST}:~/pi/data/",
       "setup": "mkdir -p data/sim_mixrec2_v1 && cd data/sim_mixrec2_v1 && for d in ../sim_mix_v1/episode_*; do ln -sfn $d $(basename $d); done && for d in ../sim_recover2_v1/episode_*; do ln -sfn $d episode_rec2_$(basename $d | cut -d_ -f2); done",
       "train": "LR=5e-5 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixrec2_v1 runs/{RUN} 12000",
-      "eval": "GPU=0 NAME={RUN} EPISODES=16 TASKS='pick_place_any bin handover two_bins' MUJOCO_GL=egl bash scripts/box/eval_when_ready.sh runs/{RUN} 1000 2000 3000 4000 5000 6000 7000 8000 9000 10000 11000 12000"
+      "eval": "GPU=0 NAME={RUN} EPISODES=16 TASKS='pick_place_any bin handover two_bins' MUJOCO_GL=egl bash scripts/box/eval_when_ready.sh runs/{RUN} 1000 2000 3000 4000 5000 6000 7000 8000 9000 10000 11000 12000",
+      "avoid_hosts": [
+        "192.222.52.191"
+      ]
     },
     {
       "name": "pi05_2arm_ema",
@@ -68,7 +79,10 @@
       "prep_on_main": "ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@{HOST} 'mkdir -p ~/pi/runs/pi05_single' && rsync -a -e 'ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes' runs/pi05_single/step_0006000 ubuntu@{HOST}:~/pi/runs/pi05_single/ && rsync -a -e 'ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes' data/sim_recover2_v1 ubuntu@{HOST}:~/pi/data/",
       "setup": "mkdir -p data/sim_mixrec2_v1 && cd data/sim_mixrec2_v1 && for d in ../sim_mix_v1/episode_*; do ln -sfn $d $(basename $d); done && for d in ../sim_recover2_v1/episode_*; do ln -sfn $d episode_rec2_$(basename $d | cut -d_ -f2); done",
       "train": "EMA=0.999 RESUME=runs/pi05_single/step_0006000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixrec2_v1 runs/{RUN} 10000",
-      "eval": "GPU=0 NAME={RUN} EPISODES=16 TASKS='pick_place_any bin handover two_bins' MUJOCO_GL=egl bash scripts/box/eval_when_ready.sh runs/{RUN} 1000 2000 3000 4000 5000 6000 7000 8000 9000 10000"
+      "eval": "GPU=0 NAME={RUN} EPISODES=16 TASKS='pick_place_any bin handover two_bins' MUJOCO_GL=egl bash scripts/box/eval_when_ready.sh runs/{RUN} 1000 2000 3000 4000 5000 6000 7000 8000 9000 10000",
+      "avoid_hosts": [
+        "192.222.52.191"
+      ]
     }
   ],
   "a10": [
@@ -139,12 +153,13 @@
     {
       "name": "dagger4_generate",
       "hypothesis": "H2b data from the best two-arm policy (pi05_v1 step 15000: 7/8, 4/8, 2/8, 3/8)",
-      "status": "running",
+      "status": "done",
       "prefer_host": "132.145.199.243",
       "prep_on_main": "ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@{HOST} 'mkdir -p ~/pi/exports/pi05_v1_15k' && rsync -a -e 'ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes' runs/pi05_v1/step_0015000 ubuntu@{HOST}:~/pi/exports/pi05_v1_15k/",
       "eval": "MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.dagger --checkpoint exports/pi05_v1_15k/step_0015000 --episodes-per-task 150 --out data/sim_dagger_v4 --seed 990000",
       "host": "132.145.199.243",
-      "started": "2026-10-16T06:24"
+      "started": "2026-10-16T06:24",
+      "result": "600 rollouts, 472 kept, 209 teacher-successful"
     },
     {
       "name": "v1_17000_confirm30",
@@ -201,6 +216,16 @@
       "host": "129.213.124.160",
       "started": "2026-10-16T07:24",
       "result": "4/6; both failures are a missed right-arm grasp followed by hovering (no retry)"
+    },
+    {
+      "name": "v2arm_11000_confirm30",
+      "hypothesis": "H1a/H8: does the warm-started pi05_2arm_v2 (step 11000: 8/12, 8/12, 4/12, 4/12 at 11k steps) match pi05_v1 (75-76/120 at 13-17k) on the same 30 seeds? Decides the base for later DAgger rounds",
+      "status": "queued",
+      "prefer_host": "132.145.199.243",
+      "requires_on_host": [
+        "exports/pi05_2arm_v2/step_0011000/model.pt"
+      ],
+      "eval": "for T in pick_place_any bin handover two_bins; do MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.eval_sim --checkpoint exports/pi05_2arm_v2/step_0011000 --task $T --episodes 30 --episode-seconds 30 --execute 25 --delay 0 --device cuda --subtask oracle --seed 4000 --out outputs/eval_v2armconfirm30_step11000_$T; done"
     }
   ]
 }

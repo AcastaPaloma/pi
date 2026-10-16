@@ -372,3 +372,12 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   clean). Its checkpoints relay to A10#1. Others: 2arm_v2 11500, warm2arm 9540, recover 9280, easy 9820; no
   errors. DAgger v4 at two_bins 100/150; dagger5_twobins 60/400 (33 teacher successes of 43 kept).
 - **2026-10-16 08:49** [scheduler] 132.145.199.243 was idle; launched **twobins_mixed_generate** (H10 data: two_bins demos with either arm placing first (half also with recover2 knocks), 1,500 episodes (deprioritised 11:30 UTC: the video shows failures are missed-grasp recovery, not arm order; the recover2 half of this data still helps))
+- **2026-10-16 12:55 UTC** pi05_2arm_v2 finished (12000; step 11000: 8/12, 8/12, 4/12, 4/12, its best);
+  pi05_easy step 10000: 14/16, 14/16 (best; H1b curriculum looks good, stage 2 queued); pi05_dagger1 at step 480
+  (loss 0.031). DAgger v4 done (472 kept). **Caught before launch:** main GPU1 was free and the next entries
+  would have failed there (prep ssh's to the main box from itself → host-key failure; on-box EGL eval). Fix:
+  `scripts/scheduler.py` gains `avoid_hosts` and a Mac-side `mac_after_launch` hook. pi05_v1_rec2 is now
+  main-box native (resumes runs/pi05_v1/step_0020000 directly; checkpoints relayed to A10#2 for 8-episode
+  ladders, started by the hook); pi05_dagger2 relays to A10#1 the same way; curriculum2 / lr5e5 / 2arm_ema avoid
+  the main box. Dry run picks pi05_v1_rec2 for main GPU1. Queued **v2arm_11000_confirm30** (A10): does the
+  warm start match pi05_v1 on the same 30 seeds — decides the base for later DAgger rounds.
