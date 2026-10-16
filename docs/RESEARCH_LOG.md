@@ -167,3 +167,4 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   pi05_single step 6000 on data/sim_mixrec2_v1 (two-arm mix + 6,000 recover2 episodes), 12,000 steps,
   scored on the second A10 at 12 episodes per rung. First launch silently ignored RESUME/META because
   the main box had a stale launcher; synced and relaunched.
+- **2026-10-16 01:56** [scheduler] 132.145.199.243 was idle; launched **single6000_execute_sweep** (H6: re-planning more often (execute 10 or 15 actions per chunk) raises closed-loop success of the solved single-arm model)

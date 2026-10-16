@@ -6,7 +6,9 @@
       "hypothesis": "H1b: easy rungs first learns fastest; stage 2 adds handover and two_bins plus recover2 data",
       "status": "queued",
       "prefer_host": "209.20.158.194",
-      "requires_on_host": ["runs/pi05_easy"],
+      "requires_on_host": [
+        "runs/pi05_easy"
+      ],
       "prep_on_main": "rsync -a -e 'ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes' data/sim_recover2_v1 ubuntu@{HOST}:~/pi/data/",
       "setup": "mkdir -p data/sim_mixrec2_v1 && cd data/sim_mixrec2_v1 && for d in ../sim_mix_v1/episode_*; do ln -sfn $d $(basename $d); done && for d in ../sim_recover2_v1/episode_*; do ln -sfn $d episode_rec2_$(basename $d | cut -d_ -f2); done",
       "train": "RESUME={LATEST:runs/pi05_easy} META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixrec2_v1 runs/{RUN} 10000",
@@ -23,7 +25,7 @@
     },
     {
       "name": "pi05_dagger1",
-      "hypothesis": "H2b: DAgger — label states the policy actually visits with the privileged teacher, so compounding errors are covered",
+      "hypothesis": "H2b: DAgger \u2014 label states the policy actually visits with the privileged teacher, so compounding errors are covered",
       "status": "blocked",
       "blocked_on": "pi_sim DAgger recorder (teacher action from arbitrary state via sync_from_state) not written yet"
     }
@@ -32,10 +34,14 @@
     {
       "name": "single6000_execute_sweep",
       "hypothesis": "H6: re-planning more often (execute 10 or 15 actions per chunk) raises closed-loop success of the solved single-arm model",
-      "status": "queued",
+      "status": "running",
       "prefer_host": "132.145.199.243",
-      "requires_on_host": ["exports/pi05_single/step_0006000/model.pt"],
-      "eval": "for E in 10 15 40; do MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.eval_sim --checkpoint exports/pi05_single/step_0006000 --episodes 30 --episode-seconds 20 --execute $E --delay 0 --device cuda --subtask oracle --seed 1000 --out outputs/eval_single6000exec${E}_step6000_pick_place; done"
+      "requires_on_host": [
+        "exports/pi05_single/step_0006000/model.pt"
+      ],
+      "eval": "for E in 10 15 40; do MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.eval_sim --checkpoint exports/pi05_single/step_0006000 --episodes 30 --episode-seconds 20 --execute $E --delay 0 --device cuda --subtask oracle --seed 1000 --out outputs/eval_single6000exec${E}_step6000_pick_place; done",
+      "host": "132.145.199.243",
+      "started": "2026-10-16T01:56"
     }
   ]
 }
