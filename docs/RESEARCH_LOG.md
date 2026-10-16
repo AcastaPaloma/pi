@@ -259,3 +259,7 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   step 12000); every success includes a lift and the handover successes need both grippers on the cube.
   The plateau at 9000–12000 was not the ceiling. 8-episode samples are noisy; confirm at 14000.
 - **2026-10-16 04:27** [scheduler] 129.213.124.160 was idle; launched **dagger3_generate** (H2b data from the strongest two-arm policy (pi05_warm2arm step 4000: 11/16, 9/16))
+- **2026-10-16 ~10:45** **pi05_recover step 5000: pick 5/16, bin 8/16, handover 4/16, two_bins 4/16** — the
+  first run with successes on all four rungs by step 5000 (pi05_v1's step-5000 two-arm scores predate the
+  oracle fix). It looked beaten at step 4000; not stopping it was right. Scheduler: busy check fixed;
+  dagger3_generate (from pi05_warm2arm step 4000) running on the first A10; dagger2 at 269/600.
