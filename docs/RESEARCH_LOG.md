@@ -88,3 +88,7 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   two-arm is slower, not stuck — keep running, no stop. Opened H4 (post-grasp failures). Launched
   pi05_warm2arm, pi05_recover and pi05_easy on the three new H100 PCIe nodes (≈10 samples/s each;
   the warm start's checkpoint copy failed once on a missing folder and was redone).
+- **2026-10-15 ~23:55** pi05_single step 3000 on 30 episodes: **19/30 success (0.46–0.78), lift 24/30**,
+  up from 10/30 at step 2000 — the leading model. pi05_v1 step 4000 pick_place_any: 0/8, lift 2/8,
+  closest 21 mm (holding the step-3000 gains). H4 (post-grasp failures) still open: lift 80% vs
+  success 63%.
