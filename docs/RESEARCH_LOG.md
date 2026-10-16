@@ -595,3 +595,7 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   (and/or the new data) causes the dip. Queued **pi05_dagger_clean_lr1e5** (same as dagger_clean at LR 1e-5)
   ahead of lr5e5/ema; it runs on main or a node. H100 runnable: dagger2, dagger_clean_lr1e5, lr5e5, 2arm_ema.
 - **2026-10-16 14:47** [scheduler] 129.213.124.160 was idle; launched **v1_rec2_final_confirm30** (H2: pi05_v1_rec2 final (step 8000) vs its resume point (83/120) on the 30 shared seeds)
+- **2026-10-16 18:50 UTC** **dagger1_final_confirm30 (step 8000, strict): 24/26/16/14 = 80/120** (step 7000: 85; baseline
+  pi05_v1 step 20000: 83). DAgger round 1 is confirmed as no gain; pi05_v1 step 20000 stays the reference and the demo
+  model. v1_rec2_final_confirm30 running on A10#1. Steps: dagger_clean 2140, v1_cont 1760, rec2_trim 3140, curriculum2
+  3240, recover 15760. No idle GPUs; queue has 4 H100 and 1 A10 runnable (dagger10_fixed).
