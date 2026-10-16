@@ -24,16 +24,16 @@ import json, glob, os, statistics as s
 for f in glob.glob(os.path.expanduser("~/pi/outputs/eval_*/results.json")):
     try:
         r = json.load(open(f))
+        res = r.get("results", [])
+        if not res:
+            continue
+        print(json.dumps({"dir": os.path.basename(os.path.dirname(f)), "n": len(res),
+            "success": sum(bool(x["success"]) for x in res), "lift": sum(bool(x.get("lifted")) for x in res),
+            "closest_mm": round(1000 * s.median(x.get("closest_hand_to_cube_m", float("nan")) for x in res)),
+            "both": sum(all((x.get("touched") or {"a": False}).values()) for x in res),
+            "task": res[0].get("task_id", "pick_place"), "mtime": os.path.getmtime(f)}))
     except Exception:
         continue
-    res = r.get("results", [])
-    if not res:
-        continue
-    print(json.dumps({"dir": os.path.basename(os.path.dirname(f)), "n": len(res),
-        "success": sum(bool(x["success"]) for x in res), "lift": sum(bool(x.get("lifted")) for x in res),
-        "closest_mm": round(1000 * s.median(x["closest_hand_to_cube_m"] for x in res)),
-        "both": sum(all((x.get("touched") or {"a": False}).values()) for x in res),
-        "task": res[0].get("task_id", "pick_place"), "mtime": os.path.getmtime(f)}))
 EOF'''
 
 

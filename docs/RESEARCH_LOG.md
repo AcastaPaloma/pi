@@ -48,6 +48,13 @@ Rungs use 8 episodes, 30 s, both sides of the table and container walls; the sin
 the original placement. Not a model problem, but it changes how to read 0/8. Check by scoring
 pi05_single and pi05_v1 on the same task (pick_place_any, left side only) once both have ~3000 steps.
 
+### H4: single-arm failures now happen after the grasp (watching, since 2026-10-15 23:30)
+pi05_single step 3000 lifts the cube in 8/10 episodes but succeeds in 5/10: the remaining failures
+are in carrying, placing or releasing, not in reaching. Possible changes: (a) longer training (the
+place phase is the last to be learned); (b) more place/release supervision via recovery episodes
+(knocks during transfer and lower-to-goal); (c) check the success rule (released, settled, on disk)
+against videos of the failures. Decide after steps 4000–5000 and a video review.
+
 ## Experiments and compute (from 2026-10-15 ~22:40)
 
 | Run | Machine | Change vs pi05_v1 | Tests | Evaluated by |
@@ -73,3 +80,11 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   two-arm flat); per protocol, not acting on pi05_v1 itself yet. User added three 1×H100 PCIe nodes
   and an A10: launching pi05_warm2arm (H1a), pi05_recover (H2), pi05_easy (H1b) so each hypothesis is
   tested by its own run instead of sequentially. Recovery data generated: 2,000 episodes, 1,481 successful.
+
+- **2026-10-15 ~23:30** Leaderboard fixed (one malformed old result file had hidden later ones).
+  pi05_single: 3/10 → 5/10 → 5/10 at steps 1000–3000, lift 8/10 and 10 mm median closest at 3000;
+  30-episode check at step 2000: 10/30 (0.19–0.51). pi05_v1 step 3000: still 0 successes but clearly
+  learning (closest 61→20 mm on pick_place_any, handover lift 3/8, two_bins lift 2/8). H1 evidence:
+  two-arm is slower, not stuck — keep running, no stop. Opened H4 (post-grasp failures). Launched
+  pi05_warm2arm, pi05_recover and pi05_easy on the three new H100 PCIe nodes (≈10 samples/s each;
+  the warm start's checkpoint copy failed once on a missing folder and was redone).
