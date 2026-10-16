@@ -109,7 +109,9 @@ def launch(entry, host, gpu=None):
             steps.append(f"setsid nohup bash -c {shlex.quote(tagged)} < /dev/null > {log} 2>&1 &")
     # Fire and forget: a remote shell that backgrounds jobs can keep the ssh channel open for hours,
     # which used to block the whole scheduler. Start it detached here and verify by the job tag instead.
-    remote = "cd ~/pi && mkdir -p logs outputs && " + " ; cd ~/pi && ".join(steps)
+    # One step per line: joining background steps with " ; " gives "cmd & ; cd ...", a bash syntax error that
+    # silently ran nothing for any entry with both train and eval (pi05_curriculum2, 2026-10-16).
+    remote = "cd ~/pi && mkdir -p logs outputs\n" + "\n".join(f"cd ~/pi && {step}" for step in steps)
     subprocess.Popen(["ssh", "-n", "-o", "BatchMode=yes", "-o", "ConnectTimeout=20", f"ubuntu@{host}", remote],
                      stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
     # Setup can take minutes (pi05_dagger1 linked ~13k episodes). train_pi05.sh backgrounds the trainer and

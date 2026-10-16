@@ -298,6 +298,16 @@
       "eval": "MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.dagger --checkpoint exports/pi05_v1/step_0020000 --episodes-per-task 150 --takeover-min 1 --takeover-max 15 --out data/sim_dagger_v7 --seed 999000",
       "host": "129.213.124.160",
       "started": "2026-10-16T10:42"
+    },
+    {
+      "name": "v1_20000_twobins_video",
+      "hypothesis": "H11/H12 evidence: is the second-arm hover still the main two_bins failure for the best policy (pi05_v1 step 20000: second cube 12/30, never lifted in 10 of 18 failures)?",
+      "status": "queued",
+      "prefer_host": "129.213.124.160",
+      "requires_on_host": [
+        "exports/pi05_v1/step_0020000/model.pt"
+      ],
+      "eval": "MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.eval_sim --checkpoint exports/pi05_v1/step_0020000 --task two_bins --episodes 6 --episode-seconds 30 --execute 25 --delay 0 --device cuda --subtask oracle --seed 5000 --out outputs/video_v1_20000_two_bins --video --full-video 2"
     }
   ]
 }

@@ -475,3 +475,15 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   two_bins 20/100. Steps: dagger1 3880, v1_rec2 3140, warm2arm 11880 (ends at 12000; its node then takes
   pi05_v1_rec2_trim), recover 11560. No errors.
 - **2026-10-16 11:21** [scheduler] 209.20.158.194:0 was idle; launched **pi05_curriculum2** (H1b: easy rungs first learns fastest; stage 2 adds handover and two_bins plus recover2 data)
+- **2026-10-16 15:25 UTC** **Scheduler bug fixed: H100 entries with both `train` and `eval` launched nothing.**
+  `launch()` joined background steps with " ; ", giving `cmd & ; cd …`, a bash syntax error. The remote shell
+  ran nothing, and the output went to /dev/null. pi05_curriculum2 (launched 14:47) sat idle for 30 min because of
+  it, and pi05_v1_rec2_trim, pi05_dagger_clean, pi05_lr5e5 and pi05_2arm_ema would have hit the same bug. Fix:
+  one step per line. Every H100 entry's launch string now passes `bash -n`; curriculum2 requeued and now loading
+  data. pi05_warm2arm finished (step 12000: 8/16, 11/16, 4/16, 5/16); its node takes pi05_v1_rec2_trim next.
+  **pi05_v1_rec2 step 3000: 4/8, 2/8, 3/8, 0/8 (9/32), the third checkpoint far below its 22/32 resume point**
+  (7 → 10 → 9 of 32), and pi05_dagger1 is also low. **H14 (open):** resuming a converged policy with a fresh
+  warmup to the full LR (2.5e-5) knocks it out of its basin, whatever the data. Implied change: continue at a
+  lower peak LR (e.g. 5e-6). Watching 1–2 more checkpoints of both continuations (the 2arm_v2 dip recovered by
+  ~6000) before queuing a low-LR continuation. Queued A10 **v1_20000_twobins_video** (6 full-video episodes) to
+  check the second-arm hover on the best policy.
