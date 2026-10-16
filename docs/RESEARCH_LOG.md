@@ -431,10 +431,10 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
 
   | set | episodes | teacher failed | parked share of steps |
   | --- | --- | --- | --- |
-  | v1 (pi05_v1 8000) | 532 | 19% | 36% |
-  | v2 (2arm_v2 in its dip) | 570 | 70% | 81% |
-  | v3 (warm2arm 4000) | 546 | 14% | 27% |
-  | v4 (pi05_v1 15000) | 436 | 52% | 72% |
+  | v1 (pi05_v1 8000) | 532 | 19% | 37% |
+  | v2 (2arm_v2 in its dip) | 570 | 70% | 82% |
+  | v3 (warm2arm 4000) | 546 | 14% | 29% |
+  | v4 (pi05_v1 15000) | 436 | 53% | 73% |
   | all | 2,084 | 38% | **62%** |
 
   Two_bins continuations failed 100% (v2) and 95% (v4). So the joint-space DAgger teacher often cannot recover
