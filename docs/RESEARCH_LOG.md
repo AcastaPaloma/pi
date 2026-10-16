@@ -189,3 +189,9 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   score pending). Scheduler: a hung ssh launch had blocked it; launches are now detached and confirmed
   by job tag; the A10 execute-horizon sweep is running and DAgger generation is at 88 episodes. Queue:
   added **pi05_v1_rec2** (continue the best two-arm model on recover2 data) at the front.
+- **2026-10-16 ~07:00** pi05_v1 step 10000: bin **6/8**, pick_place_any 4/8, handover 1/8 (lift 7/8, both
+  arms 4/8), two_bins **0/8 with lift 7/8**. Opened **H7: two_bins fails after the grasp** — candidate
+  causes: the second arm stalls on the "hold and wait" prompt, arms collide over the shared container, or
+  a cube lands on the rim/other cube. Recording 6 two_bins + 6 handover full videos of step 10000 on the
+  easy-rungs H100 to decide. pi05_2arm_v2 (warm start from single-arm 6000 + recover2) step 1000:
+  pick_place_any 2/12, bin 2/12 — the best step-1000 two-arm start so far.
