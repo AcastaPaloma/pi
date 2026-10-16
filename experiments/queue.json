@@ -121,10 +121,12 @@
     {
       "name": "dagger4_generate",
       "hypothesis": "H2b data from the best two-arm policy (pi05_v1 step 15000: 7/8, 4/8, 2/8, 3/8)",
-      "status": "queued",
+      "status": "running",
       "prefer_host": "132.145.199.243",
       "prep_on_main": "ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@{HOST} 'mkdir -p ~/pi/exports/pi05_v1_15k' && rsync -a -e 'ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes' runs/pi05_v1/step_0015000 ubuntu@{HOST}:~/pi/exports/pi05_v1_15k/",
-      "eval": "MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.dagger --checkpoint exports/pi05_v1_15k/step_0015000 --episodes-per-task 150 --out data/sim_dagger_v4 --seed 990000"
+      "eval": "MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.dagger --checkpoint exports/pi05_v1_15k/step_0015000 --episodes-per-task 150 --out data/sim_dagger_v4 --seed 990000",
+      "host": "132.145.199.243",
+      "started": "2026-10-16T06:24"
     }
   ]
 }

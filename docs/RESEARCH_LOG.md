@@ -279,3 +279,4 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   7000: pick 10/16, bin 11/16. pi05_recover step 6000: 9/16, 9/16, 4/16, 0/16. DAgger v3 done (546 episodes,
   470 successful); pi05_dagger1 now aggregates DAgger v1+v2+v3 (~1,600 episodes). The 30-episode confirmation
   of pi05_v1 step 13000 is running on the first A10.
+- **2026-10-16 06:27** [scheduler] 132.145.199.243 was idle; launched **dagger4_generate** (H2b data from the best two-arm policy (pi05_v1 step 15000: 7/8, 4/8, 2/8, 3/8))
