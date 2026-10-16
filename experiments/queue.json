@@ -117,6 +117,14 @@
       "eval": "for T in pick_place_any bin handover two_bins; do MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.eval_sim --checkpoint exports/pi05_v1/step_0013000 --task $T --episodes 30 --episode-seconds 30 --execute 25 --delay 0 --device cuda --subtask oracle --seed 4000 --out outputs/eval_v1confirm30_step13000_$T; done",
       "host": "129.213.124.160",
       "started": "2026-10-16T06:04"
+    },
+    {
+      "name": "dagger4_generate",
+      "hypothesis": "H2b data from the best two-arm policy (pi05_v1 step 15000: 7/8, 4/8, 2/8, 3/8)",
+      "status": "queued",
+      "prefer_host": "132.145.199.243",
+      "prep_on_main": "ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@{HOST} 'mkdir -p ~/pi/exports/pi05_v1_15k' && rsync -a -e 'ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes' runs/pi05_v1/step_0015000 ubuntu@{HOST}:~/pi/exports/pi05_v1_15k/",
+      "eval": "MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.dagger --checkpoint exports/pi05_v1_15k/step_0015000 --episodes-per-task 150 --out data/sim_dagger_v4 --seed 990000"
     }
   ]
 }
