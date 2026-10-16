@@ -502,3 +502,11 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   whose export is already there), which also feeds pi05_dagger_clean. Steps: dagger1 5180, v1_rec2 4460, recover
   12300. No errors.
 - **2026-10-16 11:46** [scheduler] 209.20.159.198:0 was idle; launched **pi05_v1_rec2_trim** (H12: failed scripted demos end with both hands parked for 10-25 s until the time limit (44% of failed two_bins demos; 13% of all samples, 20% of two_bins steps); sampling them teaches the policy to stop, the hover seen in two_bins failures. A/B twin of pi05_v1_rec2 (same resume, data, steps) with PI_TRIM_STILL_TAIL_S=1)
+- **2026-10-16 15:55 UTC** **Live interactive demo** (user request): `pi_model/live_demo.py` serves pi05_v1
+  step 20000 (bf16, 5 denoise steps, oracle subtasks, 25 actions per chunk, the confirmation settings) on A10#2
+  (132.145.199.243), bound to 127.0.0.1:8765 and reached through an SSH tunnel. The user drags the cube(s) and
+  the destination on a top-down table map, picks one of the four tasks, and watches the three cameras live at
+  real-time pace. Checks through the API: two_bins succeeded in 9.5 s, bin in 10.5 s; training-distribution
+  placements gave pick_place_any 3/4 and handover 2/3, in line with the 30-episode rates, so the demo's
+  placement path is faithful. A10#2 is reserved for it: dagger8_fixed is held, and the server runs under a
+  SCHEDJOB tag so the scheduler leaves the GPU alone.
