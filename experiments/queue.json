@@ -2,6 +2,15 @@
   "_doc": "Experiment queue read by scripts/scheduler.py. Entries run in order on the first idle machine of their class. Each entry ties to a hypothesis in docs/RESEARCH_LOG.md. status: queued | running | done | failed | blocked. Shell snippets run on the target host in ~/pi unless noted; {HOST} is the target address, {RUN} the run name, {LATEST:<dir>} the highest step_* directory under <dir> on the target.",
   "h100": [
     {
+      "name": "pi05_v1_rec2",
+      "hypothesis": "H2 on the best model: continue pi05_v1 (6/8 and 5/8 at step 9000) on the two-arm mix plus recover2 (bumps, missed grasps)",
+      "status": "queued",
+      "prep_on_main": "L=$(ls -d runs/pi05_v1/step_* | sort | tail -1); ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@{HOST} 'mkdir -p ~/pi/runs/pi05_v1_snap' && rsync -a -e 'ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes' $L ubuntu@{HOST}:~/pi/runs/pi05_v1_snap/ && rsync -a -e 'ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes' data/sim_recover2_v1 ubuntu@{HOST}:~/pi/data/",
+      "setup": "mkdir -p data/sim_mixrec2_v1 && cd data/sim_mixrec2_v1 && for d in ../sim_mix_v1/episode_*; do ln -sfn $d $(basename $d); done && for d in ../sim_recover2_v1/episode_*; do ln -sfn $d episode_rec2_$(basename $d | cut -d_ -f2); done",
+      "train": "RESUME={LATEST:runs/pi05_v1_snap} META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixrec2_v1 runs/{RUN} 8000",
+      "eval": "GPU=0 NAME={RUN} EPISODES=16 TASKS='pick_place_any bin handover two_bins' MUJOCO_GL=egl bash scripts/box/eval_when_ready.sh runs/{RUN} 1000 2000 3000 4000 5000 6000 7000 8000"
+    },
+    {
       "name": "pi05_curriculum2",
       "hypothesis": "H1b: easy rungs first learns fastest; stage 2 adds handover and two_bins plus recover2 data",
       "status": "queued",

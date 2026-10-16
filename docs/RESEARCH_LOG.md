@@ -182,3 +182,10 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   so they are unaffected. Report strict numbers from now on. pi05_warm2arm step 3000 otherwise improved
   (bin 5/16, handover lift 7/16) vs pi05_v1 at step 3000 (0/8): H1a now has some support.
 - **2026-10-16 02:28** [scheduler] 132.145.199.243 was idle; launched **single6000_execute_sweep** (H6: re-planning more often (execute 10 or 15 actions per chunk) raises closed-loop success of the solved single-arm model)
+- **2026-10-16 ~06:40** Step 3000 of the three experiments (16/rung): pi05_recover bin 5/16, two_bins lift
+  6/16; pi05_warm2arm bin 5/16, handover lift 7/16; pi05_easy bin 3/16. All three beat pi05_v1 at the
+  same step (0/8; caveat: old oracle), so each change speeds early learning; none separates from the
+  others yet — step 4000 is their fourth checkpoint. pi05_v1 at step 10320, pi05_2arm_v2 at 1280 (first
+  score pending). Scheduler: a hung ssh launch had blocked it; launches are now detached and confirmed
+  by job tag; the A10 execute-horizon sweep is running and DAgger generation is at 88 episodes. Queue:
+  added **pi05_v1_rec2** (continue the best two-arm model on recover2 data) at the front.
