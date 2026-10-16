@@ -249,12 +249,14 @@
     {
       "name": "dagger6_generate",
       "hypothesis": "H2b/H11 data diversity: DAgger rollouts from a second, differently trained policy (pi05_2arm_v2 final step 12000: 8/12, 6/12, 5/12, 5/12) for pi05_dagger2",
-      "status": "queued",
+      "status": "running",
       "prefer_host": "132.145.199.243",
       "requires_on_host": [
         "exports/pi05_2arm_v2/step_0012000/model.pt"
       ],
-      "eval": "MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.dagger --checkpoint exports/pi05_2arm_v2/step_0012000 --episodes-per-task 100 --out data/sim_dagger_v6 --seed 997000"
+      "eval": "MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.dagger --checkpoint exports/pi05_2arm_v2/step_0012000 --episodes-per-task 100 --out data/sim_dagger_v6 --seed 997000",
+      "host": "132.145.199.243",
+      "started": "2026-10-16T09:50"
     },
     {
       "name": "v1_20000_confirm30",

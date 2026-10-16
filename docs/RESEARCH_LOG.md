@@ -423,3 +423,4 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   **v1_20000_confirm30** on A10#1: the resume point of the DAgger, recover2 and trim runs, on the 30 shared seeds,
   as their baseline.
 - **2026-10-16 09:50** [scheduler] 129.213.124.160 was idle; launched **v1_20000_confirm30** (Baseline for H2b/H12: pi05_v1 step 20000 (the resume point of pi05_dagger1, pi05_v1_rec2 and pi05_v1_rec2_trim) on the same 30 seeds, with per-object two_bins metrics, so their final checkpoints can be compared episode for episode)
+- **2026-10-16 09:51** [scheduler] 132.145.199.243 was idle; launched **dagger6_generate** (H2b/H11 data diversity: DAgger rollouts from a second, differently trained policy (pi05_2arm_v2 final step 12000: 8/12, 6/12, 5/12, 5/12) for pi05_dagger2)
