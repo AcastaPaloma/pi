@@ -315,12 +315,13 @@
     {
       "name": "dagger8_fixed",
       "hypothesis": "H13 fixed teacher, second policy for state diversity: DAgger from pi05_v1 step 15000 (export already on A10#2) for pi05_dagger_clean",
-      "status": "queued",
+      "status": "held",
       "prefer_host": "132.145.199.243",
       "requires_on_host": [
         "exports/pi05_v1_15k/step_0015000/model.pt"
       ],
-      "eval": "MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.dagger --checkpoint exports/pi05_v1_15k/step_0015000 --episodes-per-task 120 --takeover-min 1 --takeover-max 15 --out data/sim_dagger_v8 --seed 1001000"
+      "eval": "MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.dagger --checkpoint exports/pi05_v1_15k/step_0015000 --episodes-per-task 120 --takeover-min 1 --takeover-max 15 --out data/sim_dagger_v8 --seed 1001000",
+      "held_reason": "A10#2 (132.145.199.243) reserved for the live two-arm demo requested by the user (2026-10-16 ~16:00 UTC); release with status queued when the demo is done"
     }
   ]
 }

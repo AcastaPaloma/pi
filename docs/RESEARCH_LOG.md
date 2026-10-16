@@ -501,3 +501,4 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   successful (89%; was 47–81% failure in v2/v4). Queued **dagger8_fixed** on A10#2 (from pi05_v1 step 15000,
   whose export is already there), which also feeds pi05_dagger_clean. Steps: dagger1 5180, v1_rec2 4460, recover
   12300. No errors.
+- **2026-10-16 11:46** [scheduler] 209.20.159.198:0 was idle; launched **pi05_v1_rec2_trim** (H12: failed scripted demos end with both hands parked for 10-25 s until the time limit (44% of failed two_bins demos; 13% of all samples, 20% of two_bins steps); sampling them teaches the policy to stop, the hover seen in two_bins failures. A/B twin of pi05_v1_rec2 (same resume, data, steps) with PI_TRIM_STILL_TAIL_S=1)
