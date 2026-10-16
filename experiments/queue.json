@@ -42,14 +42,13 @@
     {
       "name": "single6000_execute_sweep",
       "hypothesis": "H6: re-planning more often (execute 10 or 15 actions per chunk) raises closed-loop success of the solved single-arm model",
-      "status": "running",
+      "status": "queued",
       "prefer_host": "132.145.199.243",
       "requires_on_host": [
         "exports/pi05_single/step_0006000/model.pt"
       ],
       "eval": "for E in 10 15 40; do MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.eval_sim --checkpoint exports/pi05_single/step_0006000 --episodes 30 --episode-seconds 20 --execute $E --delay 0 --device cuda --subtask oracle --seed 1000 --out outputs/eval_single6000exec${E}_step6000_pick_place; done",
-      "host": "132.145.199.243",
-      "started": "2026-10-16T01:56"
+      "note": "first launch failed: the scheduler's quoting let $E expand to nothing (fixed)"
     },
     {
       "name": "dagger1_generate",

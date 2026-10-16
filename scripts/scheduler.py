@@ -12,6 +12,7 @@ to docs/RESEARCH_LOG.md (committed and pushed). Crashed or stopped runs free the
 import json
 import os
 import re
+import shlex
 import subprocess
 import time
 from datetime import datetime
@@ -44,8 +45,16 @@ def gpu_busy(slot):
 
 
 def a10_busy(host):
-    code, out = ssh(host, "pgrep -f '[p]i_model.eval_sim' >/dev/null && echo busy || echo idle")
-    return "busy" in out
+    """Busy if a scheduler job already runs there, or the GPU is too full for one more model (~9 GB).
+    Checkpoint evaluations may run alongside a scheduler job."""
+    code, out = ssh(host, "pgrep -f '[S]CHEDJOB_' >/dev/null && echo busy; "
+                          "nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits | head -1")
+    if "busy" in out:
+        return True
+    try:
+        return int(out.split()[-1]) > 13000
+    except (ValueError, IndexError):
+        return True
 
 
 def resolve(text, host, run):
@@ -89,7 +98,9 @@ def launch(entry, host, gpu=None):
             if gpu is not None:
                 cmd = cmd.replace("GPUS=0", f"GPUS={gpu}").replace("GPU=0", f"GPU={gpu}")
             log = f"logs/{key}_{run}.log" if key == "train" else f"logs/eval_{run}.log"
-            steps.append(f"setsid nohup bash -c {json.dumps(cmd)} < /dev/null > {log} 2>&1 &")
+            # shlex.quote keeps $VARS for the job's own shell (json.dumps let the login shell expand them).
+            tagged = f": SCHEDJOB_{run}; {cmd}"
+            steps.append(f"setsid nohup bash -c {shlex.quote(tagged)} < /dev/null > {log} 2>&1 &")
     code, out = ssh(host, "cd ~/pi && mkdir -p logs outputs && " + " ; cd ~/pi && ".join(steps), timeout=3600)
     return code, out
 

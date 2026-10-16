@@ -168,3 +168,9 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   scored on the second A10 at 12 episodes per rung. First launch silently ignored RESUME/META because
   the main box had a stale launcher; synced and relaunched.
 - **2026-10-16 01:56** [scheduler] 132.145.199.243 was idle; launched **single6000_execute_sweep** (H6: re-planning more often (execute 10 or 15 actions per chunk) raises closed-loop success of the solved single-arm model)
+- **2026-10-16 ~05:15** **pi05_v1 step 9000: pick_place_any 6/8, bin 5/8**, handover 1/8 (both arms 1/8),
+  two_bins 0/8 (lift 5/8) — single-object two-arm rungs now work most of the time; coordination tasks
+  are the frontier. pi05_easy step 3000: 2/16 and 3/16 (down from 3/16, 5/16; 16-episode noise).
+  Scheduler bug: its first A10 launch (execute sweep) failed because double-quoting let the login
+  shell expand `$E`; switched to shlex quoting, tagged jobs (SCHEDJOB_<name>) and let an A10 job run
+  beside checkpoint evaluations when memory allows. Re-queued the sweep; dagger1_generate launches next.
