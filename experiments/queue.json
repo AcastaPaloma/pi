@@ -141,6 +141,22 @@
       "eval": "for T in pick_place_any bin handover two_bins; do MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.eval_sim --checkpoint exports/pi05_v1/step_0017000 --task $T --episodes 30 --episode-seconds 30 --execute 25 --delay 0 --device cuda --subtask oracle --seed 4000 --out outputs/eval_v1confirm30_step17000_$T; done",
       "host": "129.213.124.160",
       "started": "2026-10-16T06:48"
+    },
+    {
+      "name": "twobins_mixed_generate",
+      "hypothesis": "H10 data: two_bins demos with either arm placing first (half also with recover2 knocks), 1,500 episodes",
+      "status": "queued",
+      "eval": "MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_sim.record_tasks --out data/sim_twobins_mixed_v1 --tasks two_bins --episodes-per-task 1500 --styles mixed_order,mixed_order_recover2 --workers 12 --seed 1100000 --episode-seconds 40"
+    },
+    {
+      "name": "v1_17000_twobins_video",
+      "hypothesis": "H10 evidence: watch how step-17000 two_bins episodes fail",
+      "status": "queued",
+      "prefer_host": "129.213.124.160",
+      "requires_on_host": [
+        "exports/pi05_v1/step_0017000/model.pt"
+      ],
+      "eval": "MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.eval_sim --checkpoint exports/pi05_v1/step_0017000 --task two_bins --episodes 6 --episode-seconds 30 --execute 25 --delay 0 --device cuda --subtask oracle --seed 5000 --out outputs/video_v1_17000_two_bins --video --full-video 2"
     }
   ]
 }

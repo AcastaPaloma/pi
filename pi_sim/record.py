@@ -37,6 +37,10 @@ STYLES = {
 PERTURB = {"recover": {"perturb_rate": 1.0},
            # v2: target knocks plus object bumps during approach/grasp and deliberate off-target grasps
            "recover2": {"perturb_rate": 0.5, "bump_rate": 0.5, "miss_prob": 0.3}}
+PERTURB["mixed_order"] = {"random_order": True}
+PERTURB["mixed_order_recover2"] = {"random_order": True, "perturb_rate": 0.5, "bump_rate": 0.5, "miss_prob": 0.3}
+STYLES["mixed_order"] = (1.0, 0.0, 5)
+STYLES["mixed_order_recover2"] = (0.85, 0.004, 3)
 STYLES["recover"] = (0.85, 0.004, 3)
 STYLES["recover2"] = (0.85, 0.004, 3)
 

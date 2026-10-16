@@ -406,7 +406,7 @@ class TaskTeacher:
     """Scripted demonstrator for every rung; works in ee_delta control."""
 
     def __init__(self, env: TaskEnv, *, rng=None, speed=1.0, noise=0.0, observe_only=False, perturb_rate=0.0,
-                 bump_rate=0.0, miss_prob=0.0):
+                 bump_rate=0.0, miss_prob=0.0, random_order=False):
         """observe_only: track the scripted phase from true state while something else (a policy)
         moves the arms; `observe()` advances it and `subtask` gives the oracle label."""
         if env.control_mode != "ee_delta" and not observe_only:
@@ -430,7 +430,10 @@ class TaskTeacher:
             b = env.bin_position
             first = ArmPickPlace(env, "left", "cube", b[:2] + [-0.022, 0], 0.055, "bin", rng=rng, noise=noise, perturb_rate=perturb_rate, bump_rate=bump_rate, miss_prob=miss_prob)
             second = ArmPickPlace(env, "right", "cube2", b[:2] + [0.022, 0], 0.055, "bin", rng=rng, noise=noise, perturb_rate=perturb_rate, bump_rate=bump_rate, miss_prob=miss_prob)
-            second.wait_for = first  # both pick at once; the right arm carries once the left has left the bin
+            if random_order and rng.random() < 0.5:
+                # H10: also demonstrate the right arm placing first (the default always leads with the left).
+                first, second = second, first
+            second.wait_for = first  # both pick at once; the other arm carries once the first has left the bin
             self.stages = [[first, second]]
         self.k = 0
 
