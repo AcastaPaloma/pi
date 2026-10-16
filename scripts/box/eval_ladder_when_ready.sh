@@ -4,6 +4,7 @@
 # Prints one "RUNG <step> <rung> success=<x> lift=<y>" line per rung so trends are easy to grep.
 set -u
 RUN=${RUN:-full_v2}; EPISODES=${EPISODES:-8}; RUNGS=${RUNGS:-pick_place_any bin handover two_bins}
+PY=${PY:-$HOME/pi-venv/bin/python}; DELAY=${DELAY:-6}  # π0.5 backbone: PY=~/lerobot-venv/bin/python DELAY=0
 # NVIDIA EGL: the ladder episodes (most of the training data) were rendered with it, and it is ~100x
 # faster than Mesa, which leaves the ~1 s policy calls as the main cost (~60 s per failed 30 s episode).
 export MUJOCO_GL=${MUJOCO_GL:-egl} LP_NUM_THREADS=8
@@ -14,8 +15,8 @@ for step in "$@"; do
   echo "=== $ckpt $(date) ==="
   for rung in $RUNGS; do
     out="outputs/eval_${RUN}_step${step}_${rung}"
-    ~/pi-venv/bin/python -m pi_model.eval_sim --checkpoint "$ckpt" --task "$rung" --episodes "$EPISODES" \
-        --episode-seconds 30 --execute 25 --delay 6 --device cuda --dtype bf16 --subtask oracle --out "$out" 2>&1 \
+    $PY -m pi_model.eval_sim --checkpoint "$ckpt" --task "$rung" --episodes "$EPISODES" \
+        --episode-seconds 30 --execute 25 --delay "$DELAY" --device cuda --dtype bf16 --subtask oracle --out "$out" 2>&1 \
         | grep --line-buffered -E "Traceback|Error"
     python3 -c "
 import json, statistics as s

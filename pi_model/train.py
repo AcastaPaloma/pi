@@ -71,7 +71,7 @@ def build_model(cfg, *, gemma=None, device=torch.device("cpu"), checkpoint=None,
         model = make_model(cfg, pretrained=checkpoint is None)
         if checkpoint is not None:
             model.load_state_dict(torch.load(Path(checkpoint) / "model.pt", map_location="cpu"))
-        return model.to(device), {"pi05_base": checkpoint is None}
+        return model.to(device), None
     model = Pi07(cfg)
     if checkpoint is not None:
         model.load_state_dict(torch.load(Path(checkpoint) / "model.pt", map_location="cpu"))
