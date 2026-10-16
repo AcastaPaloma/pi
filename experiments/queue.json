@@ -77,12 +77,14 @@
     {
       "name": "dagger2_generate",
       "hypothesis": "H2b data, second policy: rollouts of pi05_2arm_v2 (warm start + recover2) finished by the teacher; aggregates mistakes from a different policy",
-      "status": "queued",
+      "status": "running",
       "prefer_host": "132.145.199.243",
       "requires_on_host": [
         "exports/pi05_2arm_v2/step_0002000/model.pt"
       ],
-      "eval": "MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.dagger --checkpoint {LATEST:exports/pi05_2arm_v2} --episodes-per-task 150 --out data/sim_dagger_v2 --seed 950000"
+      "eval": "MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.dagger --checkpoint {LATEST:exports/pi05_2arm_v2} --episodes-per-task 150 --out data/sim_dagger_v2 --seed 950000",
+      "host": "132.145.199.243",
+      "started": "2026-10-16T03:19"
     }
   ]
 }

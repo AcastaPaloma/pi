@@ -215,3 +215,4 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   strict 21/26/26/27 of 30 — re-planning more often does not help; keep execute 25. DAgger data from
   pi05_v1 at 351/600. Queued **dagger2_generate** (rollouts of pi05_2arm_v2) for the idle second A10.
   Steps: pi05_v1 11580, 2arm_v2 2560, warm2arm 4420, recover 4240, easy 4380; no errors.
+- **2026-10-16 03:20** [scheduler] 132.145.199.243 was idle; launched **dagger2_generate** (H2b data, second policy: rollouts of pi05_2arm_v2 (warm start + recover2) finished by the teacher; aggregates mistakes from a different policy)
