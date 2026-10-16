@@ -334,3 +334,4 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   not clearly beaten, so it continues under the stop rule; if its next four checkpoints stay below pi05_v1's
   lower bounds it gets stopped for a queued entry. No errors on any host; all five H100s training, A10#2
   generating DAgger v4 (handover 80/150), A10#1 about to take the soup confirmation. No extra compute needed.
+- **2026-10-16 07:37** [scheduler] 129.213.124.160 was idle; launched **v1_soup_confirm30** (H9b: checkpoints trade skills (13000 vs 17000: pick 27 vs 23, two_bins 9 vs 15 of 30). A uniform average of pi05_v1 steps 13000-18000 should keep both, beating each single checkpoint on the same seeds)
