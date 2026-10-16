@@ -381,3 +381,4 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   ladders, started by the hook); pi05_dagger2 relays to A10#1 the same way; curriculum2 / lr5e5 / 2arm_ema avoid
   the main box. Dry run picks pi05_v1_rec2 for main GPU1. Queued **v2arm_11000_confirm30** (A10): does the
   warm start match pi05_v1 on the same 30 seeds — decides the base for later DAgger rounds.
+- **2026-10-16 08:58** [scheduler] 192.222.52.191:1 was idle; launched **pi05_v1_rec2** (H2 on the best model: continue pi05_v1 (6/8 and 5/8 at step 9000) on the two-arm mix plus recover2 (bumps, missed grasps) | 11:30 UTC: promoted — the step-17000 two_bins video shows missed grasps with no retry, which recover2's deliberate missed grasps teach)

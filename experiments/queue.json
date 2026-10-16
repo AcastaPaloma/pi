@@ -20,7 +20,7 @@
     {
       "name": "pi05_v1_rec2",
       "hypothesis": "H2 on the best model: continue pi05_v1 (6/8 and 5/8 at step 9000) on the two-arm mix plus recover2 (bumps, missed grasps) | 11:30 UTC: promoted \u2014 the step-17000 two_bins video shows missed grasps with no retry, which recover2's deliberate missed grasps teach",
-      "status": "queued",
+      "status": "running",
       "setup": "mkdir -p data/sim_mixrec2_v1 && cd data/sim_mixrec2_v1 && for d in ../sim_mix_v1/episode_*; do ln -sfn $d $(basename $d); done && for d in ../sim_recover2_v1/episode_*; do ln -sfn $d episode_rec2_$(basename $d | cut -d_ -f2); done",
       "train": "RESUME=runs/pi05_v1/step_0020000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixrec2_v1 runs/{RUN} 8000",
       "prefer_host": "192.222.52.191",
@@ -28,7 +28,9 @@
         "runs/pi05_v1/step_0020000",
         "data/sim_mixrec2_v1"
       ],
-      "mac_after_launch": "EVAL=ubuntu@132.145.199.243 RUN={RUN} EVAL_KEY='~/.ssh/id_ed25519_evalbox' nohup bash scripts/relay_checkpoints.sh 1000 2000 3000 4000 5000 6000 7000 8000 > outputs/relay_{RUN}.log 2>&1 & ssh -n -o BatchMode=yes ubuntu@132.145.199.243 'cd ~/pi && (RUN={RUN} PY=~/lerobot-venv/bin/python DELAY=0 setsid nohup bash scripts/box/eval_ladder_when_ready.sh 1000 2000 3000 4000 5000 6000 7000 8000 > logs/eval_ladder_{RUN}.log 2>&1 < /dev/null &)'"
+      "mac_after_launch": "EVAL=ubuntu@132.145.199.243 RUN={RUN} EVAL_KEY='~/.ssh/id_ed25519_evalbox' nohup bash scripts/relay_checkpoints.sh 1000 2000 3000 4000 5000 6000 7000 8000 > outputs/relay_{RUN}.log 2>&1 & ssh -n -o BatchMode=yes ubuntu@132.145.199.243 'cd ~/pi && (RUN={RUN} PY=~/lerobot-venv/bin/python DELAY=0 setsid nohup bash scripts/box/eval_ladder_when_ready.sh 1000 2000 3000 4000 5000 6000 7000 8000 > logs/eval_ladder_{RUN}.log 2>&1 < /dev/null &)'",
+      "host": "192.222.52.191:1",
+      "started": "2026-10-16T08:56"
     },
     {
       "name": "pi05_dagger2",
