@@ -140,3 +140,11 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   step 7000 confirms ≥ 85%, its GPU goes to **pi05_2arm_v2**: warm start from the best pi05_single
   checkpoint on two-arm data + 6,000 recover2 episodes (data/sim_mixrec2_v1). This reassigns a finished
   run rather than stopping an experiment early. recover2 generation at 5,494/6,000.
+- **2026-10-16 ~03:15** pi05_v1 step 7000 (new oracle): **pick_place_any 2/8, bin 4/8** (lift 5/8),
+  handover 0/8 with both arms touching in 1/8, two_bins 0/8 (both 1/8) — six successes vs one at 6000.
+  **pi05_easy step 2000: pick_place_any 3/16, bin 5/16** — first strong evidence for H1b (easy rungs
+  learn fast; pi05_v1 had 0 at step 2000, though its early checkpoints used the old stalling oracle).
+  pi05_single step 7000: 9/10 and **24/30 (0.63–0.90)**; steps 6000/7000 pooled 35/40 vs 33/40 —
+  plateau in the 80s. The ≥85% reassignment bar was not met at 7000, so it keeps training; decide at
+  8000. recover2 finished: 5,965 episodes (4,243 successful, 11 crashed and skipped); copying to the
+  main box as data/sim_mixrec2_v1.
