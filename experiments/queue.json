@@ -107,7 +107,18 @@
       "avoid_hosts": [
         "192.222.52.191"
       ],
-      "eval": "GPU=0 NAME={RUN} EPISODES=8 DELAY=0 TASKS='pick_place_any bin handover two_bins' MUJOCO_GL=egl bash scripts/box/eval_when_ready.sh runs/{RUN} 1000 2000 3000 4000 5000 6000 7000 8000"
+      "eval": "GPU=0 NAME={RUN} EPISODES=8 DELAY=0 TASKS='pick_place_any bin handover two_bins' MUJOCO_GL=egl bash scripts/box/eval_when_ready.sh runs/{RUN} 1000 2000 3000 4000 5000 6000 7000 8000",
+      "main_variant": {
+        "prep_on_main": null,
+        "eval": null,
+        "mac_after_launch": "EVAL=ubuntu@129.213.124.160 RUN={RUN} EVAL_KEY='~/.ssh/id_ed25519_evalbox' nohup bash scripts/relay_checkpoints.sh 1000 2000 3000 4000 5000 6000 7000 8000 > outputs/relay_{RUN}.log 2>&1 & ssh -n -o BatchMode=yes ubuntu@129.213.124.160 'cd ~/pi && (RUN={RUN} PY=~/lerobot-venv/bin/python DELAY=0 setsid nohup bash scripts/box/eval_ladder_when_ready.sh 1000 2000 3000 4000 5000 6000 7000 8000 > logs/eval_ladder_{RUN}.log 2>&1 < /dev/null &)'",
+        "prefer_host": null,
+        "requires_on_host": [
+          "runs/pi05_dagger1/step_0007000",
+          "data/sim_mixdagclean_v1"
+        ],
+        "train": "PI_TRIM_STILL_TAIL_S=1 RESUME=runs/pi05_dagger1/step_0007000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdagclean_v1 runs/{RUN} 8000"
+      }
     },
     {
       "name": "pi05_lr5e5",
@@ -119,7 +130,16 @@
       "eval": "GPU=0 NAME={RUN} EPISODES=16 TASKS='pick_place_any bin handover two_bins' MUJOCO_GL=egl bash scripts/box/eval_when_ready.sh runs/{RUN} 1000 2000 3000 4000 5000 6000 7000 8000 9000 10000 11000 12000",
       "avoid_hosts": [
         "192.222.52.191"
-      ]
+      ],
+      "main_variant": {
+        "prep_on_main": null,
+        "eval": null,
+        "mac_after_launch": "EVAL=ubuntu@129.213.124.160 RUN={RUN} EVAL_KEY='~/.ssh/id_ed25519_evalbox' nohup bash scripts/relay_checkpoints.sh 1000 2000 3000 4000 5000 6000 7000 8000 > outputs/relay_{RUN}.log 2>&1 & ssh -n -o BatchMode=yes ubuntu@129.213.124.160 'cd ~/pi && (RUN={RUN} PY=~/lerobot-venv/bin/python DELAY=0 setsid nohup bash scripts/box/eval_ladder_when_ready.sh 1000 2000 3000 4000 5000 6000 7000 8000 > logs/eval_ladder_{RUN}.log 2>&1 < /dev/null &)'",
+        "prefer_host": null,
+        "requires_on_host": [
+          "data/sim_recover2_v1"
+        ]
+      }
     },
     {
       "name": "pi05_2arm_ema",
@@ -131,7 +151,17 @@
       "eval": "GPU=0 NAME={RUN} EPISODES=16 TASKS='pick_place_any bin handover two_bins' MUJOCO_GL=egl bash scripts/box/eval_when_ready.sh runs/{RUN} 1000 2000 3000 4000 5000 6000 7000 8000 9000 10000",
       "avoid_hosts": [
         "192.222.52.191"
-      ]
+      ],
+      "main_variant": {
+        "prep_on_main": null,
+        "eval": null,
+        "mac_after_launch": "EVAL=ubuntu@129.213.124.160 RUN={RUN} EVAL_KEY='~/.ssh/id_ed25519_evalbox' nohup bash scripts/relay_checkpoints.sh 1000 2000 3000 4000 5000 6000 7000 8000 > outputs/relay_{RUN}.log 2>&1 & ssh -n -o BatchMode=yes ubuntu@129.213.124.160 'cd ~/pi && (RUN={RUN} PY=~/lerobot-venv/bin/python DELAY=0 setsid nohup bash scripts/box/eval_ladder_when_ready.sh 1000 2000 3000 4000 5000 6000 7000 8000 > logs/eval_ladder_{RUN}.log 2>&1 < /dev/null &)'",
+        "prefer_host": null,
+        "requires_on_host": [
+          "runs/pi05_single/step_0006000",
+          "data/sim_recover2_v1"
+        ]
+      }
     }
   ],
   "a10": [
@@ -374,10 +404,9 @@
       "hypothesis": "H2b: does pi05_dagger1's final checkpoint beat its resume point (pi05_v1 step 20000: 83/120) on the same 30 seeds?",
       "status": "queued",
       "prefer_host": "129.213.124.160",
-      "requires_on_host": [
-        "exports/pi05_dagger1/step_0008000/model.pt"
-      ],
-      "eval": "for T in pick_place_any bin handover two_bins; do MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.eval_sim --checkpoint exports/pi05_dagger1/step_0008000 --task $T --episodes 30 --episode-seconds 30 --execute 25 --delay 0 --device cuda --subtask oracle --seed 4000 --out outputs/eval_dagger1confirm30_step8000_$T; done"
+      "requires_on_host": [],
+      "eval": "for T in pick_place_any bin handover two_bins; do MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.eval_sim --checkpoint exports/pi05_dagger1/step_0008000 --task $T --episodes 30 --episode-seconds 30 --execute 25 --delay 0 --device cuda --subtask oracle --seed 4000 --out outputs/eval_dagger1confirm30_step8000_$T; done",
+      "prep_on_main": "ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@{HOST} 'test -e ~/pi/exports/pi05_dagger1/step_0008000/model.pt' || (ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@129.213.124.160 'tar cf - -C ~/pi exports/pi05_dagger1/step_0008000' | ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@{HOST} 'mkdir -p ~/pi && tar xf - -C ~/pi')"
     },
     {
       "name": "v1_rec2_final_confirm30",
@@ -386,7 +415,15 @@
       "prefer_host": "129.213.124.160",
       "requires_on_host": [],
       "eval": "for T in pick_place_any bin handover two_bins; do MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.eval_sim --checkpoint exports/pi05_v1_rec2/step_0008000 --task $T --episodes 30 --episode-seconds 30 --execute 25 --delay 0 --device cuda --subtask oracle --seed 4000 --out outputs/eval_v1rec2confirm30_step8000_$T; done",
-      "prep_on_main": "ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@132.145.199.243 'tar cf - -C ~/pi/exports pi05_v1_rec2/step_0008000' | ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@{HOST} 'mkdir -p ~/pi/exports && tar xf - -C ~/pi/exports'"
+      "prep_on_main": "ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@{HOST} 'test -e ~/pi/exports/pi05_v1_rec2/step_0008000/model.pt' || (ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@132.145.199.243 'tar cf - -C ~/pi exports/pi05_v1_rec2/step_0008000' | ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@{HOST} 'mkdir -p ~/pi && tar xf - -C ~/pi')"
+    },
+    {
+      "name": "dagger10_fixed",
+      "hypothesis": "H2b next round: fixed-teacher DAgger from the best checkpoint so far (pi05_dagger1 step 7000, 27/32), whose failure states differ from pi05_v1's; data for the round after pi05_dagger2",
+      "status": "queued",
+      "requires_on_host": [],
+      "prep_on_main": "ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@{HOST} 'test -e ~/pi/exports/pi05_dagger1/step_0007000/model.pt' || (ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@129.213.124.160 'tar cf - -C ~/pi exports/pi05_dagger1/step_0007000' | ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@{HOST} 'mkdir -p ~/pi && tar xf - -C ~/pi')",
+      "eval": "MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.dagger --checkpoint exports/pi05_dagger1/step_0007000 --episodes-per-task 150 --takeover-min 1 --takeover-max 15 --out data/sim_dagger_v10 --seed 1005000"
     }
   ]
 }

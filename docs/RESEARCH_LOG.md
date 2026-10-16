@@ -565,3 +565,15 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   avoids the main box and evaluates on its node, so dagger_clean vs dagger2 separates the effect of the resume
   point. Also queued **v1_rec2_final_confirm30** (its export is copied from A10#2 to A10#1 in prep). H100
   runnable: dagger2, lr5e5, 2arm_ema; A10: two confirmations.
+- **2026-10-16 18:05 UTC** **Standing rule from the user: no GPU may idle; always keep experiments queued.**
+  Changes so the queue covers every slot:
+  1. `scripts/scheduler.py` checks every 60 s (was 300 s), so a freed GPU is refilled in about 2 min.
+  2. Entries may carry a `main_variant` (no EGL evaluation on the main box; relay to an A10 instead), so node
+     experiments can also fill main-box GPUs. pi05_dagger2, pi05_lr5e5 and pi05_2arm_ema all now run on main or
+     nodes (checked: runnable and `bash -n` clean on both).
+  3. Status updates re-read the queue and change one entry, so manual edits made while it sleeps are never
+     overwritten, and the in-memory status blocks a second launch of the same entry in a round.
+  4. A slot that is idle with nothing runnable writes `outputs/IDLE_ALERT`, which the event watcher turns into an
+     immediate wake-up to write a new experiment.
+  A10 confirmations copy their checkpoint to whichever A10 is free (only if missing). Queued **dagger10_fixed**
+  (fixed-teacher DAgger from the best checkpoint, pi05_dagger1 step 7000). Every GPU is busy now.

@@ -24,7 +24,7 @@ LOG = ROOT / "docs" / "RESEARCH_LOG.md"
 MAIN = "192.222.52.191"
 H100 = ["192.222.52.191:0", "192.222.52.191:1", "209.20.159.198:0", "209.20.157.232:0", "209.20.158.194:0"]
 A10 = ["129.213.124.160", "132.145.199.243"]
-INTERVAL = int(os.environ.get("INTERVAL", 300))
+INTERVAL = int(os.environ.get("INTERVAL", 60))  # the user wants no GPU idle: check every minute
 DRY_RUN = os.environ.get("DRY_RUN") == "1"   # print decisions only; one pass with no idle wait
 
 
@@ -134,11 +134,39 @@ def after_launch(entry, host, run):
                          start_new_session=True)
 
 
+def effective(entry, host):
+    """An entry as it would run on `host`: `main_variant` overrides apply on the main box (which cannot render
+    with EGL, so main variants relay checkpoints to an A10 via `mac_after_launch` instead of evaluating)."""
+    if host == MAIN and entry.get("main_variant"):
+        merged = {**entry, **entry["main_variant"]}
+        merged.pop("avoid_hosts", None)
+        for key in [k for k, v in entry["main_variant"].items() if v is None]:
+            merged.pop(key, None)  # a None in main_variant deletes that field (e.g. "eval": null)
+        return merged
+    return entry
+
+
+def update_entry(cls, name, **fields):
+    """Re-read the queue and update one entry, so edits made while the scheduler slept are never overwritten."""
+    queue = json.loads(QUEUE.read_text())
+    for e in queue[cls]:
+        if e["name"] == name:
+            e.update(fields)
+            for k, v in fields.items():
+                if v is None:
+                    e.pop(k, None)
+    QUEUE.write_text(json.dumps(queue, indent=2) + "\n")
+
+
+IDLE_ALERT = ROOT / "outputs" / "IDLE_ALERT"
+
+
 def main():
     idle_counts = {}
     print(f"{datetime.now():%H:%M} scheduler started", flush=True)
     while True:
         queue = json.loads(QUEUE.read_text())
+        starved = []
         for cls, slots, busy in (("h100", H100, gpu_busy), ("a10", A10, a10_busy)):
             for slot in slots:
                 try:
@@ -154,30 +182,34 @@ def main():
                 host, gpu = (slot.split(":") + [None])[:2]
                 candidates = [e for e in queue[cls] if e.get("status") == "queued"]
                 candidates.sort(key=lambda e: 0 if e.get("prefer_host") == host else 1)
-                for entry in candidates:
+                for orig in candidates:
+                    entry = effective(orig, host)
                     if not requirements_met(entry, host):
                         continue
                     print(f"{datetime.now():%H:%M} launching {entry['name']} on {slot}", flush=True)
                     if DRY_RUN:
                         print("   would run:", resolve(entry.get("train") or entry.get("eval"), host, entry["name"])[:160], flush=True)
                         break
-                    entry["status"] = "running"
-                    entry["host"] = slot
-                    entry["started"] = datetime.now().isoformat(timespec="minutes")
-                    QUEUE.write_text(json.dumps(queue, indent=2) + "\n")
+                    started = datetime.now().isoformat(timespec="minutes")
+                    orig["status"] = "running"  # also in memory, so no other slot launches it this round
+                    update_entry(cls, entry["name"], status="running", host=slot, started=started)
                     code, out = launch(entry, host, gpu if cls == "h100" else None)
                     if code != 0:
-                        entry["status"] = "failed"
-                        entry["error"] = out[-500:]
-                        QUEUE.write_text(json.dumps(queue, indent=2) + "\n")
+                        update_entry(cls, entry["name"], status="failed", error=out[-500:])
                         log_line(f"launch of {entry['name']} on {slot} failed: {out[-200:]}")
                     else:
                         log_line(f"{slot} was idle; launched **{entry['name']}** ({entry['hypothesis']})")
                     idle_counts[slot] = 0
                     break
                 else:
+                    starved.append(slot)
                     if idle_counts[slot] == 2:
                         print(f"{datetime.now():%H:%M} {slot} idle but no runnable {cls} entry", flush=True)
+        # The event watcher wakes Claude on this file so a new experiment is written at once (GPUs never idle).
+        if starved:
+            IDLE_ALERT.write_text(f"{datetime.now():%Y-%m-%d %H:%M} idle with no runnable entry: {' '.join(starved)}\n")
+        elif IDLE_ALERT.exists():
+            IDLE_ALERT.unlink()
         if DRY_RUN:
             return
         time.sleep(INTERVAL)
