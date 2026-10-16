@@ -1,4 +1,4 @@
-# Closed-loop results (generated 2026-10-16 13:35)
+# Closed-loop results (generated 2026-10-16 13:36)
 
 Success with Wilson 95% interval; strict = success with the object lifted (rules out pushing it into place); lift = object raised; closest = median hand-to-object distance.
 
@@ -120,6 +120,7 @@ Success with Wilson 95% interval; strict = success with the object lifted (rules
 | pi05_dagger1 | two_bins | 5000 | 4/8 | 4/8 | 0.22–0.78 | 7/8 | 7 mm | 0/8 | 129.213.124.160 |
 | pi05_dagger1 | two_bins | 6000 | 4/8 | 4/8 | 0.22–0.78 | 6/8 | 7 mm | 0/8 | 129.213.124.160 |
 | pi05_dagger1 | two_bins | 7000 | 4/8 | 4/8 | 0.22–0.78 | 7/8 | 6 mm | 0/8 | 129.213.124.160 |
+| pi05_dagger1 | two_bins | 8000 | 4/8 | 4/8 | 0.22–0.78 | 8/8 | 7 mm | 0/8 | 129.213.124.160 |
 | pi05_easy | bin | 1000 | 0/16 | 0/16 | 0.00–0.19 | 1/16 | 58 mm | 0/16 | 209.20.158.194 |
 | pi05_easy | bin | 2000 | 5/16 | 5/16 | 0.14–0.56 | 5/16 | 15 mm | 0/16 | 209.20.158.194 |
 | pi05_easy | bin | 3000 | 3/16 | 3/16 | 0.07–0.43 | 3/16 | 25 mm | 0/16 | 209.20.158.194 |
@@ -452,7 +453,7 @@ Success with Wilson 95% interval; strict = success with the object lifted (rules
 | full_v1 | timing | 1 | step 500: 0/1 (0.00–0.79) | 0/1 |
 | pi05_v1 | two_bins | 20 | step 16000: 6/8 (0.41–0.93) | 3/8 → 2/8 → 5/8 → 3/8 |
 | pi05_v1_rec2 | two_bins | 7 | step 6000: 5/8 (0.31–0.86) | 5/8 → 3/8 → 5/8 → 3/8 |
-| pi05_dagger1 | two_bins | 7 | step 4000: 4/8 (0.22–0.78) | 4/8 → 4/8 → 4/8 → 4/8 |
+| pi05_dagger1 | two_bins | 8 | step 8000: 4/8 (0.22–0.78) | 4/8 → 4/8 → 4/8 → 4/8 |
 | v1confirm30 | two_bins | 3 | step 17000: 15/30 (0.33–0.67) | 9/30 → 15/30 → 12/30 |
 | v1soup30 | two_bins | 1 | step 18000: 15/30 (0.33–0.67) | 15/30 |
 | pi05_2arm_v2 | two_bins | 12 | step 12000: 5/12 (0.19–0.68) | 1/12 → 4/12 → 4/12 → 5/12 |

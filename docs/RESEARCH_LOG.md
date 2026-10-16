@@ -550,3 +550,9 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   trimmed. It resumes from pi05_v1 step 20000, and prep took ~8 min to pull 14 GB from the A10s. pi05_v1_rec2 step
   7000: 5/8 (4 lifted), 8/8, 2/8, 3/8; it ends at 8000, and main GPU1 then takes pi05_v1_cont. DAgger v9 at two_bins
   80/150 (287/336 successful). curriculum2 2080, rec2_trim 1880, recover 14400. No errors.
+- **2026-10-16 17:45 UTC** **pi05_dagger1's last checkpoints are the best ladder scores yet: step 7000 8/8,
+  8/8, 7/8, 4/8 (27/32), step 8000 8/8, 8/8, 4/8, 4/8 (24/32)**, against 22/32 for its resume point pi05_v1 step
+  20000. So DAgger helped despite the broken-takeover data, once past the H8 dip (7 → 3 → … → 20 → 20 → 27 →
+  24 of 32). Queued **dagger1_7000_confirm30** ahead of the step-8000 confirmation; both use the 30 shared seeds
+  against the 83/120 baseline on A10#1. If DAgger holds up on 30 seeds, pi05_dagger_clean (fixed-teacher and
+  success-only data) is the next candidate to beat it.
