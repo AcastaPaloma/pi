@@ -113,6 +113,8 @@ def run_episode(env: RobotEnv, policy: Pi07Policy, *, seed, execute, delay, cfg_
     inference_calls = 1
     closest = float("inf")
     lifted = 0.0
+    two_objects = ladder and env.task_name == "two_bins"
+    lifted2 = 0.0
     while True:
         if cursor >= execute:
             # A new chunk is requested now; the `delay` actions executed while the
@@ -135,6 +137,8 @@ def run_episode(env: RobotEnv, policy: Pi07Policy, *, seed, execute, delay, cfg_
         t += 1
         closest = min(closest, float(min(np.linalg.norm(obs["ee_pose"][k:k + 3] - obs["cube_position"]) for k in (0, 7))))
         lifted = max(lifted, float(obs["cube_position"][2]))
+        if two_objects:  # the second arm's object; failures of two_bins were invisible without it (H10)
+            lifted2 = max(lifted2, float(env.object_position("cube2")[2]))
         if t % observe_every == 0 and cursor < execute:
             observe(t)  # keep the one-second-stride history populated between inferences
         if terminated or truncated:
@@ -142,6 +146,9 @@ def run_episode(env: RobotEnv, policy: Pi07Policy, *, seed, execute, delay, cfg_
     extra = {"task_id": env.task_name, "side": env.side, "touched": info.get("touched"),
              "final_cube_to_bin_m": round(float(np.linalg.norm(obs["cube_position"][:2] - obs["bin_position"][:2])), 4)}\
         if ladder else {}
+    if two_objects:
+        extra.update({"cube_in_bin": env._in_bin("cube"), "cube2_in_bin": env._in_bin("cube2"),
+                      "cube2_max_height_m": round(lifted2, 4), "cube2_lifted": bool(lifted2 > 0.045)})
     return {**extra, "seed": seed, "success": bool(info["is_success"]), "steps": int(info["elapsed_steps"]),
             "failure": info["failure"], "inference_calls": inference_calls, "task": task, "subtask_mode": subtask,
             "object": f"{env.object_color} {env.object_shape}",

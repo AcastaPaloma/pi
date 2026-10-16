@@ -313,3 +313,13 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   5/16, 4/16, 2/16; 2arm_v2 step 8000 5/12, 5/12, 3/12, 1/12; recover step 7000 4/16, 5/16, 1/16, 1/16.
   None meets the stop rule yet (each still overlaps the leader on some rung). Steps: pi05_v1 18560, 2arm_v2
   9580, warm2arm 8420, recover 8200, easy 8640; no errors.
+- **2026-10-16 ~11:50 UTC** **H10 video review (pi05_v1 step 17000, two_bins, 6 episodes): 4/6 succeed.**
+  Successes are genuine: the check requires both cubes inside the bin with both grippers open; frames show the
+  left arm placing its cube and the right arm placing the blue one. **Both failures share one mode:** the left
+  arm places its cube, the right arm's first grasp on the blue cube misses (gripper stays open at the cube,
+  t≈3 s) and the policy then hovers above the cube for the remaining ~25 s, never re-opening/re-grasping. This is
+  a missed-grasp-recovery gap, not an ordering problem: the policy runs both arms in parallel. pi05_v1 never saw
+  recover2's deliberate missed grasps, so pi05_dagger1 (mix + recover2 + DAgger v1–v4, resumes pi05_v1) and
+  pi05_v1_rec2 directly target it. Instrumentation gap fixed: two_bins evaluations now also record
+  `cube2_in_bin`, `cube2_lifted` and the first cube's `cube_in_bin`, so per-arm failure rates are measurable on
+  30 episodes. pi05_2arm_v2 step 9000: 8/12, 8/12, 2/12, 1/12.
