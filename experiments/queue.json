@@ -362,12 +362,14 @@
     {
       "name": "dagger1_7000_confirm30",
       "hypothesis": "H2b: pi05_dagger1 step 7000 scored 27/32 on the 8-episode ladder (8, 8, 7, 4), the best yet; confirm on the 30 shared seeds against the 83/120 baseline",
-      "status": "queued",
+      "status": "running",
       "prefer_host": "129.213.124.160",
       "requires_on_host": [
         "exports/pi05_dagger1/step_0007000/model.pt"
       ],
-      "eval": "for T in pick_place_any bin handover two_bins; do MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.eval_sim --checkpoint exports/pi05_dagger1/step_0007000 --task $T --episodes 30 --episode-seconds 30 --execute 25 --delay 0 --device cuda --subtask oracle --seed 4000 --out outputs/eval_dagger1confirm30_step7000_$T; done"
+      "eval": "for T in pick_place_any bin handover two_bins; do MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.eval_sim --checkpoint exports/pi05_dagger1/step_0007000 --task $T --episodes 30 --episode-seconds 30 --execute 25 --delay 0 --device cuda --subtask oracle --seed 4000 --out outputs/eval_dagger1confirm30_step7000_$T; done",
+      "host": "129.213.124.160",
+      "started": "2026-10-16T13:47"
     },
     {
       "name": "dagger1_final_confirm30",

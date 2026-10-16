@@ -557,3 +557,4 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   against the 83/120 baseline on A10#1. If DAgger holds up on 30 seeds, pi05_dagger_clean (fixed-teacher and
   success-only data) is the next candidate to beat it.
 - **2026-10-16 13:47** [scheduler] 192.222.52.191:1 was idle; launched **pi05_v1_cont** by hand at the user's request (H16: pi05_v1 was still improving at its last step (30-seed strict 75 -> 76 -> 83/120 at 13k/17k/20k). Plain continuation)
+- **2026-10-16 13:48** [scheduler] 129.213.124.160 was idle; launched **dagger1_7000_confirm30** by hand at the user's request (H2b: pi05_dagger1 step 7000 scored 27/32 on the 8-episode ladder (8, 8, 7, 4), the best yet; confirm on the 30 shared se)
