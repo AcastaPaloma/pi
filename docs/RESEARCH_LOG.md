@@ -525,3 +525,15 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   83/120 baseline). Steps: dagger1 6120, v1_rec2 5420, rec2_trim 380, curriculum2 740, recover 12880. No errors.
 - **2026-10-16 12:12** [scheduler] 129.213.124.160 was idle; launched **v1_20000_twobins_video** (H11/H12 evidence: is the second-arm hover still the main two_bins failure for the best policy (pi05_v1 step 20000: second cube 12/30, never lifted in 10 of 18 failures)?)
 - **2026-10-16 12:22** [scheduler] 129.213.124.160 was idle; launched **dagger9_fixed** (H2b/H13: more fixed-teacher DAgger from the best policy (pi05_v1 step 20000), new seeds, for pi05_dagger_clean)
+- **2026-10-16 16:35 UTC** **Video review of pi05_v1 step 20000 on two_bins (6 episodes, 3 succeed).** In two
+  failures the left cube is placed, and the right gripper sits open about 2 cm off the blue cube for 20 s,
+  prompted "move above" (the oracle's xy-near test fails, so it never says "lower"). In the third, the right arm
+  holds its cube and waits, as the teacher does, while the left arm never grasps its own, so the episode
+  deadlocks. All three are an arm stuck off-centre during approach and never corrected: the states the
+  fixed-teacher DAgger (v7 86% and v9 teacher success) labels. Therefore **pi05_dagger_clean is now main-box
+  native** (resumes step 20000 on the main box when pi05_dagger1 ends in ~45 min; evaluation relayed to
+  A10#1) instead of waiting ~4 h for a node. Added **pi05_v1_cont** (H16: continue pi05_v1 on its own data with
+  trimming at LR 1e-5; pi05_v1 was still improving at 20k: 75 → 76 → 83/120) for main GPU1 when pi05_v1_rec2
+  ends. It is the baseline the new-data continuations must beat. pi05_dagger1 step 6000: 6/8, 6/8, 4/8, 4/8;
+  pi05_v1_rec2 step 5000: 5/8, 4/8, 2/8, 3/8. Live demo on A10#2 (tunnel; public access needs a provider
+  firewall rule). No errors.

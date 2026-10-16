@@ -62,18 +62,6 @@
       "started": "2026-10-16T11:26"
     },
     {
-      "name": "pi05_dagger_clean",
-      "hypothesis": "H2b done right (H12 corollary): pi05_dagger1 collapsed (22/32 at resume -> 7/32 -> 3/32) on data where 38% of DAgger continuations are teacher failures and 62% of DAgger steps are parked tails. Resume pi05_v1 step 20000 on mix + recover2 + only teacher-successful DAgger (v1-v6) and mixed-order two_bins demos, with PI_TRIM_STILL_TAIL_S=1; plus DAgger v7 from the fixed teacher",
-      "status": "queued",
-      "avoid_hosts": [
-        "192.222.52.191"
-      ],
-      "prep_on_main": "ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@129.213.124.160 'tar cf - -C ~/pi/data sim_dagger_v5 sim_dagger_v7 sim_dagger_v9' | tar xf - -C data; ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@132.145.199.243 'tar cf - -C ~/pi/data sim_dagger_v6 sim_dagger_v8 sim_twobins_mixed_v1' | tar xf - -C data; ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@{HOST} 'mkdir -p ~/pi/runs/pi05_v1_snap' && rsync -a -e 'ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes' runs/pi05_v1/step_0020000 ubuntu@{HOST}:~/pi/runs/pi05_v1_snap/ && rsync -a -e 'ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes' data/sim_recover2_v1 data/sim_dagger_v1 data/sim_dagger_v2 data/sim_dagger_v3 data/sim_dagger_v4 data/sim_dagger_v5 data/sim_dagger_v6 data/sim_dagger_v7 data/sim_dagger_v8 data/sim_dagger_v9 data/sim_twobins_mixed_v1 ubuntu@{HOST}:~/pi/data/ 2>/dev/null; true",
-      "setup": "mkdir -p data/sim_mixdagclean_v1 && cd data/sim_mixdagclean_v1 && for d in ../sim_mix_v1/episode_*; do ln -sfn $d $(basename $d); done && for d in ../sim_recover2_v1/episode_*; do ln -sfn $d episode_rec2_$(basename $d | cut -d_ -f2); done && for v in 1 2 3 4 5 6 7 8 9; do for d in ../sim_dagger_v$v/episode_*; do grep -qs '\"success\": true' $d/meta.json && ln -sfn $d episode_dag${v}_$(basename $d | cut -d_ -f2); done; done; for d in ../sim_twobins_mixed_v1/episode_*; do grep -qs '\"success\": true' $d/meta.json && ln -sfn $d episode_tbmix_$(basename $d | cut -d_ -f2); done; true",
-      "train": "PI_TRIM_STILL_TAIL_S=1 RESUME=runs/pi05_v1_snap/step_0020000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdagclean_v1 runs/{RUN} 8000",
-      "eval": "GPU=0 NAME={RUN} EPISODES=8 DELAY=0 TASKS='pick_place_any bin handover two_bins' MUJOCO_GL=egl bash scripts/box/eval_when_ready.sh runs/{RUN} 1000 2000 3000 4000 5000 6000 7000 8000"
-    },
-    {
       "name": "pi05_curriculum2",
       "hypothesis": "H1b: easy rungs first learns fastest; stage 2 adds handover and two_bins plus recover2 data",
       "status": "running",
@@ -91,6 +79,33 @@
       "launch_note": "first launch (14:47 UTC) ran nothing: scheduler joined background steps with \" ; \" (bash syntax error); fixed and requeued 15:15 UTC",
       "host": "209.20.158.194:0",
       "started": "2026-10-16T11:18"
+    },
+    {
+      "name": "pi05_dagger_clean",
+      "hypothesis": "H2b done right (H12 corollary): pi05_dagger1 collapsed (22/32 at resume -> 7/32 -> 3/32) on data where 38% of DAgger continuations are teacher failures and 62% of DAgger steps are parked tails. Resume pi05_v1 step 20000 on mix + recover2 + only teacher-successful DAgger (v1-v6) and mixed-order two_bins demos, with PI_TRIM_STILL_TAIL_S=1; plus DAgger v7 from the fixed teacher | 16:35 UTC: made main-box native (the step-20000 video shows the remaining two_bins failures are arms hovering off-centre without grasping, the states fixed-teacher DAgger labels); evaluation relayed to A10#1",
+      "status": "queued",
+      "prep_on_main": "ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@129.213.124.160 'tar cf - -C ~/pi/data sim_dagger_v5 sim_dagger_v7 sim_dagger_v9' | tar xf - -C data; ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@132.145.199.243 'tar cf - -C ~/pi/data sim_dagger_v6 sim_dagger_v8 sim_twobins_mixed_v1' | tar xf - -C data 2>/dev/null; true",
+      "setup": "mkdir -p data/sim_mixdagclean_v1 && cd data/sim_mixdagclean_v1 && for d in ../sim_mix_v1/episode_*; do ln -sfn $d $(basename $d); done && for d in ../sim_recover2_v1/episode_*; do ln -sfn $d episode_rec2_$(basename $d | cut -d_ -f2); done && for v in 1 2 3 4 5 6 7 8 9; do for d in ../sim_dagger_v$v/episode_*; do grep -qs '\"success\": true' $d/meta.json && ln -sfn $d episode_dag${v}_$(basename $d | cut -d_ -f2); done; done; for d in ../sim_twobins_mixed_v1/episode_*; do grep -qs '\"success\": true' $d/meta.json && ln -sfn $d episode_tbmix_$(basename $d | cut -d_ -f2); done; true",
+      "train": "PI_TRIM_STILL_TAIL_S=1 RESUME=runs/pi05_v1/step_0020000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdagclean_v1 runs/{RUN} 8000",
+      "prefer_host": "192.222.52.191",
+      "requires_on_host": [
+        "runs/pi05_v1/step_0020000",
+        "data/sim_recover2_v1",
+        "data/sim_dagger_v1"
+      ],
+      "mac_after_launch": "EVAL=ubuntu@129.213.124.160 RUN={RUN} EVAL_KEY='~/.ssh/id_ed25519_evalbox' nohup bash scripts/relay_checkpoints.sh 1000 2000 3000 4000 5000 6000 7000 8000 > outputs/relay_{RUN}.log 2>&1 & ssh -n -o BatchMode=yes ubuntu@129.213.124.160 'cd ~/pi && (RUN={RUN} PY=~/lerobot-venv/bin/python DELAY=0 setsid nohup bash scripts/box/eval_ladder_when_ready.sh 1000 2000 3000 4000 5000 6000 7000 8000 > logs/eval_ladder_{RUN}.log 2>&1 < /dev/null &)'"
+    },
+    {
+      "name": "pi05_v1_cont",
+      "hypothesis": "H16: pi05_v1 was still improving at its last step (30-seed strict 75 -> 76 -> 83/120 at 13k/17k/20k). Plain continuation on its own data (sim_mix_v1) with parked tails trimmed and a lower peak LR (1e-5) is the baseline every new-data continuation (DAgger, recover2) must beat",
+      "status": "queued",
+      "prefer_host": "192.222.52.191",
+      "requires_on_host": [
+        "runs/pi05_v1/step_0020000",
+        "data/sim_mix_v1/pi07_meta"
+      ],
+      "train": "PI_TRIM_STILL_TAIL_S=1 LR=1e-5 RESUME=runs/pi05_v1/step_0020000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mix_v1 runs/{RUN} 8000",
+      "mac_after_launch": "EVAL=ubuntu@132.145.199.243 RUN={RUN} EVAL_KEY='~/.ssh/id_ed25519_evalbox' nohup bash scripts/relay_checkpoints.sh 1000 2000 3000 4000 5000 6000 7000 8000 > outputs/relay_{RUN}.log 2>&1 & ssh -n -o BatchMode=yes ubuntu@132.145.199.243 'cd ~/pi && (RUN={RUN} PY=~/lerobot-venv/bin/python DELAY=0 setsid nohup bash scripts/box/eval_ladder_when_ready.sh 1000 2000 3000 4000 5000 6000 7000 8000 > logs/eval_ladder_{RUN}.log 2>&1 < /dev/null &)'"
     },
     {
       "name": "pi05_lr5e5",
@@ -306,14 +321,15 @@
     {
       "name": "v1_20000_twobins_video",
       "hypothesis": "H11/H12 evidence: is the second-arm hover still the main two_bins failure for the best policy (pi05_v1 step 20000: second cube 12/30, never lifted in 10 of 18 failures)?",
-      "status": "running",
+      "status": "done",
       "prefer_host": "129.213.124.160",
       "requires_on_host": [
         "exports/pi05_v1/step_0020000/model.pt"
       ],
       "eval": "MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.eval_sim --checkpoint exports/pi05_v1/step_0020000 --task two_bins --episodes 6 --episode-seconds 30 --execute 25 --delay 0 --device cuda --subtask oracle --seed 5000 --out outputs/video_v1_20000_two_bins --video --full-video 2",
       "host": "129.213.124.160",
-      "started": "2026-10-16T12:11"
+      "started": "2026-10-16T12:11",
+      "result": "3/6; failures: two right-arm hovers off-centre without grasping, one deadlock (right arm holds and waits while the left never grasps)"
     },
     {
       "name": "dagger8_fixed",
