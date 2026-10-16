@@ -448,10 +448,12 @@
     {
       "name": "dagger10_fixed",
       "hypothesis": "H2b next round: fixed-teacher DAgger from the best checkpoint so far (pi05_dagger1 step 7000, 27/32), whose failure states differ from pi05_v1's; data for the round after pi05_dagger2",
-      "status": "queued",
+      "status": "running",
       "requires_on_host": [],
       "prep_on_main": "ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@{HOST} 'test -e ~/pi/exports/pi05_dagger1/step_0007000/model.pt' || (ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@129.213.124.160 'tar cf - -C ~/pi exports/pi05_dagger1/step_0007000' | ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@{HOST} 'mkdir -p ~/pi && tar xf - -C ~/pi')",
-      "eval": "MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.dagger --checkpoint exports/pi05_dagger1/step_0007000 --episodes-per-task 150 --takeover-min 1 --takeover-max 15 --out data/sim_dagger_v10 --seed 1005000"
+      "eval": "MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.dagger --checkpoint exports/pi05_dagger1/step_0007000 --episodes-per-task 150 --takeover-min 1 --takeover-max 15 --out data/sim_dagger_v10 --seed 1005000",
+      "host": "129.213.124.160",
+      "started": "2026-10-16T15:18"
     }
   ]
 }

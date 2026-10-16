@@ -605,3 +605,4 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   failed demos with parked tails) and H14 (full-LR restart). The pi05_v1_rec2_trim A/B (step 3480) and the
   pi05_dagger_clean vs pi05_dagger_clean_lr1e5 pair test the two. pi05_v1_cont (same data, LR 1e-5) is the control
   that so far holds its level. All GPUs busy; no alerts.
+- **2026-10-16 15:18** [scheduler] 129.213.124.160 was idle; launched **dagger10_fixed** (H2b next round: fixed-teacher DAgger from the best checkpoint so far (pi05_dagger1 step 7000, 27/32), whose failure states differ from pi05_v1's; data for the round after pi05_dagger2)
