@@ -537,3 +537,9 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   ends. It is the baseline the new-data continuations must beat. pi05_dagger1 step 6000: 6/8, 6/8, 4/8, 4/8;
   pi05_v1_rec2 step 5000: 5/8, 4/8, 2/8, 3/8. Live demo on A10#2 (tunnel; public access needs a provider
   firewall rule). No errors.
+- **2026-10-16 17:15 UTC** pi05_v1_rec2 step 6000: 6/8, 4/8, 7/8, 5/8 (22/32, its best; back at its resume
+  point, with handover 7/8 and two_bins 5/8 above it). pi05_curriculum2 step 1000: 8/16, 6/16, 1/16, 0/16 (first
+  contact with the two-arm rungs plus the resume dip). pi05_dagger1 at 7960, ending now; the scheduler hands
+  main GPU0 to pi05_dagger_clean, and main GPU1 goes to pi05_v1_cont when pi05_v1_rec2 ends at 8000. Final
+  checkpoints get 30-seed confirmations (dagger1_final_confirm30 queued). DAgger v9 at handover 120/150 (217/248
+  successful). rec2_trim at 1500 (it shares its GPU with on-node evaluation, so it runs slower). No errors.
