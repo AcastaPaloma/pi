@@ -364,3 +364,10 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   crashed. Removed it; their checkpoints are relayed from the Mac to A10#1 instead
   (`relay_checkpoints.sh` + `eval_ladder_when_ready.sh`, 8 episodes per rung, the same protocol as pi05_v1).
 - **2026-10-16 08:32** [scheduler] launch of pi05_dagger1 on 192.222.52.191:0 failed: job tag SCHEDJOB_pi05_dagger1 not seen on 192.222.52.191 within 3 minutes
+- **2026-10-16 12:35 UTC** **pi05_dagger1 is training** on main GPU0 (resumes pi05_v1 step 20000 on
+  `sim_mixdag_v1`, 12,878 episodes: mix + recover2 + DAgger v1–v4; first loss 0.056). The scheduler had
+  marked it failed: setup took over 3 minutes, and `train_pi05.sh` backgrounds the trainer so its tagged
+  shell exits at once, so the tag check could never pass for an H100 job. Fixed `scripts/scheduler.py`: wait up
+  to 15 minutes and accept a filled GPU as proof of launch; status corrected; scheduler restarted (dry run
+  clean). Its checkpoints relay to A10#1. Others: 2arm_v2 11500, warm2arm 9540, recover 9280, easy 9820; no
+  errors. DAgger v4 at two_bins 100/150; dagger5_twobins 60/400 (33 teacher successes of 43 kept).

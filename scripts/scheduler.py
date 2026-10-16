@@ -110,12 +110,16 @@ def launch(entry, host, gpu=None):
     remote = "cd ~/pi && mkdir -p logs outputs && " + " ; cd ~/pi && ".join(steps)
     subprocess.Popen(["ssh", "-n", "-o", "BatchMode=yes", "-o", "ConnectTimeout=20", f"ubuntu@{host}", remote],
                      stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
-    for _ in range(12):  # setup (symlinks) can take a minute before the job starts
+    # Setup can take minutes (pi05_dagger1 linked ~13k episodes). train_pi05.sh backgrounds the trainer and
+    # returns, so its tagged shell exits at once: for a GPU slot the GPU filling up also proves the launch.
+    for _ in range(60):
         time.sleep(15)
         code, out = ssh(host, f"pgrep -f '^bash -c : SCHEDJOB_{run}' >/dev/null && echo started")
         if "started" in out:
             return 0, "started"
-    return 1, f"job tag SCHEDJOB_{run} not seen on {host} within 3 minutes"
+        if gpu is not None and gpu_busy(f"{host}:{gpu}"):
+            return 0, "started (GPU busy)"
+    return 1, f"job tag SCHEDJOB_{run} not seen and GPU not busy on {host} within 15 minutes"
 
 
 def main():
