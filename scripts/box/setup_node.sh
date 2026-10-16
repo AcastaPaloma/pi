@@ -5,7 +5,7 @@ set -eu
 export PATH=$HOME/.local/bin:$PATH
 command -v uv >/dev/null || curl -LsSf https://astral.sh/uv/install.sh | sh >/dev/null 2>&1
 export PATH=$HOME/.local/bin:$PATH
-DRV=$(cat /proc/driver/nvidia/version | grep -o "Kernel Module  *[0-9.]*" | awk '{print $NF}')
+DRV=$(nvidia-smi --query-gpu=driver_version --format=csv,noheader | head -1)
 BR=${DRV%%.*}
 sudo -n apt-get update -qq >/dev/null 2>&1 || true
 sudo -n DEBIAN_FRONTEND=noninteractive apt-get install -y -qq libegl1 libosmesa6 libgl1 libglvnd0 >/dev/null 2>&1 || true
@@ -18,4 +18,5 @@ VIRTUAL_ENV=~/lerobot-venv uv pip install -q mujoco==3.15.0 tokenizers safetenso
 MUJOCO_GL=egl ~/lerobot-venv/bin/python -c "
 from pi_sim.env import RobotEnv
 e = RobotEnv(task='pick_place', control_mode='joint'); e.reset(seed=0); e.render_camera('overhead')
-import torch, lerobot, pi_model; print('node ready:', torch.__version__, torch.cuda.get_device_name(0), 'EGL ok')"
+import torch, lerobot, pi_model; import time; t = time.time(); [e.render_camera('overhead') for _ in range(10)]; dt = (time.time() - t) / 10
+print('node ready:', torch.__version__, torch.cuda.get_device_name(0), f'render {dt*1000:.1f} ms', 'NVIDIA EGL' if dt < 0.05 else 'SOFTWARE RENDERING - check libnvidia-gl')"

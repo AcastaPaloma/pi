@@ -103,3 +103,21 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
 - **2026-10-16 ~00:55** pi05_single step 4000 on 30 episodes: **21/30 (0.52–0.83), lift 26/30** —
   33% → 63% → 70% over steps 2000–4000, still rising; it is the working sim policy for the original
   task. No changes. pi05_v1 step 5000 being scored; the three experiments reach step 1000 shortly.
+- **2026-10-16 ~00:40** (user asked to verify two-arm successes by video, and for much more recovery
+  data). Full three-camera captioned videos (`eval_sim --video --full-video 2`): the two-arm success
+  (pi05_v1 step 5000, bin) is genuine — right arm grasps (gripper 0.16, contact), lifts to 7.2 cm,
+  carries over the container (wrist camera looks into it), releases, cube lands 2.2 cm from centre.
+  A single-arm success (pi05_single step 4000) is a clean 4 s pick-and-place. Replays: two-arm bin on
+  new seeds 0/12 (lift 4/12), on the original seeds 1/8; single-arm 4/6 on camera.
+  **Bug found (H3 confirmed in a new form):** the ladder's subtask oracle only advanced when the arm hit
+  the teacher's own waypoints, so the policy was prompted "Lift the cube" for ~10 s while hovering over
+  the bin. Replaced with a state-based oracle (object held/at destination, hand position, gripper) with
+  hysteresis; it reproduces the teacher's phase sequence on every rung (45–53% exact agreement on the
+  single-object rungs, the rest adjacent labels a dwell apart). **Two-arm scores from step 6000 on are
+  not comparable with earlier ones.**
+  **Recovery data v2 (user request, also H2):** object bumps during approach/grasp (teacher re-reads the
+  pose and corrects, re-approaching from above if it moved >1.5 cm while low) and deliberate off-target
+  grasps (30% of attempts, mistake-labelled, then clean retries), on top of target knocks. Teacher
+  success 70–85% with 4–8 bumps and 1–2.5 misses per episode. Generating 6,000 episodes on the second A10.
+  Infra: the setup script had failed to install NVIDIA EGL on the four new machines (software rendering,
+  0.9 s/frame); fixed (3 ms/frame) and the script now verifies the render path.

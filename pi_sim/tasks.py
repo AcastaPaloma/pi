@@ -228,7 +228,7 @@ class ArmPickPlace:
     PHASES = ("approach", "lower", "grasp", "lift", "transfer", "lower to goal", "release", "retreat", "home")
 
     def __init__(self, env: TaskEnv, arm, body, dest_xy, dest_z, dest_name, *, rng, noise=0.0, carry_z=0.075,
-                 perturb_rate=0.0):
+                 perturb_rate=0.0, bump_rate=0.0, miss_prob=0.0):
         self.env, self.arm, self.body = env, arm, body
         self.i = ARMS.index(arm)
         self.dest = np.r_[dest_xy, dest_z]
@@ -243,6 +243,12 @@ class ArmPickPlace:
         # during free-space phases; that stretch is labelled a mistake, the correction afterwards is clean.
         self.perturb_rate, self._perturb_left, self._perturb_offset = perturb_rate, 0, np.zeros(3)
         self.perturbations = 0
+        # Recovery v2: shove the object while the arm approaches or grasps (the teacher re-reads its pose
+        # and corrects), and deliberately grasp off-target on some attempts (labelled a mistake; the lift
+        # check then triggers a clean retry).
+        self.bump_rate, self.miss_prob = bump_rate, miss_prob
+        self.bumps, self.misses = 0, 0
+        self._miss_this_attempt = False
         self.obj = env.object_position(body)
         self._offset = rng.normal(0, noise, 2) if noise else np.zeros(2)
         hz = env.control_hz
@@ -264,6 +270,59 @@ class ArmPickPlace:
     def subtask(self):
         return PHRASES[self.stage].format(arm=self.arm, obj=self.obj_name, dest=self.dest_name)
 
+    def sync_from_state(self):
+        """Observe-only oracle: infer this arm's phase from the true state (object, hand, gripper),
+        not from reaching the teacher's own waypoints, so it follows whatever path a policy takes."""
+        if self.done:
+            return
+        before = self.phase
+        self._sync_raw()
+        # Hysteresis: within carry-and-place (transfer..retreat) never step back, which would make the
+        # prompt flap between "lower" and "release" as the object's height jitters at a threshold.
+        if 4 <= before <= 7 and 4 <= self.phase < before:
+            self.phase = before
+
+    def _sync_raw(self):
+        """Labels follow the teacher's convention: a phase lasts until its target is reached."""
+        env = self.env
+        hand = env.robot[self.arm].position
+        obj = env.object_position(self.body)
+        opening = env.robot[self.arm].gripper_opening
+        closed = opening < 0.7
+        dest_xy = np.linalg.norm(obj[:2] - self.dest[:2]) < (BIN_INNER if self.dest_name == "bin" else 0.03)
+        hand_at_dest = np.linalg.norm(hand[:2] - self.dest[:2]) < 0.025
+        if not closed or np.linalg.norm(hand - obj) > 0.04:
+            self._was_lifted = False
+        elif obj[2] > 0.045:
+            self._was_lifted = True
+        # Held: closed around the object and either off the table or already carried (a placed cube is
+        # back at table height while still in the gripper).
+        held = closed and np.linalg.norm(hand - obj) < 0.04 and (obj[2] > 0.02 or getattr(self, "_was_lifted", False))
+        if dest_xy and not held and obj[2] < self.dest[2] + 0.01 and not closed:
+            # Object placed: release until fully open, retreat until clear, then this arm is done.
+            if opening < 0.95 and np.linalg.norm(hand - obj) < 0.035:
+                self.phase = 6
+            elif np.linalg.norm(hand - obj) > 0.06:
+                self.phase = len(self.PHASES)
+            else:
+                self.phase = 7
+        elif held:
+            if not hand_at_dest:
+                self.phase = 3 if obj[2] < self.carry_z - 0.015 and self.phase <= 3 else 4
+            elif obj[2] > self.dest[2] + 0.008:
+                self.phase = 5
+            else:
+                self.phase = 6
+        else:
+            low = hand[2] < 0.027
+            near = np.linalg.norm(hand[:2] - obj[:2]) < 0.02
+            if near and low:
+                self.phase = 2                      # closing, or holding before the lift
+            elif np.linalg.norm(hand[:2] - obj[:2]) < 0.012 or (near and hand[2] < 0.07):
+                self.phase = 1                      # descending around the object
+            else:
+                self.phase = 0
+
     def target(self):
         """(xyz, opening) for this step; advances phases."""
         if self.done:
@@ -275,8 +334,33 @@ class ArmPickPlace:
         opening = 1.0 if self.phase in (0, 1, 6, 7, 8) else 0.0
         if self.waiting:
             return np.r_[c, self.carry_z], 0.0
-        tgt = targets[self.phase]
         hz = self.env.control_hz
+        if self.phase in (0, 1, 2):
+            if self.bump_rate and self.rng.random() < self.bump_rate / hz:
+                angle = self.rng.uniform(0, 2 * np.pi)
+                speed = self.rng.uniform(0.12, 0.35)
+                qvel = self.env.data.joint(f"{self.body}_joint").qvel
+                qvel[:3] = [speed * np.cos(angle), speed * np.sin(angle), 0.0]
+                self.bumps += 1
+            now = self.env.object_position(self.body)
+            moved = np.linalg.norm(now[:2] - self.obj[:2])
+            if moved > 0.008 and now[2] < 0.03 and not self._miss_this_attempt:
+                # The object moved: re-read it; back up and re-approach if the hand was already low.
+                self.obj = now
+                if moved > 0.015 and self.phase in (1, 2):
+                    self.phase, self.ticks = 0, 0
+                c = self.obj[:2] + self._offset
+                targets[:4] = [np.r_[c, 0.075], np.r_[c, 0.022], np.r_[c, 0.022], np.r_[c, self.carry_z]]
+                opening = 1.0 if self.phase in (0, 1, 6, 7, 8) else 0.0
+            if self.phase == 0 and self.ticks == 0 and self.miss_prob and self.rng.random() < self.miss_prob:
+                angle, dist = self.rng.uniform(0, 2 * np.pi), self.rng.uniform(0.012, 0.025)
+                self._offset = np.array([dist * np.cos(angle), dist * np.sin(angle)])
+                self._miss_this_attempt = True
+                self.mistake_active = True
+                self.misses += 1
+                c = self.obj[:2] + self._offset
+                targets[:4] = [np.r_[c, 0.075], np.r_[c, 0.022], np.r_[c, 0.022], np.r_[c, self.carry_z]]
+        tgt = targets[self.phase]
         if self._perturb_left > 0:
             self._perturb_left -= 1
             if self._perturb_left == 0:
@@ -303,10 +387,12 @@ class ArmPickPlace:
                 self.mistake_active = True
                 self.obj = self.env.object_position(self.body)
                 self._offset = self.rng.normal(0, self.noise, 2) if self.noise else np.zeros(2)
+                self._miss_this_attempt = False
                 self.phase, self.ticks = 0, 0
             else:
                 if self.phase == 3:
                     self.mistake_active = False
+                    self._miss_this_attempt = False
                 self.phase += 1
                 self.ticks = 0
         return tgt, opening
@@ -315,7 +401,8 @@ class ArmPickPlace:
 class TaskTeacher:
     """Scripted demonstrator for every rung; works in ee_delta control."""
 
-    def __init__(self, env: TaskEnv, *, rng=None, speed=1.0, noise=0.0, observe_only=False, perturb_rate=0.0):
+    def __init__(self, env: TaskEnv, *, rng=None, speed=1.0, noise=0.0, observe_only=False, perturb_rate=0.0,
+                 bump_rate=0.0, miss_prob=0.0):
         """observe_only: track the scripted phase from true state while something else (a policy)
         moves the arms; `observe()` advances it and `subtask` gives the oracle label."""
         if env.control_mode != "ee_delta" and not observe_only:
@@ -327,18 +414,18 @@ class TaskTeacher:
         far = "right" if near == "left" else "left"
         if t == "pick_place_any":
             g = env.goal_position
-            self.stages = [[ArmPickPlace(env, near, "cube", g[:2], 0.022, "green disk", rng=rng, noise=noise, perturb_rate=perturb_rate)]]
+            self.stages = [[ArmPickPlace(env, near, "cube", g[:2], 0.022, "green disk", rng=rng, noise=noise, perturb_rate=perturb_rate, bump_rate=bump_rate, miss_prob=miss_prob)]]
         elif t == "bin":
             b = env.bin_position
-            self.stages = [[ArmPickPlace(env, near, "cube", b[:2], 0.06, "bin", rng=rng, noise=noise, perturb_rate=perturb_rate)]]
+            self.stages = [[ArmPickPlace(env, near, "cube", b[:2], 0.06, "bin", rng=rng, noise=noise, perturb_rate=perturb_rate, bump_rate=bump_rate, miss_prob=miss_prob)]]
         elif t == "handover":
             b = env.bin_position
-            self.stages = [[ArmPickPlace(env, near, "cube", RELAY, 0.022, "grey pad", rng=rng, noise=noise, perturb_rate=perturb_rate)],
-                           ["handover", lambda: ArmPickPlace(env, far, "cube", b[:2], 0.06, "bin", rng=rng, noise=noise, perturb_rate=perturb_rate)]]
+            self.stages = [[ArmPickPlace(env, near, "cube", RELAY, 0.022, "grey pad", rng=rng, noise=noise, perturb_rate=perturb_rate, bump_rate=bump_rate, miss_prob=miss_prob)],
+                           ["handover", lambda: ArmPickPlace(env, far, "cube", b[:2], 0.06, "bin", rng=rng, noise=noise, perturb_rate=perturb_rate, bump_rate=bump_rate, miss_prob=miss_prob)]]
         else:
             b = env.bin_position
-            first = ArmPickPlace(env, "left", "cube", b[:2] + [-0.022, 0], 0.055, "bin", rng=rng, noise=noise, perturb_rate=perturb_rate)
-            second = ArmPickPlace(env, "right", "cube2", b[:2] + [0.022, 0], 0.055, "bin", rng=rng, noise=noise, perturb_rate=perturb_rate)
+            first = ArmPickPlace(env, "left", "cube", b[:2] + [-0.022, 0], 0.055, "bin", rng=rng, noise=noise, perturb_rate=perturb_rate, bump_rate=bump_rate, miss_prob=miss_prob)
+            second = ArmPickPlace(env, "right", "cube2", b[:2] + [0.022, 0], 0.055, "bin", rng=rng, noise=noise, perturb_rate=perturb_rate, bump_rate=bump_rate, miss_prob=miss_prob)
             second.wait_for = first  # both pick at once; the right arm carries once the left has left the bin
             self.stages = [[first, second]]
         self.k = 0
@@ -367,9 +454,11 @@ class TaskTeacher:
 
     def observe(self):
         """Advance phases from the current state without producing an action (observe_only mode)."""
+        for w in self.workers:
+            w.sync_from_state()
         self._advance()
         for w in self.workers:
-            w.target()
+            w.sync_from_state()
 
     def _advance(self):
         if self.k < len(self.stages) and all(w.done for w in self.workers):

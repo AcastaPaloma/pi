@@ -57,7 +57,8 @@ def oracle_subtask(env: RobotEnv, obs, released_after_place: bool) -> str:
 
 
 def run_episode(env: RobotEnv, policy: Pi07Policy, *, seed, execute, delay, cfg_beta, subtask, image_size,
-                placement, visual_randomization, video_frames=None, generator=None):
+                placement, visual_randomization, video_frames=None, generator=None, full_video_every=0):
+    """full_video_every > 0: record all cameras every that many control steps with captions (real-time video)."""
     obs, info = env.reset(seed=seed, options={"placement_range": placement, "visual_randomization": visual_randomization})
     history = HistoryBuffer(policy.cameras, hz=env.control_hz)
     task = info["instruction"]
@@ -92,7 +93,7 @@ def run_episode(env: RobotEnv, policy: Pi07Policy, *, seed, execute, delay, cfg_
         t0 = time.monotonic()
         images = {cam: policy.prepare_image(env.render_camera(cam, native=True)) for cam in policy.cameras}
         history.append(step, images, obs["state"])
-        if video_frames is not None:
+        if video_frames is not None and not full_video_every:
             video_frames.append(images[policy.cameras[0]])
         timing["observe_s"] += time.monotonic() - t0
 
@@ -128,6 +129,8 @@ def run_episode(env: RobotEnv, policy: Pi07Policy, *, seed, execute, delay, cfg_
         obs, reward, terminated, truncated, info = env.step(action)
         if shadow is not None:
             shadow.observe()
+        if video_frames is not None and full_video_every and t % full_video_every == 0:
+            video_frames.append(_captioned_frame(env, policy.cameras, task, context.subtask, t, info))
         cursor += 1
         t += 1
         closest = min(closest, float(min(np.linalg.norm(obs["ee_pose"][k:k + 3] - obs["cube_position"]) for k in (0, 7))))
@@ -146,6 +149,27 @@ def run_episode(env: RobotEnv, policy: Pi07Policy, *, seed, execute, delay, cfg_
             "lifted": bool(lifted > 0.045),
             "final_cube_to_goal_m": round(float(np.linalg.norm(obs["cube_position"] - obs["goal_position"])), 4),
             "policy_s": round(timing["policy_s"], 1), "observe_s": round(timing["observe_s"], 1)}
+
+
+def _captioned_frame(env, cameras, task, subtask, t, info):
+    """All cameras side by side (320x240 each) with the instruction, prompted subtask and live state."""
+    from PIL import ImageDraw
+    tiles = [np.asarray(Image.fromarray(env.render_camera(c, native=True)).resize((320, 240))) for c in cameras]
+    row = np.concatenate(tiles, 1)
+    canvas = Image.new("RGB", (row.shape[1], 240 + 54), (255, 255, 255))
+    canvas.paste(Image.fromarray(row), (0, 0))
+    d = ImageDraw.Draw(canvas)
+    cube = env.data.body("cube").xpos
+    grips = " ".join(f"{side} grip {env.robot[side].gripper_opening:.2f}" for side in ("left", "right"))
+    d.text((6, 244), f"{task}", fill=(20, 20, 20))
+    d.text((6, 260), f"prompted subtask: {subtask or '-'}", fill=(10, 70, 160))
+    touched = info.get("touched") or {}
+    d.text((6, 276), f"t={t / env.control_hz:5.2f}s  cube z={cube[2] * 100:4.1f} cm  {grips}  "
+                     f"touched L={touched.get('left', '-')} R={touched.get('right', '-')}"
+                     + ("   SUCCESS" if info.get("is_success") else ""), fill=(150, 30, 30) if info.get("is_success") else (60, 60, 60))
+    for i, c in enumerate(cameras):
+        d.text((i * 320 + 6, 6), c, fill=(255, 255, 255))
+    return np.asarray(canvas)
 
 
 def write_video(frames, path, fps=10):
@@ -190,6 +214,8 @@ def main(argv=None):
     parser.add_argument("--episode-seconds", type=float, default=20.0)
     parser.add_argument("--out", type=Path, help="Write results.json (and videos) here")
     parser.add_argument("--video", action="store_true")
+    parser.add_argument("--full-video", type=int, default=0, metavar="N",
+                        help="With --video: record all cameras with captions every N control steps (2 = real time at 25 fps)")
     args = parser.parse_args(argv)
 
     policy = Pi07Policy(args.checkpoint, device=args.device, tokenizer=args.tokenizer, denoise_steps=args.denoise_steps,
@@ -217,14 +243,16 @@ def main(argv=None):
         result = run_episode(envs[(color, shape)], policy, seed=args.seed + i, execute=args.execute, delay=args.delay,
                              cfg_beta=args.cfg_beta, subtask=args.subtask, image_size=image_size,
                              placement=args.placement, visual_randomization=args.visual_randomization,
-                             video_frames=frames, generator=generator)
+                             video_frames=frames, generator=generator, full_video_every=args.full_video)
         results.append(result)
         print(f"episode {i}: {result['object']:<14} success={result['success']} steps={result['steps']} "
               f"failure={result['failure']} calls={result['inference_calls']} closest={result['closest_hand_to_cube_m']:.3f}m "
               f"lifted={result['lifted']} final_to_goal={result['final_cube_to_goal_m']:.3f}m "
               f"policy={result['policy_s']:.0f}s observe={result['observe_s']:.0f}s", flush=True)
         if args.video and args.out:
-            write_video(frames, args.out / f"episode_{i:03d}.mp4")
+            tag = "success" if result["success"] else "fail"
+            write_video(frames, args.out / f"episode_{i:03d}_{tag}.mp4",
+                        fps=int(round(policy.hz / args.full_video)) if args.full_video else 10)
     for env in envs.values():
         env.close()
     rate = float(np.mean([r["success"] for r in results])) if results else 0.0
