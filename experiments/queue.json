@@ -128,6 +128,16 @@
       "eval": "MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.dagger --checkpoint exports/pi05_v1_15k/step_0015000 --episodes-per-task 150 --out data/sim_dagger_v4 --seed 990000",
       "host": "132.145.199.243",
       "started": "2026-10-16T06:24"
+    },
+    {
+      "name": "v1_17000_confirm30",
+      "hypothesis": "Confirm pi05_v1 step 17000 (8/8, 6/8, 7/8, 3/8 on 8 episodes; best checkpoint) with 30 episodes per rung",
+      "status": "queued",
+      "prefer_host": "129.213.124.160",
+      "requires_on_host": [
+        "exports/pi05_v1/step_0017000/model.pt"
+      ],
+      "eval": "for T in pick_place_any bin handover two_bins; do MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.eval_sim --checkpoint exports/pi05_v1/step_0017000 --task $T --episodes 30 --episode-seconds 30 --execute 25 --delay 0 --device cuda --subtask oracle --seed 4000 --out outputs/eval_v1confirm30_step17000_$T; done"
     }
   ]
 }
