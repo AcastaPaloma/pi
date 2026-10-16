@@ -523,3 +523,4 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   step-20000 video review: **dagger9_fixed** (more fixed-teacher data from step 20000, new seeds, also feeds
   pi05_dagger_clean) and **dagger1_final_confirm30** (runs once step 8000 is relayed; same 30 seeds as the
   83/120 baseline). Steps: dagger1 6120, v1_rec2 5420, rec2_trim 380, curriculum2 740, recover 12880. No errors.
+- **2026-10-16 12:12** [scheduler] 129.213.124.160 was idle; launched **v1_20000_twobins_video** (H11/H12 evidence: is the second-arm hover still the main two_bins failure for the best policy (pi05_v1 step 20000: second cube 12/30, never lifted in 10 of 18 failures)?)
