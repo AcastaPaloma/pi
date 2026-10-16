@@ -29,6 +29,7 @@ for f in glob.glob(os.path.expanduser("~/pi/outputs/eval_*/results.json")):
             continue
         print(json.dumps({"dir": os.path.basename(os.path.dirname(f)), "n": len(res),
             "success": sum(bool(x["success"]) for x in res), "lift": sum(bool(x.get("lifted")) for x in res),
+            "strict": sum(bool(x["success"]) and bool(x.get("lifted")) for x in res),
             "closest_mm": round(1000 * s.median(x.get("closest_hand_to_cube_m", float("nan")) for x in res)),
             "both": sum(all((x.get("touched") or {"a": False}).values()) for x in res),
             "task": res[0].get("task_id", "pick_place"), "mtime": os.path.getmtime(f)}))
@@ -86,15 +87,16 @@ def main():
     for r in rows:
         by_run[(r["run"], r["task"])].append(r)
     lines = [f"# Closed-loop results (generated {datetime.now():%Y-%m-%d %H:%M})", "",
-             "Success with Wilson 95% interval; lift = object raised; closest = median hand-to-object distance.", "",
-             "| Run | Task | Step | Success | 95% CI | Lift | Closest | Both arms | Host |",
-             "| --- | --- | --- | --- | --- | --- | --- | --- | --- |"]
+             "Success with Wilson 95% interval; strict = success with the object lifted (rules out pushing it into place); "
+             "lift = object raised; closest = median hand-to-object distance.", "",
+             "| Run | Task | Step | Success | Strict | 95% CI | Lift | Closest | Both arms | Host |",
+             "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |"]
     summary = []
     for (run, task), rs in sorted(by_run.items()):
         rs.sort(key=lambda r: r["step"])
         for r in rs:
             lo, hi = wilson(r["success"], r["n"])
-            lines.append(f"| {run} | {task} | {r['step']} | {r['success']}/{r['n']} | {lo:.2f}–{hi:.2f} | "
+            lines.append(f"| {run} | {task} | {r['step']} | {r['success']}/{r['n']} | {r.get('strict', r['success'])}/{r['n']} | {lo:.2f}–{hi:.2f} | "
                          f"{r['lift']}/{r['n']} | {r['closest_mm']} mm | {r['both']}/{r['n']} | {r['host']} |")
         best = max(rs, key=lambda r: (r["success"] / r["n"], r["lift"] / r["n"]))
         lo, hi = wilson(best["success"], best["n"])

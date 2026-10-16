@@ -174,3 +174,10 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   Scheduler bug: its first A10 launch (execute sweep) failed because double-quoting let the login
   shell expand `$E`; switched to shlex quoting, tagged jobs (SCHEDJOB_<name>) and let an A10 job run
   beside checkpoint evaluations when memory allows. Re-queued the sweep; dagger1_generate launches next.
+- **2026-10-16 ~05:35** **Shortcut check (user's concern):** pick_place success only requires the cube
+  to end on the disk, so a push counts. The leaderboard now shows **strict success = success with the
+  cube lifted**. Correction: pi05_single step 6000 is **26/30 strict (≈87%)**, not 28/30 — two of its
+  successes were pushes; step 5000 22/30, step 7000 21/30. pi05_warm2arm step 3000 pick_place_any 3/16
+  (2/16 strict). Container, handover and two-object rungs need a lift to succeed (cube inside walls),
+  so they are unaffected. Report strict numbers from now on. pi05_warm2arm step 3000 otherwise improved
+  (bin 5/16, handover lift 7/16) vs pi05_v1 at step 3000 (0/8): H1a now has some support.
