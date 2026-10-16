@@ -138,6 +138,9 @@ class TaskEnv(RobotEnv):
         self.data.time = 0
         mujoco.mj_forward(self.model, self.data)
         self._ee_targets = np.array([a.position for a in self.robot.values()])
+        # True rest poses, fixed at reset. A teacher built mid-episode (DAgger takeover) must return each arm
+        # here, not to wherever that hand happened to be when the teacher was created (H13).
+        self.home_positions = {name: a.position.copy() for name, a in self.robot.items()}
         self._touched = {side: False for side in ARMS}
         self._task_success_steps = 0
         return self._observation(), self._info(False)
@@ -237,7 +240,7 @@ class ArmPickPlace:
         self.obj_name = f"{color} {env.object_shape}"
         self.phase, self.ticks, self.mistakes, self.mistake_active = 0, 0, 0, False
         self._last = env.robot[arm].position
-        self.home = env.robot[arm].position
+        self.home = getattr(env, "home_positions", {}).get(arm, env.robot[arm].position).copy()
         self.wait_for = None  # another ArmPickPlace that must finish before this one carries
         # Recovery data: knock the target off course for ~0.5 s at `perturb_rate` events per second
         # during free-space phases; that stretch is labelled a mistake, the correction afterwards is clean.

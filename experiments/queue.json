@@ -61,13 +61,13 @@
     },
     {
       "name": "pi05_dagger_clean",
-      "hypothesis": "H2b done right (H12 corollary): pi05_dagger1 collapsed (22/32 at resume -> 7/32 -> 3/32) on data where 38% of DAgger continuations are teacher failures and 62% of DAgger steps are parked tails. Resume pi05_v1 step 20000 on mix + recover2 + only teacher-successful DAgger (v1-v6) and mixed-order two_bins demos, with PI_TRIM_STILL_TAIL_S=1",
+      "hypothesis": "H2b done right (H12 corollary): pi05_dagger1 collapsed (22/32 at resume -> 7/32 -> 3/32) on data where 38% of DAgger continuations are teacher failures and 62% of DAgger steps are parked tails. Resume pi05_v1 step 20000 on mix + recover2 + only teacher-successful DAgger (v1-v6) and mixed-order two_bins demos, with PI_TRIM_STILL_TAIL_S=1; plus DAgger v7 from the fixed teacher",
       "status": "queued",
       "avoid_hosts": [
         "192.222.52.191"
       ],
-      "prep_on_main": "ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@129.213.124.160 'tar cf - -C ~/pi/data sim_dagger_v5' | tar xf - -C data; ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@132.145.199.243 'tar cf - -C ~/pi/data sim_dagger_v6 sim_twobins_mixed_v1' | tar xf - -C data; ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@{HOST} 'mkdir -p ~/pi/runs/pi05_v1_snap' && rsync -a -e 'ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes' runs/pi05_v1/step_0020000 ubuntu@{HOST}:~/pi/runs/pi05_v1_snap/ && rsync -a -e 'ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes' data/sim_recover2_v1 data/sim_dagger_v1 data/sim_dagger_v2 data/sim_dagger_v3 data/sim_dagger_v4 data/sim_dagger_v5 data/sim_dagger_v6 data/sim_twobins_mixed_v1 ubuntu@{HOST}:~/pi/data/ 2>/dev/null; true",
-      "setup": "mkdir -p data/sim_mixdagclean_v1 && cd data/sim_mixdagclean_v1 && for d in ../sim_mix_v1/episode_*; do ln -sfn $d $(basename $d); done && for d in ../sim_recover2_v1/episode_*; do ln -sfn $d episode_rec2_$(basename $d | cut -d_ -f2); done && for v in 1 2 3 4 5 6; do for d in ../sim_dagger_v$v/episode_*; do grep -qs '\"success\": true' $d/meta.json && ln -sfn $d episode_dag${v}_$(basename $d | cut -d_ -f2); done; done; for d in ../sim_twobins_mixed_v1/episode_*; do grep -qs '\"success\": true' $d/meta.json && ln -sfn $d episode_tbmix_$(basename $d | cut -d_ -f2); done; true",
+      "prep_on_main": "ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@129.213.124.160 'tar cf - -C ~/pi/data sim_dagger_v5 sim_dagger_v7' | tar xf - -C data; ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@132.145.199.243 'tar cf - -C ~/pi/data sim_dagger_v6 sim_twobins_mixed_v1' | tar xf - -C data; ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@{HOST} 'mkdir -p ~/pi/runs/pi05_v1_snap' && rsync -a -e 'ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes' runs/pi05_v1/step_0020000 ubuntu@{HOST}:~/pi/runs/pi05_v1_snap/ && rsync -a -e 'ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes' data/sim_recover2_v1 data/sim_dagger_v1 data/sim_dagger_v2 data/sim_dagger_v3 data/sim_dagger_v4 data/sim_dagger_v5 data/sim_dagger_v6 data/sim_dagger_v7 data/sim_twobins_mixed_v1 ubuntu@{HOST}:~/pi/data/ 2>/dev/null; true",
+      "setup": "mkdir -p data/sim_mixdagclean_v1 && cd data/sim_mixdagclean_v1 && for d in ../sim_mix_v1/episode_*; do ln -sfn $d $(basename $d); done && for d in ../sim_recover2_v1/episode_*; do ln -sfn $d episode_rec2_$(basename $d | cut -d_ -f2); done && for v in 1 2 3 4 5 6 7; do for d in ../sim_dagger_v$v/episode_*; do grep -qs '\"success\": true' $d/meta.json && ln -sfn $d episode_dag${v}_$(basename $d | cut -d_ -f2); done; done; for d in ../sim_twobins_mixed_v1/episode_*; do grep -qs '\"success\": true' $d/meta.json && ln -sfn $d episode_tbmix_$(basename $d | cut -d_ -f2); done; true",
       "train": "PI_TRIM_STILL_TAIL_S=1 RESUME=runs/pi05_v1_snap/step_0020000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdagclean_v1 runs/{RUN} 8000",
       "eval": "GPU=0 NAME={RUN} EPISODES=8 DELAY=0 TASKS='pick_place_any bin handover two_bins' MUJOCO_GL=egl bash scripts/box/eval_when_ready.sh runs/{RUN} 1000 2000 3000 4000 5000 6000 7000 8000"
     },
@@ -274,14 +274,25 @@
     {
       "name": "v1_20000_confirm30",
       "hypothesis": "Baseline for H2b/H12: pi05_v1 step 20000 (the resume point of pi05_dagger1, pi05_v1_rec2 and pi05_v1_rec2_trim) on the same 30 seeds, with per-object two_bins metrics, so their final checkpoints can be compared episode for episode",
-      "status": "running",
+      "status": "done",
       "prefer_host": "129.213.124.160",
       "requires_on_host": [
         "exports/pi05_v1/step_0020000/model.pt"
       ],
       "eval": "for T in pick_place_any bin handover two_bins; do MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.eval_sim --checkpoint exports/pi05_v1/step_0020000 --task $T --episodes 30 --episode-seconds 30 --execute 25 --delay 0 --device cuda --dtype bf16 --subtask oracle --seed 4000 --out outputs/eval_v1confirm30_step20000_$T; done",
       "host": "129.213.124.160",
-      "started": "2026-10-16T09:50"
+      "started": "2026-10-16T09:50",
+      "result": "strict 26/26/19/12 of 30 = 83/120, best two-arm checkpoint; two_bins first cube 27/30, second 12/30"
+    },
+    {
+      "name": "dagger7_fixed",
+      "hypothesis": "H13 fixed: the DAgger teacher took the hand position at takeover as each arm's rest pose, deadlocking two_bins mid-carry and handover lower/raise takeovers (0/8 each; 8/8 after the fix). Regenerate DAgger from the best policy (pi05_v1 step 20000, 83/120) with the fixed teacher",
+      "status": "queued",
+      "prefer_host": "129.213.124.160",
+      "requires_on_host": [
+        "exports/pi05_v1/step_0020000/model.pt"
+      ],
+      "eval": "MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.dagger --checkpoint exports/pi05_v1/step_0020000 --episodes-per-task 150 --takeover-min 1 --takeover-max 15 --out data/sim_dagger_v7 --seed 999000"
     }
   ]
 }

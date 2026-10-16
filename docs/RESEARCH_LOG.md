@@ -451,3 +451,19 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   pi05_v1 so far, and it is the resume point of every running continuation, so it is their baseline. two_bins
   still running. Steps: dagger1 2780, v1_rec2 2040, warm2arm 11220, recover 10940, easy 11580; DAgger v6 at bin
   60/100. No errors.
+- **2026-10-16 14:55 UTC** **pi05_v1 step 20000 confirmed: 26/26/19/12 of 30 strict = 83/120, the best two-arm
+  policy** (step 13000: 75, 17000: 76). two_bins: first cube in bin 27/30, second 12/30; in 10 of the 18
+  failures the second cube is never lifted. pi05_recover step 11000: 12/16, 11/16, 7/16, 6/16 (36/64, its best
+  by far, after a flat 8000–10000; the ≥ 4-checkpoint rule kept it alive). pi05_v1_rec2 step 2000: 4/8, 4/8,
+  1/8, 1/8 (10/32; still in its post-resume dip). pi05_warm2arm step 11000: 13/16, 9/16, 6/16, 3/16.
+  **H13 confirmed and fixed: the DAgger takeover was broken, not DAgger itself.** Diagnostic: the teacher
+  takes over from a clean reset on 10/10 episodes for every task. When the teacher drives for T seconds and a
+  fresh DAgger-style teacher then takes over (exactly dagger.py's takeover), two_bins fails 8/8 at T=4 s and
+  handover fails 8/8 at T=4 s and 6 s. Bin, and the other takeover times, stay at 8/8. Cause: `ArmPickPlace` set each
+  arm's rest pose to the hand position when the teacher was created, so a mid-carry takeover sent the arm
+  "home" to a mid-air point and the other arm waited forever. Fix: `TaskEnv.reset` records
+  `home_positions`, which the teacher uses. All takeovers now 8/8 (two_bins and handover at 2/4/6/9 s); task
+  tests 5/5; new `tests/test_dagger_takeover.py`. Normal recording and the eval oracle build their teacher at
+  reset, so they were never affected. This explains the 62% parked DAgger data and plausibly pi05_dagger1's
+  collapse. Queued **dagger7_fixed** (A10#1, 150 per task from pi05_v1 step 20000, takeover 1–15 s);
+  pi05_dagger_clean now also takes v7.
