@@ -300,3 +300,16 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   bin 22/30 (73%), handover 17/30 (57%), two_bins 9/30 (30%) — 75/120 overall.** Step 17000 (8/8, 6/8, 7/8,
   3/8 on 8 episodes) is now being confirmed on 30. Opened H10 (two_bins weakest).
 - **2026-10-16 07:24** [scheduler] 129.213.124.160 was idle; launched **v1_17000_twobins_video** (H10 evidence: watch how step-17000 two_bins episodes fail)
+- **2026-10-16 ~11:30 UTC (07:30 EDT)** **30-episode confirmation of pi05_v1 step 17000 (strict): pick_place_any
+  23/30, bin 22/30, handover 16/30, two_bins 15/30 — 76/120**, a tie with step 13000's 75/120. The two
+  checkpoints trade skills on identical seeds: pick 27 → 23, two_bins 9 → 15. That is the H9 pattern
+  (neighbouring checkpoints oscillate) on 30-episode evidence, not 8-episode noise. Step 17000 is the
+  two-object demo model; step 13000 stays the single-object one.
+  **New H9b test, no training needed:** a uniform average of pi05_v1 steps 13000–18000 (six checkpoints,
+  `scripts/box/average_checkpoints.py`, built on the main box) queued as **v1_soup_confirm30** on the same
+  seeds. Prediction: it matches the better checkpoint on every rung (≥ 27, 22, 17, 15). If it does, every run
+  should be evaluated as a soup and EMA (pi05_2arm_ema) becomes the default. The DAgger fine-tune now also takes
+  DAgger v4 (from step 15000, 340/600 done). Other runs at their latest checkpoint: warm2arm step 8000 8/16,
+  5/16, 4/16, 2/16; 2arm_v2 step 8000 5/12, 5/12, 3/12, 1/12; recover step 7000 4/16, 5/16, 1/16, 1/16.
+  None meets the stop rule yet (each still overlaps the leader on some rung). Steps: pi05_v1 18560, 2arm_v2
+  9580, warm2arm 8420, recover 8200, easy 8640; no errors.
