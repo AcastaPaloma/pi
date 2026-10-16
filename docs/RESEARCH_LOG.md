@@ -148,3 +148,8 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   plateau in the 80s. The ≥85% reassignment bar was not met at 7000, so it keeps training; decide at
   8000. recover2 finished: 5,965 episodes (4,243 successful, 11 crashed and skipped); copying to the
   main box as data/sim_mixrec2_v1.
+- **2026-10-16 ~03:40** Step-2000 scores (16/rung): pi05_easy pick_place_any 3/16, bin 5/16;
+  pi05_recover pick_place_any 0/16, bin 1/16; pi05_warm2arm bin 0/16, handover 0/16. H1b (curriculum)
+  leads; H1a (warm start from the 50% single-arm checkpoint) and H2 v1 (target-knock recovery only)
+  show no gain yet — keep watching to step 4000 per the stop rule. recover2 data (bumps + missed
+  grasps) is on the main box as data/sim_mixrec2_v1 (10,794 episodes), ready for pi05_2arm_v2.
