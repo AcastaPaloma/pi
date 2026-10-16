@@ -101,8 +101,17 @@ def launch(entry, host, gpu=None):
             # shlex.quote keeps $VARS for the job's own shell (json.dumps let the login shell expand them).
             tagged = f": SCHEDJOB_{run}; {cmd}"
             steps.append(f"setsid nohup bash -c {shlex.quote(tagged)} < /dev/null > {log} 2>&1 &")
-    code, out = ssh(host, "cd ~/pi && mkdir -p logs outputs && " + " ; cd ~/pi && ".join(steps), timeout=3600)
-    return code, out
+    # Fire and forget: a remote shell that backgrounds jobs can keep the ssh channel open for hours,
+    # which used to block the whole scheduler. Start it detached here and verify by the job tag instead.
+    remote = "cd ~/pi && mkdir -p logs outputs && " + " ; cd ~/pi && ".join(steps)
+    subprocess.Popen(["ssh", "-n", "-o", "BatchMode=yes", "-o", "ConnectTimeout=20", f"ubuntu@{host}", remote],
+                     stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
+    for _ in range(12):  # setup (symlinks) can take a minute before the job starts
+        time.sleep(15)
+        code, out = ssh(host, f"pgrep -f '[S]CHEDJOB_{run}' >/dev/null && echo started")
+        if "started" in out:
+            return 0, "started"
+    return 1, f"job tag SCHEDJOB_{run} not seen on {host} within 3 minutes"
 
 
 def main():
