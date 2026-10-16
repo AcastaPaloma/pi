@@ -583,3 +583,9 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   confirmation follows. All GPUs busy; scheduler on 60 s checks with no idle alerts. Steps: dagger_clean 1020,
   v1_cont 620, rec2_trim 2440, curriculum2 2620, recover 15040. No errors.
 - **2026-10-16 14:15** [scheduler] 129.213.124.160 was idle; launched **dagger1_final_confirm30** (H2b: does pi05_dagger1's final checkpoint beat its resume point (pi05_v1 step 20000: 83/120) on the same 30 seeds?)
+- **2026-10-16 18:30 UTC** **dagger1_7000_confirm30 final (strict, 30 shared seeds): 25/28/18/14 = 85/120**, against
+  pi05_v1 step 20000's 26/26/19/12 = 83/120. That is within noise, so **DAgger round 1 (broken-takeover data) gave
+  no measurable gain**. two_bins: first cube in 27/30, second 14/30; in 8 of the 16 failures the second cube is
+  never lifted, the same hover as before. The open bet is the fixed-teacher, success-only data in
+  pi05_dagger_clean (step 1580) and pi05_dagger2 (queued); the step-8000 confirmation is half done (pick 24 of 26
+  lifted, bin 26/30). H11/H12 still open; the trim A/B (rec2_trim, step 2820) reports in a few hours. No idle GPUs.
