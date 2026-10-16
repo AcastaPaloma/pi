@@ -263,3 +263,7 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   first run with successes on all four rungs by step 5000 (pi05_v1's step-5000 two-arm scores predate the
   oracle fix). It looked beaten at step 4000; not stopping it was right. Scheduler: busy check fixed;
   dagger3_generate (from pi05_warm2arm step 4000) running on the first A10; dagger2 at 269/600.
+- **2026-10-16 ~11:05** pi05_2arm_v2 step 4000: pick 2/12, bin 1/12, handover 2/12 (both arms 2/12) —
+  partial recovery from 0/12 at 3000 (H8: dip then recovery). Queued **v1_13000_confirm30** (30 episodes per
+  rung on pi05_v1 step 13000, the two-arm demo candidate) for the first A10 after dagger3. Steps: pi05_v1
+  14260, 2arm_v2 5260, warm2arm 6020, recover 5760, easy 6020; no errors. dagger2 335/600, dagger3 159/600.
