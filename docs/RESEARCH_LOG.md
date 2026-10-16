@@ -517,3 +517,9 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   The takeover bug (H13) was real and is fixed regardless; v7 with the fixed teacher is at 315/361 successful.
   pi05_v1_rec2_trim (the H12 A/B twin) is training with trimming active (1,474 failed episodes trimmed); its first
   checkpoints come in about an hour. pi05_curriculum2 at step 440. The live demo holds A10#2. No errors.
+- **2026-10-16 16:10 UTC** **DAgger v7 (fixed teacher) done: 420 kept, 362 teacher-successful (86%)**, against
+  14–70% failure per set with the broken takeover. The live demo gained an orbitable full-scene 3D view at the
+  user's request (free MuJoCo camera, 1152×648; the policy's inputs are unchanged). Queued for A10#1 after the
+  step-20000 video review: **dagger9_fixed** (more fixed-teacher data from step 20000, new seeds, also feeds
+  pi05_dagger_clean) and **dagger1_final_confirm30** (runs once step 8000 is relayed; same 30 seeds as the
+  83/120 baseline). Steps: dagger1 6120, v1_rec2 5420, rec2_trim 380, curriculum2 740, recover 12880. No errors.
