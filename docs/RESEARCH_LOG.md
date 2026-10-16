@@ -474,3 +474,4 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   failure in v1–v4. That supports H13's fix in production as well as in the diagnostic. dagger6 (old teacher) at
   two_bins 20/100. Steps: dagger1 3880, v1_rec2 3140, warm2arm 11880 (ends at 12000; its node then takes
   pi05_v1_rec2_trim), recover 11560. No errors.
+- **2026-10-16 11:21** [scheduler] 209.20.158.194:0 was idle; launched **pi05_curriculum2** (H1b: easy rungs first learns fastest; stage 2 adds handover and two_bins plus recover2 data)

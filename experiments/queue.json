@@ -86,8 +86,9 @@
       "avoid_hosts": [
         "192.222.52.191"
       ],
+      "launch_note": "first launch (14:47 UTC) ran nothing: scheduler joined background steps with \" ; \" (bash syntax error); fixed and requeued 15:15 UTC",
       "host": "209.20.158.194:0",
-      "started": "2026-10-16T10:47"
+      "started": "2026-10-16T11:18"
     },
     {
       "name": "pi05_lr5e5",
