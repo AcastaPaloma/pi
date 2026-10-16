@@ -613,3 +613,7 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   `scripts/scheduler.py` gained `requires_elsewhere` (wait for a file on another host), so a confirmation can
   wait for a checkpoint relayed to the other A10. Queued **v1_cont_4000_confirm30**. DAgger v10 running (40/42
   successful so far). All GPUs busy.
+- **2026-10-16 19:35 UTC** pi05_dagger_clean step 2000: 3/8, 0/8, 3/8, 1/8 (7/32), the same full-LR dip as every
+  other 2.5e-5 continuation (5 of 5), while pi05_v1_cont at 1e-5 stays at 21 → 19/32. Acting on H14: queue reordered so
+  **pi05_dagger_clean_lr1e5** launches first, and **pi05_dagger2 now also uses LR 1e-5** (so the pair isolates
+  the resume point instead of repeating a likely-harmful LR).
