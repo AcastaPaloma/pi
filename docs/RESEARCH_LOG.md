@@ -286,3 +286,4 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   pi05_v1's 19% at step 7000 — warm start + recover2 reaches a working two-arm policy in about half the steps.
   DAgger v2 done (570 kept, only 171 teacher-successful: generated during 2arm_v2's dip); dagger4 (from
   pi05_v1 step 15000) launched on the second A10.
+- **2026-10-16 06:48** [scheduler] 129.213.124.160 was idle; launched **v1_17000_confirm30** (Confirm pi05_v1 step 17000 (8/8, 6/8, 7/8, 3/8 on 8 episodes; best checkpoint) with 30 episodes per rung)
