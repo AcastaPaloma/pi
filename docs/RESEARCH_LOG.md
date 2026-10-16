@@ -280,3 +280,9 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   470 successful); pi05_dagger1 now aggregates DAgger v1+v2+v3 (~1,600 episodes). The 30-episode confirmation
   of pi05_v1 step 13000 is running on the first A10.
 - **2026-10-16 06:27** [scheduler] 132.145.199.243 was idle; launched **dagger4_generate** (H2b data from the best two-arm policy (pi05_v1 step 15000: 7/8, 4/8, 2/8, 3/8))
+- **2026-10-16 ~12:35** **30-episode confirmation of pi05_v1 step 13000 (strict = with lift): pick_place_any
+  27/30 (90%), bin 22/30 (73%), handover 17/30 (57%)**; two_bins still running. pi05_v1 step 16000: 7/8, 5/8,
+  4/8, 6/8 (69% overall, the best checkpoint). **pi05_2arm_v2 step 7000: 8/12, 9/12, 3/12, 5/12 (52%)** vs
+  pi05_v1's 19% at step 7000 — warm start + recover2 reaches a working two-arm policy in about half the steps.
+  DAgger v2 done (570 kept, only 171 teacher-successful: generated during 2arm_v2's dip); dagger4 (from
+  pi05_v1 step 15000) launched on the second A10.
