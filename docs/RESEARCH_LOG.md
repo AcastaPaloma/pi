@@ -510,3 +510,10 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   placements gave pick_place_any 3/4 and handover 2/3, in line with the 30-episode rates, so the demo's
   placement path is faithful. A10#2 is reserved for it: dagger8_fixed is held, and the server runs under a
   SCHEDJOB tag so the scheduler leaves the GPU alone.
+- **2026-10-16 15:53 UTC** **Correction to the 14:05 entry: pi05_dagger1 did not collapse for good.** Step
+  5000: 7/8, 6/8, 3/8, 4/8 (20/32, back near its 22/32 resume point, with two_bins above it). pi05_v1_rec2 step
+  4000: 5/8, 6/8, 1/8, 5/8 (17/32). Both continuations show the H8 dip and recovery (lows of 3/32 and 9/32 near
+  steps 2000–3000). So the bad DAgger data was not the main cause of the dip, and H14 (resume LR) is weakened.
+  The takeover bug (H13) was real and is fixed regardless; v7 with the fixed teacher is at 315/361 successful.
+  pi05_v1_rec2_trim (the H12 A/B twin) is training with trimming active (1,474 failed episodes trimmed); its first
+  checkpoints come in about an hour. pi05_curriculum2 at step 440. The live demo holds A10#2. No errors.
