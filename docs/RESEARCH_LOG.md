@@ -100,3 +100,6 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   weakened**: the dominant failure is grasp precision plus poor recovery once the cube moves, which is
   **H2**'s prediction; pi05_recover tests it directly. Decision: no change yet; watch pi05_single at
   steps 4000–5000 (still rising: 10/30 → 19/30) and pi05_recover's first scores.
+- **2026-10-16 ~00:55** pi05_single step 4000 on 30 episodes: **21/30 (0.52–0.83), lift 26/30** —
+  33% → 63% → 70% over steps 2000–4000, still rising; it is the working sim policy for the original
+  task. No changes. pi05_v1 step 5000 being scored; the three experiments reach step 1000 shortly.
