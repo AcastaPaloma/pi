@@ -181,3 +181,4 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   (2/16 strict). Container, handover and two-object rungs need a lift to succeed (cube inside walls),
   so they are unaffected. Report strict numbers from now on. pi05_warm2arm step 3000 otherwise improved
   (bin 5/16, handover lift 7/16) vs pi05_v1 at step 3000 (0/8): H1a now has some support.
+- **2026-10-16 02:28** [scheduler] 132.145.199.243 was idle; launched **single6000_execute_sweep** (H6: re-planning more often (execute 10 or 15 actions per chunk) raises closed-loop success of the solved single-arm model)

@@ -42,23 +42,27 @@
     {
       "name": "single6000_execute_sweep",
       "hypothesis": "H6: re-planning more often (execute 10 or 15 actions per chunk) raises closed-loop success of the solved single-arm model",
-      "status": "queued",
+      "status": "running",
       "prefer_host": "132.145.199.243",
       "requires_on_host": [
         "exports/pi05_single/step_0006000/model.pt"
       ],
       "eval": "for E in 10 15 40; do MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.eval_sim --checkpoint exports/pi05_single/step_0006000 --episodes 30 --episode-seconds 20 --execute $E --delay 0 --device cuda --subtask oracle --seed 1000 --out outputs/eval_single6000exec${E}_step6000_pick_place; done",
-      "note": "first launch failed: the scheduler's quoting let $E expand to nothing (fixed)"
+      "note": "first launch failed: the scheduler's quoting let $E expand to nothing (fixed)",
+      "host": "132.145.199.243",
+      "started": "2026-10-16T02:28"
     },
     {
       "name": "dagger1_generate",
       "hypothesis": "H2b data: policy rollout (pi05_v1 step 8000) then teacher takeover, 150 episodes per rung",
-      "status": "queued",
+      "status": "running",
       "prefer_host": "129.213.124.160",
       "requires_on_host": [
         "exports/pi05_v1/step_0008000/model.pt"
       ],
-      "eval": "MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.dagger --checkpoint exports/pi05_v1/step_0008000 --episodes-per-task 150 --out data/sim_dagger_v1"
+      "eval": "MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.dagger --checkpoint exports/pi05_v1/step_0008000 --episodes-per-task 150 --out data/sim_dagger_v1",
+      "host": "129.213.124.160",
+      "started": "2026-10-16T02:15"
     }
   ]
 }
