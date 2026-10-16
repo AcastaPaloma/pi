@@ -52,6 +52,10 @@ class Episode:
         n = self.length if self.sample_steps is None else self.sample_steps
         return (n + self.frame_stride - 1) // self.frame_stride
 
+    def frame_step(self, t: int) -> int:
+        """Nearest recorded frame at or before t."""
+        return min(self.length - 1, t) // self.frame_stride * self.frame_stride
+
 
 def still_tail_steps(steps: dict, tol_m: float = 0.01) -> int:
     """Timesteps at the end of an episode during which both hands stay within tol_m of their final position."""
@@ -74,10 +78,6 @@ def trim_still_tail(episode: "Episode", keep_s: float) -> bool:
         return False
     episode.sample_steps = max(1, episode.length - still + int(keep_s * hz))
     return True
-
-    def frame_step(self, t: int) -> int:
-        """Nearest recorded frame at or before t."""
-        return min(self.length - 1, t) // self.frame_stride * self.frame_stride
 
 
 class EpisodeStore:

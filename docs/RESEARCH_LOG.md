@@ -487,3 +487,11 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   lower peak LR (e.g. 5e-6). Watching 1–2 more checkpoints of both continuations (the 2arm_v2 dip recovered by
   ~6000) before queuing a low-LR continuation. Queued A10 **v1_20000_twobins_video** (6 full-video episodes) to
   check the second-arm hover on the best policy.
+- **2026-10-16 15:35 UTC** **My H12 loader change broke every new training run.** I inserted the trim functions
+  inside `Episode`'s class body, which pushed `Episode.frame_step` out of the class. Any trainer started after
+  13:45 crashed on its first batch with `AttributeError: 'Episode' object has no attribute 'frame_step'`.
+  Runs already in progress had imported the old module and were unaffected. The only casualty was
+  pi05_curriculum2's first real launch. Fixed (diff against the pre-H12 file now shows only the intended
+  additions), synced to all hosts, and pi05_curriculum2 relaunched by hand on 209.20.158.194 (step 20, loss
+  normal). The crashed log is kept as `logs/train_pi05_curriculum2.crashed_frame_step`. Lesson: a compile check
+  is not a test. Loader edits now get a short real training run before launch.
