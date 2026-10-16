@@ -408,3 +408,9 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   running pi05_v1_rec2 (same resume step 20000, data and 8000 steps) with trimming on, first for the next
   free node. pi05_dagger2 now also takes the 1,500 mixed-order two_bins demos and **dagger6_generate** (A10,
   from pi05_2arm_v2 step 12000). Trimming will be applied to everything else only if the A/B supports it.
+- **2026-10-16 13:30 UTC** pi05_warm2arm step 10000: 8/16, 10/16, 5/16, 2/16 (10 checkpoints; still overlaps
+  the leader's lower bounds by a hair on every rung, ends at 12000 in ~1 h, so it runs out). v2arm_11000_confirm30
+  half done: pick_place_any 17/30 (only 14 lifted) and bin 19/30, against pi05_v1 step 13000's 27 and 22 on the
+  same seeds. The 12-episode ladder flattered pi05_2arm_v2, and pi05_v1 stays the base for DAgger rounds.
+  pi05_dagger1 step 1000 relayed to A10#1 and is being scored; pi05_v1_rec2 at 880. dagger5_twobins 380/400. No
+  errors.
