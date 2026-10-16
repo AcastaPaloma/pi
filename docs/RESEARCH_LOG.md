@@ -258,3 +258,4 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   7/8), two_bins 5/8** — the two-arm tasks now succeed most of the time (handover and two_bins were 1/8 at
   step 12000); every success includes a lift and the handover successes need both grippers on the cube.
   The plateau at 9000–12000 was not the ceiling. 8-episode samples are noisy; confirm at 14000.
+- **2026-10-16 04:27** [scheduler] 129.213.124.160 was idle; launched **dagger3_generate** (H2b data from the strongest two-arm policy (pi05_warm2arm step 4000: 11/16, 9/16))
