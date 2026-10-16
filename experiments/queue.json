@@ -222,12 +222,14 @@
     {
       "name": "v2arm_11000_confirm30",
       "hypothesis": "H1a/H8: does the warm-started pi05_2arm_v2 (step 11000: 8/12, 8/12, 4/12, 4/12 at 11k steps) match pi05_v1 (75-76/120 at 13-17k) on the same 30 seeds? Decides the base for later DAgger rounds",
-      "status": "queued",
+      "status": "running",
       "prefer_host": "132.145.199.243",
       "requires_on_host": [
         "exports/pi05_2arm_v2/step_0011000/model.pt"
       ],
-      "eval": "for T in pick_place_any bin handover two_bins; do MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.eval_sim --checkpoint exports/pi05_2arm_v2/step_0011000 --task $T --episodes 30 --episode-seconds 30 --execute 25 --delay 0 --device cuda --subtask oracle --seed 4000 --out outputs/eval_v2armconfirm30_step11000_$T; done"
+      "eval": "for T in pick_place_any bin handover two_bins; do MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.eval_sim --checkpoint exports/pi05_2arm_v2/step_0011000 --task $T --episodes 30 --episode-seconds 30 --execute 25 --delay 0 --device cuda --subtask oracle --seed 4000 --out outputs/eval_v2armconfirm30_step11000_$T; done",
+      "host": "132.145.199.243",
+      "started": "2026-10-16T09:09"
     }
   ]
 }

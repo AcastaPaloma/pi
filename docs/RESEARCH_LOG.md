@@ -382,3 +382,4 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   the main box. Dry run picks pi05_v1_rec2 for main GPU1. Queued **v2arm_11000_confirm30** (A10): does the
   warm start match pi05_v1 on the same 30 seeds — decides the base for later DAgger rounds.
 - **2026-10-16 08:58** [scheduler] 192.222.52.191:1 was idle; launched **pi05_v1_rec2** (H2 on the best model: continue pi05_v1 (6/8 and 5/8 at step 9000) on the two-arm mix plus recover2 (bumps, missed grasps) | 11:30 UTC: promoted — the step-17000 two_bins video shows missed grasps with no retry, which recover2's deliberate missed grasps teach)
+- **2026-10-16 09:09** [scheduler] 132.145.199.243 was idle; launched **v2arm_11000_confirm30** (H1a/H8: does the warm-started pi05_2arm_v2 (step 11000: 8/12, 8/12, 4/12, 4/12 at 11k steps) match pi05_v1 (75-76/120 at 13-17k) on the same 30 seeds? Decides the base for later DAgger rounds)
