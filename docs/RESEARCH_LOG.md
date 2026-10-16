@@ -61,6 +61,15 @@ right carries and places beside it, 6.4 s). Remaining failure seen: the right ar
 the rim and then hovers over the bin instead of re-grasping (recovery, H2). Two_bins scores before this
 fix understate the policy.
 
+### H8: pi05_2arm_v2 dips after its strong start (watching, since 2026-10-16 ~09:20)
+Step 2000: pick_place_any 4/12, bin 6/12; step 3000: 0/12 on every rung (lift ≤ 2/12). Re-scored on the
+same 6 seeds: step 2000 1/6, step 3000 0/6 — reproducible, not an evaluation fault; checkpoint files
+intact; training flow loss steady at ~0.03. Hypothesis: the warm start first carries over single-arm skill,
+then temporarily loses it while adapting to the two-arm action statistics and the recover2 mix (the
+opposite curve of pi05_warm2arm, weak at 1000–2000 and strong at 4000). Possible changes if it does not
+recover: lower LR or a longer warmup for warm starts, or mix in single-arm data to anchor the skill.
+Decide after steps 4000–5000.
+
 ### H4: single-arm failures now happen after the grasp (weakened 2026-10-16 00:30; see entry)
 pi05_single step 3000 lifts the cube in 8/10 episodes but succeeds in 5/10: the remaining failures
 are in carrying, placing or releasing, not in reaching. Possible changes: (a) longer training (the
@@ -228,3 +237,6 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   **H1a now strongly supported** (warm start from the single-arm model), alongside H1b (pi05_easy 6/16, 7/16)
   and the even faster pi05_2arm_v2 (warm start + recover2: 4/12, 6/12 at step 2000). DAgger data: v1 429/600,
   v2 29/600. No errors; pi05_v1 at step 12000.
+- **2026-10-16 ~09:20** pi05_v1 step 12000: pick 5/8, bin 3/8, handover 1/8, two_bins 1/8 — flat within
+  noise since step 9000 (plateau). pi05_2arm_v2 step 3000: 0/12 on every rung after 4/12, 6/12 at step
+  2000; reproduced on fixed seeds; opened H8.
