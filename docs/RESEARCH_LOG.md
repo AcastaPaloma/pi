@@ -313,7 +313,7 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   5/16, 4/16, 2/16; 2arm_v2 step 8000 5/12, 5/12, 3/12, 1/12; recover step 7000 4/16, 5/16, 1/16, 1/16.
   None meets the stop rule yet (each still overlaps the leader on some rung). Steps: pi05_v1 18560, 2arm_v2
   9580, warm2arm 8420, recover 8200, easy 8640; no errors.
-- **2026-10-16 ~11:50 UTC** **H10 video review (pi05_v1 step 17000, two_bins, 6 episodes): 4/6 succeed.**
+- **2026-10-16 ~11:30 UTC** **H10 video review (pi05_v1 step 17000, two_bins, 6 episodes): 4/6 succeed.**
   Successes are genuine: the check requires both cubes inside the bin with both grippers open; frames show the
   left arm placing its cube and the right arm placing the blue one. **Both failures share one mode:** the left
   arm places its cube, the right arm's first grasp on the blue cube misses (gripper stays open at the cube,
@@ -323,3 +323,14 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   pi05_v1_rec2 directly target it. Instrumentation gap fixed: two_bins evaluations now also record
   `cube2_in_bin`, `cube2_lifted` and the first cube's `cube_in_bin`, so per-arm failure rates are measurable on
   30 episodes. pi05_2arm_v2 step 9000: 8/12, 8/12, 2/12, 1/12.
+- **2026-10-16 11:35 UTC** pi05_v1 step 18000: 6/8, 7/8, 7/8, 2/8 (two_bins keeps swinging 6 → 3 → 2 over
+  steps 16000–18000, the H9 pattern again). pi05_2arm_v2 step 9000: 8/12, 8/12, 2/12, 1/12 (handover and
+  two_bins stuck low; the run ends at 12000). **Queue reprioritised on the H10 video evidence:** A10
+  v1_soup_confirm30 now runs before twobins_mixed_generate (failures are missed-grasp recovery, not arm
+  order); H100 pi05_v1_rec2 moved to second, behind pi05_dagger1 — both teach recovery from a missed grasp to
+  the best model. Expected launches: pi05_dagger1 on main GPU0 when pi05_v1 hits 20000 (~45 min; DAgger v4
+  will be partial, ~400/600), then pi05_v1_rec2 and pi05_2arm_ema as 2arm_v2 / warm2arm / easy end at 12000
+  (~1.5–2 h). pi05_recover runs to 20000 (~8 h): 8 checkpoints, weak (best 12/16 bin, 3/16 handover) but
+  not clearly beaten, so it continues under the stop rule; if its next four checkpoints stay below pi05_v1's
+  lower bounds it gets stopped for a queued entry. No errors on any host; all five H100s training, A10#2
+  generating DAgger v4 (handover 80/150), A10#1 about to take the soup confirmation. No extra compute needed.
