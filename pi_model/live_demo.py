@@ -34,7 +34,9 @@ from .prompt import PromptContext
 TASKS = ("pick_place_any", "bin", "handover", "two_bins")
 COLORS = ("red", "green", "blue", "yellow")
 EXECUTE = 25
-FRAME_EVERY = 4  # render the 3-camera view every 4 control steps (12.5 frames per simulated second)
+FRAME_EVERY = 4  # render the views every 4 control steps (12.5 frames per simulated second)
+VIEW_W, VIEW_H = 1152, 648  # the free 3D camera
+DEFAULT_VIEW = {"azimuth": 245.0, "elevation": -24.0, "distance": 0.85, "lookat": [0.0, -0.07, 0.05]}
 
 
 class Demo:
@@ -44,8 +46,14 @@ class Demo:
         self.envs: dict = {}
         self.commands: queue.Queue = queue.Queue()
         self.lock = threading.Lock()
-        self.frame_jpeg = b""
+        self.frame_jpeg = b""   # the three robot cameras with captions
+        self.view_jpeg = b""    # the free 3D camera
         self.frame_id = 0
+        self.view = dict(DEFAULT_VIEW)
+        self.view_version = 0
+        self._view_renderers: dict = {}
+        self._last_env = None
+        self._last_caption = None
         self.status = {"state": "loading", "task": "two_bins", "message": "loading the policy"}
         self.placement: dict = {}
         self.stop_flag = threading.Event()
@@ -112,12 +120,33 @@ class Demo:
         return self.place(task, color, cube, dest, cube2, seed=seed)
 
     # ----------------------------------------------------------------- frames
+    def render_view(self, env):
+        """The whole scene from a free perspective camera the viewer orbits (not a robot camera)."""
+        import mujoco
+        r = self._view_renderers.get(id(env))
+        if r is None:
+            env.model.vis.global_.offwidth = max(VIEW_W, env.model.vis.global_.offwidth)
+            env.model.vis.global_.offheight = max(VIEW_H, env.model.vis.global_.offheight)
+            r = self._view_renderers[id(env)] = mujoco.Renderer(env.model, height=VIEW_H, width=VIEW_W)
+        cam = mujoco.MjvCamera()
+        cam.type = mujoco.mjtCamera.mjCAMERA_FREE
+        with self.lock:
+            v = dict(self.view)
+        cam.azimuth, cam.elevation, cam.distance = v["azimuth"], v["elevation"], v["distance"]
+        cam.lookat[:] = v["lookat"]
+        r.update_scene(env.data, camera=cam)
+        return r.render()
+
     def publish(self, env, task, subtask, t, info):
+        self._last_env, self._last_caption = env, (task, subtask, t, info)
         frame = _captioned_frame(env, self.policy.cameras, task, subtask, t, info)
         buf = io.BytesIO()
         Image.fromarray(frame).save(buf, format="JPEG", quality=80)
+        vbuf = io.BytesIO()
+        Image.fromarray(self.render_view(env)).save(vbuf, format="JPEG", quality=85)
         with self.lock:
             self.frame_jpeg = buf.getvalue()
+            self.view_jpeg = vbuf.getvalue()
             self.frame_id += 1
 
     def set_status(self, **kw):
@@ -181,8 +210,15 @@ class Demo:
         self.set_status(state="idle", message="ready")
         env = self.randomize("two_bins", "red", seed)
         self.publish(env, *self._preview_args(env))
+        seen_view = self.view_version
         while True:
-            cmd = self.commands.get()
+            try:
+                cmd = self.commands.get(timeout=0.05)
+            except queue.Empty:
+                if self.view_version != seen_view and self._last_env is not None:  # orbiting while idle
+                    seen_view = self.view_version
+                    self.publish(self._last_env, *self._last_caption)
+                continue
             self.stop_flag.clear()
             try:
                 if cmd["op"] == "place":
@@ -222,12 +258,20 @@ h1{font-size:20px;margin:4px 0 2px} p.sub{color:var(--muted);margin:0 0 14px}
 select,button{font:inherit;padding:6px 12px;border-radius:7px;border:1px solid var(--line);background:var(--card);color:var(--fg)}
 button.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
 canvas{width:100%;max-width:640px;height:auto;touch-action:none;border-radius:8px;display:block}
-img#live{width:100%;border-radius:8px;background:#000;display:block}
+img#live{width:100%;border-radius:8px;background:#000;display:block;margin-top:6px}
+img#view{width:100%;border-radius:8px;background:#000;display:block;cursor:grab;user-select:none;touch-action:none}
+img#view.dragging{cursor:grabbing}
 #status{font-weight:600} .muted{color:var(--muted);font-size:13px}
 .ok{color:#1f9d55}.bad{color:#d64545}
 </style></head><body><main>
 <h1>SO-101 two-arm policy, live in simulation</h1>
-<p class="sub">π0.7 recipe on the π0.5 backbone (pi05_v1 step 20000). Drag the objects and the destination, then press Run.</p>
+<p class="sub">π0.7 recipe on the π0.5 backbone (pi05_v1 step 20000). Drag the objects and the destination on the map, then press Run.</p>
+<div class="card view3d"><div class="row" style="justify-content:space-between;margin-bottom:8px">
+<div class="row"><span id="status">connecting…</span><span class="muted" id="sub"></span></div>
+<div class="row"><button data-v="front">Front</button><button data-v="behind">Behind</button><button data-v="left">Side</button><button data-v="top">Top</button><button data-v="reset">Reset view</button></div></div>
+<img id="view" src="/stream3d" alt="3D view of both arms and the table" draggable="false">
+<p class="muted">Drag to orbit, scroll to zoom. This is a free camera around the scene; the policy itself only sees the three cameras below.</p>
+<img id="live" src="/stream" alt="the policy's cameras: overhead, left wrist, right wrist"></div>
 <div class="card"><div class="row">
 <label>Task <select id="task">
 <option value="two_bins">Two cubes into the bin, one per arm</option>
@@ -242,8 +286,6 @@ img#live{width:100%;border-radius:8px;background:#000;display:block}
 <canvas id="map" width="640" height="400"></canvas>
 <p class="muted">Shaded boxes are where training placed the objects. Anything else in reach works as a test of generalisation; expect lower success far outside them.</p>
 </div>
-<div class="card"><div class="row"><span id="status">connecting…</span><span class="muted" id="sub"></span></div>
-<img id="live" src="/stream" alt="live cameras: overhead, left wrist, right wrist"></div>
 </main><script>
 const X0=-0.36,X1=0.36,Y0=-0.26,Y1=0.18, W=640,H=400;
 const cv=document.getElementById('map'), g=cv.getContext('2d');
@@ -296,6 +338,19 @@ async function poll(){try{const s=await (await fetch('/state')).json();
  document.getElementById('sub').textContent=s.status.subtask?('prompted: '+s.status.subtask):'';
  if(s.placement&&s.placement.cube&&!drag&&s.status.state!=='running'&&s.placement.task===P.task){P.cube=s.placement.cube;P.dest=s.placement.dest;if(s.placement.cube2)P.cube2=s.placement.cube2;draw();}
 }catch(e){} setTimeout(poll,500);}
+// ---- orbit the free 3D camera
+let V={azimuth:245,elevation:-24,distance:0.85}, vdrag=null, pending=null, inflight=false;
+async function pushView(extra){pending={...V,...(extra||{})}; if(inflight)return; inflight=true;
+ while(pending){const body=pending;pending=null; try{const r=await send('/view',{view:body}); if(r.view){V.azimuth=r.view.azimuth;V.elevation=r.view.elevation;V.distance=r.view.distance;}}catch(e){}}
+ inflight=false;}
+const vi=document.getElementById('view');
+vi.addEventListener('pointerdown',e=>{vdrag=[e.clientX,e.clientY];vi.setPointerCapture(e.pointerId);vi.classList.add('dragging');});
+vi.addEventListener('pointermove',e=>{if(!vdrag)return;const dx=e.clientX-vdrag[0],dy=e.clientY-vdrag[1];vdrag=[e.clientX,e.clientY];
+ V.azimuth=(V.azimuth-dx*0.35+360)%360; V.elevation=Math.max(-89,Math.min(-3,V.elevation-dy*0.3)); pushView();});
+vi.addEventListener('pointerup',()=>{vdrag=null;vi.classList.remove('dragging');});
+vi.addEventListener('wheel',e=>{e.preventDefault();V.distance=Math.max(0.35,Math.min(2.5,V.distance*(e.deltaY>0?1.08:1/1.08)));pushView();},{passive:false});
+const PRESETS={front:{azimuth:270,elevation:-22,distance:0.85},behind:{azimuth:90,elevation:-28,distance:0.95},left:{azimuth:180,elevation:-20,distance:1.0},top:{azimuth:90,elevation:-89,distance:1.0}};
+document.querySelectorAll('button[data-v]').forEach(b=>b.onclick=()=>{const k=b.dataset.v; if(k==='reset'){send('/view',{view:{reset:true}}).then(r=>{if(r.view)Object.assign(V,r.view)});} else {Object.assign(V,PRESETS[k]);pushView();}});
 hint();draw();poll();
 </script></body></html>"""
 
@@ -326,8 +381,9 @@ def make_handler(demo: Demo):
                 self.wfile.write(page)
             elif self.path == "/state":
                 with demo.lock:
-                    self._json({"status": demo.status, "placement": demo.placement})
+                    self._json({"status": demo.status, "placement": demo.placement, "view": demo.view})
             elif self.path.startswith("/stream"):
+                which = "view" if self.path.startswith("/stream3d") else "frame"
                 self.send_response(200)
                 self.send_header("Content-Type", "multipart/x-mixed-replace; boundary=frame")
                 self.send_header("Cache-Control", "no-cache")
@@ -336,7 +392,7 @@ def make_handler(demo: Demo):
                 try:
                     while True:
                         with demo.lock:
-                            fid, jpg = demo.frame_id, demo.frame_jpeg
+                            fid, jpg = demo.frame_id, (demo.view_jpeg if which == "view" else demo.frame_jpeg)
                         if fid != last and jpg:
                             self.wfile.write(b"--frame\r\nContent-Type: image/jpeg\r\nContent-Length: "
                                              + str(len(jpg)).encode() + b"\r\n\r\n" + jpg + b"\r\n")
@@ -363,6 +419,21 @@ def make_handler(demo: Demo):
                 demo.commands.put({"op": "run"})
             elif self.path == "/stop":
                 demo.stop_flag.set()
+            elif self.path == "/view":
+                v = body.get("view") or {}
+                with demo.lock:
+                    if v.get("reset"):
+                        demo.view = dict(DEFAULT_VIEW)
+                    else:
+                        cur = demo.view
+                        cur["azimuth"] = float(v.get("azimuth", cur["azimuth"])) % 360
+                        cur["elevation"] = float(np.clip(float(v.get("elevation", cur["elevation"])), -89, -3))
+                        cur["distance"] = float(np.clip(float(v.get("distance", cur["distance"])), 0.35, 2.5))
+                        if isinstance(v.get("lookat"), list) and len(v["lookat"]) == 3:
+                            cur["lookat"] = [float(np.clip(float(x), -0.6, 0.6)) for x in v["lookat"]]
+                    demo.view_version += 1
+                    view = dict(demo.view)
+                return self._json({"ok": True, "view": view})
             else:
                 return self._json({"error": "not found"}, 404)
             self._json({"ok": True})
