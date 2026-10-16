@@ -273,3 +273,9 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   6000: pick 10/16, bin 6/16, handover 4/16 (recovered from the step-5000 dip). pi05_easy step 6000: pick
   10/16, bin 8/16. The 30-episode confirmation of step 13000 is queued for the first A10.
 - **2026-10-16 06:04** [scheduler] 129.213.124.160 was idle; launched **v1_13000_confirm30** (Confirm the two-arm breakthrough of pi05_v1 step 13000 (6/8, 5/8, 6/8, 5/8 on 8 episodes) with 30 episodes per rung — the two-arm demo candidate)
+- **2026-10-16 ~12:10** pi05_v1 step 15000: pick 7/8, bin 4/8, handover 2/8 (both arms 7/8), two_bins 3/8
+  (steps 13000–15000 pooled ≈ 83/54/50/50% over 24 episodes per rung — stable). pi05_2arm_v2 step 6000: 4/12,
+  5/12, 2/12, 1/12 — recovered past its step-2000 peak (**H8 confirmed: dip then recovery**). pi05_easy step
+  7000: pick 10/16, bin 11/16. pi05_recover step 6000: 9/16, 9/16, 4/16, 0/16. DAgger v3 done (546 episodes,
+  470 successful); pi05_dagger1 now aggregates DAgger v1+v2+v3 (~1,600 episodes). The 30-episode confirmation
+  of pi05_v1 step 13000 is running on the first A10.
