@@ -577,3 +577,8 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
      immediate wake-up to write a new experiment.
   A10 confirmations copy their checkpoint to whichever A10 is free (only if missing). Queued **dagger10_fixed**
   (fixed-teacher DAgger from the best checkpoint, pi05_dagger1 step 7000). Every GPU is busy now.
+- **2026-10-16 18:10 UTC** **dagger1_7000_confirm30, 3 of 4 rungs (strict, 30 shared seeds): pick_place_any 25/30
+  (28 including 3 pushes), bin 28/30, handover 18/30**, against pi05_v1 step 20000's 26/26/19. Tied so far
+  (71 vs 71). The ladder's 27/32 was the luck of 8 episodes. two_bins (baseline 12/30) decides it; the step-8000
+  confirmation follows. All GPUs busy; scheduler on 60 s checks with no idle alerts. Steps: dagger_clean 1020,
+  v1_cont 620, rec2_trim 2440, curriculum2 2620, recover 15040. No errors.
