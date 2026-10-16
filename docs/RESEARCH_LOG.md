@@ -223,3 +223,8 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   (4th checkpoint): 1/16, 4/16, 0, 0 — behind pi05_easy at the same step but its intervals still
   overlap at equal steps and on bin vs the leader, so not clearly beaten; keep, re-check at 5000–6000.
   dagger2_generate launched on the second A10 (03:19).
+- **2026-10-16 ~08:50** **pi05_warm2arm step 4000: pick_place_any 11/16 (strict), bin 9/16**, handover 1/16
+  (lift 7/16), two_bins 0/16 (lift 5/16) — best step-4000 result of any run (was 3/16, 5/16 at 3000).
+  **H1a now strongly supported** (warm start from the single-arm model), alongside H1b (pi05_easy 6/16, 7/16)
+  and the even faster pi05_2arm_v2 (warm start + recover2: 4/12, 6/12 at step 2000). DAgger data: v1 429/600,
+  v2 29/600. No errors; pi05_v1 at step 12000.
