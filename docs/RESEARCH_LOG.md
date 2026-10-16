@@ -414,3 +414,11 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   same seeds. The 12-episode ladder flattered pi05_2arm_v2, and pi05_v1 stays the base for DAgger rounds.
   pi05_dagger1 step 1000 relayed to A10#1 and is being scored; pi05_v1_rec2 at 880. dagger5_twobins 380/400. No
   errors.
+- **2026-10-16 13:50 UTC** **v2arm_11000_confirm30 final (strict): 14/19/12/7 of 30 = 52/120**, against pi05_v1
+  step 13000's 75/120 on the same seeds. The warm start plus recover2 reached a weaker policy, not the same one
+  sooner. On 12-episode ladders it looked equal (24/48), so 12 episodes misrank runs by about this much.
+  pi05_dagger1 step 1000: 4/8, 2/8, 0/8, 1/8 (7/32, down from 22/32 at its resume point; the H8 warm-start
+  dip, judged after ≥ 4 checkpoints). pi05_recover step 10000: 7/16, 8/16, 4/16, 2/16 (flat; still overlaps the
+  leader). pi05_easy step 11000: 12/16, 11/16. dagger5_twobins done (293 kept, 210 teacher successes). Queued
+  **v1_20000_confirm30** on A10#1: the resume point of the DAgger, recover2 and trim runs, on the 30 shared seeds,
+  as their baseline.

@@ -201,14 +201,15 @@
     {
       "name": "dagger5_twobins",
       "hypothesis": "H11: the second arm is the two_bins bottleneck (first cube in bin 28/30, second 15/30 for the pi05_v1 soup); the policy moves both arms at once, reaching right-arm states the wait-then-go teacher never shows. DAgger on two_bins only from step 17000, takeover 2-18 s to cover second-arm failures",
-      "status": "running",
+      "status": "done",
       "prefer_host": "129.213.124.160",
       "requires_on_host": [
         "exports/pi05_v1/step_0017000/model.pt"
       ],
       "eval": "MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.dagger --checkpoint exports/pi05_v1/step_0017000 --tasks two_bins --episodes-per-task 400 --takeover-min 2 --takeover-max 18 --out data/sim_dagger_v5 --seed 995000",
       "host": "129.213.124.160",
-      "started": "2026-10-16T08:13"
+      "started": "2026-10-16T08:13",
+      "result": "400 rollouts, 293 kept, 210 teacher-successful"
     },
     {
       "name": "twobins_mixed_generate",
@@ -235,14 +236,15 @@
     {
       "name": "v2arm_11000_confirm30",
       "hypothesis": "H1a/H8: does the warm-started pi05_2arm_v2 (step 11000: 8/12, 8/12, 4/12, 4/12 at 11k steps) match pi05_v1 (75-76/120 at 13-17k) on the same 30 seeds? Decides the base for later DAgger rounds",
-      "status": "running",
+      "status": "done",
       "prefer_host": "132.145.199.243",
       "requires_on_host": [
         "exports/pi05_2arm_v2/step_0011000/model.pt"
       ],
       "eval": "for T in pick_place_any bin handover two_bins; do MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.eval_sim --checkpoint exports/pi05_2arm_v2/step_0011000 --task $T --episodes 30 --episode-seconds 30 --execute 25 --delay 0 --device cuda --subtask oracle --seed 4000 --out outputs/eval_v2armconfirm30_step11000_$T; done",
       "host": "132.145.199.243",
-      "started": "2026-10-16T09:09"
+      "started": "2026-10-16T09:09",
+      "result": "strict 14/19/12/7 of 30 (52/120) vs pi05_v1 step 13000 75/120: warm start is weaker on 30 episodes"
     },
     {
       "name": "dagger6_generate",
@@ -253,6 +255,18 @@
         "exports/pi05_2arm_v2/step_0012000/model.pt"
       ],
       "eval": "MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.dagger --checkpoint exports/pi05_2arm_v2/step_0012000 --episodes-per-task 100 --out data/sim_dagger_v6 --seed 997000"
+    },
+    {
+      "name": "v1_20000_confirm30",
+      "hypothesis": "Baseline for H2b/H12: pi05_v1 step 20000 (the resume point of pi05_dagger1, pi05_v1_rec2 and pi05_v1_rec2_trim) on the same 30 seeds, with per-object two_bins metrics, so their final checkpoints can be compared episode for episode",
+      "status": "running",
+      "prefer_host": "129.213.124.160",
+      "requires_on_host": [
+        "exports/pi05_v1/step_0020000/model.pt"
+      ],
+      "eval": "for T in pick_place_any bin handover two_bins; do MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.eval_sim --checkpoint exports/pi05_v1/step_0020000 --task $T --episodes 30 --episode-seconds 30 --execute 25 --delay 0 --device cuda --dtype bf16 --subtask oracle --seed 4000 --out outputs/eval_v1confirm30_step20000_$T; done",
+      "host": "129.213.124.160",
+      "started": "2026-10-16T09:50"
     }
   ]
 }
