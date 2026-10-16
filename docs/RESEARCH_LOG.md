@@ -272,3 +272,4 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   lifts). The two-arm sim policy works on every rung roughly half to most of the time. pi05_warm2arm step
   6000: pick 10/16, bin 6/16, handover 4/16 (recovered from the step-5000 dip). pi05_easy step 6000: pick
   10/16, bin 8/16. The 30-episode confirmation of step 13000 is queued for the first A10.
+- **2026-10-16 06:04** [scheduler] 129.213.124.160 was idle; launched **v1_13000_confirm30** (Confirm the two-arm breakthrough of pi05_v1 step 13000 (6/8, 5/8, 6/8, 5/8 on 8 episodes) with 30 episodes per rung — the two-arm demo candidate)
