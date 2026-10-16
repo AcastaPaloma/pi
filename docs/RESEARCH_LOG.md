@@ -589,3 +589,8 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   never lifted, the same hover as before. The open bet is the fixed-teacher, success-only data in
   pi05_dagger_clean (step 1580) and pi05_dagger2 (queued); the step-8000 confirmation is half done (pick 24 of 26
   lifted, bin 26/30). H11/H12 still open; the trim A/B (rec2_trim, step 2820) reports in a few hours. No idle GPUs.
+- **2026-10-16 18:50 UTC** **pi05_v1_cont step 1000: 6/8, 5/8, 5/8, 5/8 (21/32), with no post-resume dip** (its resume
+  point scored 22/32). It continues on the same data at LR 1e-5. Every LR-2.5e-5 continuation on new data dipped to
+  7–12/32 at step 1000. pi05_dagger_clean step 1000: 6/8, 4/8, 1/8, 1/8 (12/32). **H14 revived:** the full-LR restart
+  (and/or the new data) causes the dip. Queued **pi05_dagger_clean_lr1e5** (same as dagger_clean at LR 1e-5)
+  ahead of lr5e5/ema; it runs on main or a node. H100 runnable: dagger2, dagger_clean_lr1e5, lr5e5, 2arm_ema.
