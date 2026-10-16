@@ -357,3 +357,4 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   where both arms move concurrently (needs collision handling at the shared bin). Watching (a) first.
   Steps: pi05_v1 19900 (dagger1 launches next), 2arm_v2 10940, warm2arm 9220, recover 9000, easy 9460; no
   errors. DAgger v4 at two_bins 60/150.
+- **2026-10-16 08:13** [scheduler] 129.213.124.160 was idle; launched **dagger5_twobins** (H11: the second arm is the two_bins bottleneck (first cube in bin 28/30, second 15/30 for the pi05_v1 soup); the policy moves both arms at once, reaching right-arm states the wait-then-go teacher never shows. DAgger on two_bins only from step 17000, takeover 2-18 s to cover second-arm failures)

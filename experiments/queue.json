@@ -169,12 +169,14 @@
     {
       "name": "dagger5_twobins",
       "hypothesis": "H11: the second arm is the two_bins bottleneck (first cube in bin 28/30, second 15/30 for the pi05_v1 soup); the policy moves both arms at once, reaching right-arm states the wait-then-go teacher never shows. DAgger on two_bins only from step 17000, takeover 2-18 s to cover second-arm failures",
-      "status": "queued",
+      "status": "running",
       "prefer_host": "129.213.124.160",
       "requires_on_host": [
         "exports/pi05_v1/step_0017000/model.pt"
       ],
-      "eval": "MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.dagger --checkpoint exports/pi05_v1/step_0017000 --tasks two_bins --episodes-per-task 400 --takeover-min 2 --takeover-max 18 --out data/sim_dagger_v5 --seed 995000"
+      "eval": "MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.dagger --checkpoint exports/pi05_v1/step_0017000 --tasks two_bins --episodes-per-task 400 --takeover-min 2 --takeover-max 18 --out data/sim_dagger_v5 --seed 995000",
+      "host": "129.213.124.160",
+      "started": "2026-10-16T08:13"
     },
     {
       "name": "twobins_mixed_generate",
