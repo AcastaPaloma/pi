@@ -161,3 +161,9 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   arm grasps from the pad (0.17), lifts to 6.2 cm, releases inside the container; both grippers
   touched; success at 11.3 s. Copied to ~/Downloads/pi_sim_videos for the user. Cosmetic oracle quirk:
   after the final release the caption reverts to "Move the left gripper above the cube".
+- **2026-10-16 ~04:30** **Decision:** pi05_single plateaued (pooled 35/40 at step 6000, 33/40 at 7000,
+  7/10 at 8000) and was stopped at step ~8200; its best checkpoint is **step 6000 (28/30)**, the
+  single-arm demo model. Its GPU (main box GPU1) now runs **pi05_2arm_v2**: warm start from
+  pi05_single step 6000 on data/sim_mixrec2_v1 (two-arm mix + 6,000 recover2 episodes), 12,000 steps,
+  scored on the second A10 at 12 episodes per rung. First launch silently ignored RESUME/META because
+  the main box had a stale launcher; synced and relaunched.
