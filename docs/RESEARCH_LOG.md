@@ -48,8 +48,28 @@ Rungs use 8 episodes, 30 s, both sides of the table and container walls; the sin
 the original placement. Not a model problem, but it changes how to read 0/8. Check by scoring
 pi05_single and pi05_v1 on the same task (pick_place_any, left side only) once both have ~3000 steps.
 
+## Experiments and compute (from 2026-10-15 ~22:40)
+
+| Run | Machine | Change vs pi05_v1 | Tests | Evaluated by |
+| --- | --- | --- | --- | --- |
+| pi05_v1 | main box GPU0 | — (π0.5 base, two-arm mix) | baseline | first A10, 8/rung |
+| pi05_single | main box GPU1 | single-arm data only | backbone works at all | GPU1 (10) + second A10 (30) |
+| pi05_warm2arm | 209.20.159.198 H100 | warm start from pi05_single step 2000 | H1a | own GPU, 16/rung |
+| pi05_recover | 209.20.157.232 H100 | + 2,000 recovery episodes | H2 | own GPU, 16/rung |
+| pi05_easy | 209.20.158.194 H100 | pick_place_any + bin only | H1b (curriculum) | own GPU, 16/rung |
+
+Monitoring: `python3 scripts/leaderboard.py` collects every result into docs/RESULTS.md with Wilson
+95% intervals. **Stop rule** (user: do not kill tries too early): stop a run only after at least four
+evaluated checkpoints, when the upper bound of its best checkpoint is below the lower bound of the
+leading run on the same task, or when its loss diverges. Otherwise it keeps training.
+
 ## Wake-up entries
 
 - **2026-10-15 ~22:00** pi05_single step 1000: 3/10 (genuine grasps, one in 194 steps). pi05_v1
   step 2000: 0/8 on pick_place_any (61 mm) and bin (76 mm). Opened H1–H3. Started a per-checkpoint
   evaluator for pi05_single on GPU1.
+- **2026-10-15 ~22:40** pi05_single step 2000: **5/10 success, 6/10 lift** (up from 3/10). pi05_v1
+  step 2000: 0/8 on all four rungs (handover 1/8 lift). H1 gains evidence (single-arm improves fast,
+  two-arm flat); per protocol, not acting on pi05_v1 itself yet. User added three 1×H100 PCIe nodes
+  and an A10: launching pi05_warm2arm (H1a), pi05_recover (H2), pi05_easy (H1b) so each hypothesis is
+  tested by its own run instead of sequentially. Recovery data generated: 2,000 episodes, 1,481 successful.
