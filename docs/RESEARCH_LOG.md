@@ -335,3 +335,8 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   lower bounds it gets stopped for a queued entry. No errors on any host; all five H100s training, A10#2
   generating DAgger v4 (handover 80/150), A10#1 about to take the soup confirmation. No extra compute needed.
 - **2026-10-16 07:37** [scheduler] 129.213.124.160 was idle; launched **v1_soup_confirm30** (H9b: checkpoints trade skills (13000 vs 17000: pick 27 vs 23, two_bins 9 vs 15 of 30). A uniform average of pi05_v1 steps 13000-18000 should keep both, beating each single checkpoint on the same seeds)
+- **2026-10-16 11:50 UTC** v1_soup_confirm30 (average of pi05_v1 steps 13000–18000, same seeds as the two
+  single-checkpoint confirmations) half done: pick_place_any 24/30 (13000: 27, 17000: 23), bin 21/30 (22, 22) —
+  within noise of both, no gain yet; handover and two_bins (the rung where 13000 and 17000 disagreed most, 9 vs
+  15) decide H9b. Steps: pi05_v1 19320, 2arm_v2 10360, warm2arm 8920, recover 8640, easy 9100; no errors.
+  DAgger v4 at handover 140/150 (two_bins next). Queue unchanged: 5 runnable H100 entries, 1 A10.
