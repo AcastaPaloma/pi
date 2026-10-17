@@ -1,4 +1,4 @@
-# Closed-loop results (generated 2026-10-17 01:21)
+# Closed-loop results (generated 2026-10-17 01:56)
 
 Success with Wilson 95% interval; strict = success with the object lifted (rules out pushing it into place); lift = object raised; closest = median hand-to-object distance.
 
@@ -12,6 +12,10 @@ Success with Wilson 95% interval; strict = success with the object lifted (rules
 | dagger1confirm30 | pick_place_any | 8000 | 26/30 | 24/30 | 0.70–0.95 | 24/30 | 7 mm | 0/30 | 129.213.124.160 |
 | dagger1confirm30 | two_bins | 7000 | 14/30 | 14/30 | 0.30–0.64 | 29/30 | 7 mm | 0/30 | 129.213.124.160 |
 | dagger1confirm30 | two_bins | 8000 | 14/30 | 14/30 | 0.30–0.64 | 28/30 | 7 mm | 0/30 | 129.213.124.160 |
+| dagger2confirm30 | bin | 7000 | 28/30 | 28/30 | 0.79–0.98 | 28/30 | 8 mm | 0/30 | 129.213.124.160 |
+| dagger2confirm30 | handover | 7000 | 12/30 | 12/30 | 0.25–0.58 | 27/30 | 6 mm | 26/30 | 129.213.124.160 |
+| dagger2confirm30 | pick_place_any | 7000 | 29/30 | 28/30 | 0.83–0.99 | 28/30 | 6 mm | 0/30 | 129.213.124.160 |
+| dagger2confirm30 | two_bins | 7000 | 18/30 | 18/30 | 0.42–0.75 | 27/30 | 7 mm | 0/30 | 129.213.124.160 |
 | exp_C_noKI | pick_place | 3000 | 2/20 | 2/20 | 0.03–0.30 | 3/20 | 17 mm | 0/20 | 192.222.52.191 |
 | full_v1 | pick_place | 500 | 0/20 | 0/20 | 0.00–0.16 | 0/20 | 38 mm | 0/20 | 129.213.124.160 |
 | full_v1 | pick_place | 1000 | 0/20 | 0/20 | 0.00–0.16 | 0/20 | 24 mm | 0/20 | 129.213.124.160 |
@@ -289,21 +293,25 @@ Success with Wilson 95% interval; strict = success with the object lifted (rules
 | pi05_lr5e5 | bin | 3000 | 0/16 | 0/16 | 0.00–0.19 | 1/16 | 48 mm | 0/16 | 209.20.157.232 |
 | pi05_lr5e5 | bin | 4000 | 0/16 | 0/16 | 0.00–0.19 | 0/16 | 20 mm | 0/16 | 209.20.157.232 |
 | pi05_lr5e5 | bin | 5000 | 3/16 | 3/16 | 0.07–0.43 | 4/16 | 16 mm | 0/16 | 209.20.157.232 |
+| pi05_lr5e5 | bin | 6000 | 10/16 | 10/16 | 0.39–0.82 | 10/16 | 9 mm | 0/16 | 209.20.157.232 |
 | pi05_lr5e5 | handover | 1000 | 0/16 | 0/16 | 0.00–0.19 | 1/16 | 42 mm | 0/16 | 209.20.157.232 |
 | pi05_lr5e5 | handover | 2000 | 0/16 | 0/16 | 0.00–0.19 | 2/16 | 41 mm | 1/16 | 209.20.157.232 |
 | pi05_lr5e5 | handover | 3000 | 1/16 | 1/16 | 0.01–0.28 | 3/16 | 21 mm | 1/16 | 209.20.157.232 |
 | pi05_lr5e5 | handover | 4000 | 1/16 | 1/16 | 0.01–0.28 | 5/16 | 13 mm | 3/16 | 209.20.157.232 |
 | pi05_lr5e5 | handover | 5000 | 3/16 | 3/16 | 0.07–0.43 | 4/16 | 11 mm | 3/16 | 209.20.157.232 |
+| pi05_lr5e5 | handover | 6000 | 5/16 | 5/16 | 0.14–0.56 | 9/16 | 7 mm | 7/16 | 209.20.157.232 |
 | pi05_lr5e5 | pick_place_any | 1000 | 0/16 | 0/16 | 0.00–0.19 | 0/16 | 55 mm | 0/16 | 209.20.157.232 |
 | pi05_lr5e5 | pick_place_any | 2000 | 1/16 | 1/16 | 0.01–0.28 | 1/16 | 57 mm | 0/16 | 209.20.157.232 |
 | pi05_lr5e5 | pick_place_any | 3000 | 1/16 | 1/16 | 0.01–0.28 | 2/16 | 39 mm | 0/16 | 209.20.157.232 |
 | pi05_lr5e5 | pick_place_any | 4000 | 4/16 | 4/16 | 0.10–0.49 | 4/16 | 13 mm | 0/16 | 209.20.157.232 |
 | pi05_lr5e5 | pick_place_any | 5000 | 5/16 | 4/16 | 0.14–0.56 | 4/16 | 10 mm | 0/16 | 209.20.157.232 |
+| pi05_lr5e5 | pick_place_any | 6000 | 6/16 | 6/16 | 0.18–0.61 | 7/16 | 11 mm | 0/16 | 209.20.157.232 |
 | pi05_lr5e5 | two_bins | 1000 | 0/16 | 0/16 | 0.00–0.19 | 1/16 | 17 mm | 1/16 | 209.20.157.232 |
 | pi05_lr5e5 | two_bins | 2000 | 0/16 | 0/16 | 0.00–0.19 | 3/16 | 14 mm | 0/16 | 209.20.157.232 |
 | pi05_lr5e5 | two_bins | 3000 | 0/16 | 0/16 | 0.00–0.19 | 4/16 | 17 mm | 0/16 | 209.20.157.232 |
 | pi05_lr5e5 | two_bins | 4000 | 0/16 | 0/16 | 0.00–0.19 | 7/16 | 9 mm | 0/16 | 209.20.157.232 |
 | pi05_lr5e5 | two_bins | 5000 | 1/16 | 1/16 | 0.01–0.28 | 6/16 | 10 mm | 0/16 | 209.20.157.232 |
+| pi05_lr5e5 | two_bins | 6000 | 4/16 | 4/16 | 0.10–0.49 | 9/16 | 7 mm | 0/16 | 209.20.157.232 |
 | pi05_recover | bin | 1000 | 0/16 | 0/16 | 0.00–0.19 | 0/16 | 58 mm | 0/16 | 209.20.157.232 |
 | pi05_recover | bin | 2000 | 1/16 | 1/16 | 0.01–0.28 | 3/16 | 64 mm | 0/16 | 209.20.157.232 |
 | pi05_recover | bin | 3000 | 5/16 | 5/16 | 0.14–0.56 | 5/16 | 23 mm | 0/16 | 209.20.157.232 |
@@ -642,6 +650,7 @@ Success with Wilson 95% interval; strict = success with the object lifted (rules
 | pi05_curriculum2 | bin | 10 | step 9000: 15/16 (0.72–0.99) | 13/16 → 12/16 → 15/16 → 13/16 |
 | pi05_easy | bin | 12 | step 12000: 15/16 (0.72–0.99) | 13/16 → 14/16 → 11/16 → 15/16 |
 | dagger1confirm30 | bin | 2 | step 7000: 28/30 (0.79–0.98) | 28/30 → 26/30 |
+| dagger2confirm30 | bin | 1 | step 7000: 28/30 (0.79–0.98) | 28/30 |
 | pi05_v1 | bin | 20 | step 18000: 7/8 (0.53–0.98) | 6/8 → 7/8 → 5/8 → 7/8 |
 | v1confirm30 | bin | 3 | step 20000: 26/30 (0.70–0.95) | 22/30 → 22/30 → 26/30 |
 | v1contconfirm30 | bin | 1 | step 4000: 26/30 (0.70–0.95) | 26/30 |
@@ -651,7 +660,7 @@ Success with Wilson 95% interval; strict = success with the object lifted (rules
 | pi05_warm2arm | bin | 12 | step 12000: 11/16 (0.44–0.86) | 9/16 → 10/16 → 9/16 → 11/16 |
 | v1rec2confirm30 | bin | 1 | step 8000: 20/30 (0.49–0.81) | 20/30 |
 | v2armconfirm30 | bin | 1 | step 11000: 19/30 (0.46–0.78) | 19/30 |
-| pi05_lr5e5 | bin | 5 | step 5000: 3/16 (0.07–0.43) | 0/16 → 0/16 → 0/16 → 3/16 |
+| pi05_lr5e5 | bin | 6 | step 6000: 10/16 (0.39–0.82) | 0/16 → 0/16 → 3/16 → 10/16 |
 | full_v2 | bin | 5 | step 500: 0/8 (0.00–0.32) | 0/8 → 0/8 → 0/8 → 0/8 |
 | pi05_dagger1 | handover | 8 | step 7000: 7/8 (0.53–0.98) | 3/8 → 4/8 → 7/8 → 4/8 |
 | pi05_dagger2 | handover | 8 | step 4000: 7/8 (0.53–0.98) | 6/8 → 5/8 → 6/8 → 6/8 |
@@ -670,8 +679,9 @@ Success with Wilson 95% interval; strict = success with the object lifted (rules
 | v1soup30 | handover | 1 | step 18000: 14/30 (0.30–0.64) | 14/30 |
 | pi05_recover | handover | 12 | step 11000: 7/16 (0.23–0.67) | 4/16 → 4/16 → 7/16 → 6/16 |
 | pi05_2arm_v2 | handover | 12 | step 12000: 5/12 (0.19–0.68) | 2/12 → 3/12 → 4/12 → 5/12 |
+| dagger2confirm30 | handover | 1 | step 7000: 12/30 (0.25–0.58) | 12/30 |
 | v2armconfirm30 | handover | 1 | step 11000: 12/30 (0.25–0.58) | 12/30 |
-| pi05_lr5e5 | handover | 5 | step 5000: 3/16 (0.07–0.43) | 0/16 → 1/16 → 1/16 → 3/16 |
+| pi05_lr5e5 | handover | 6 | step 6000: 5/16 (0.14–0.56) | 1/16 → 1/16 → 3/16 → 5/16 |
 | full_v2 | handover | 5 | step 500: 0/8 (0.00–0.32) | 0/8 → 0/8 → 0/8 → 0/8 |
 | small_v1 | none_cpu | 1 | step 5000: 1/10 (0.02–0.40) | 1/10 |
 | small_v1 | oracle | 1 | step 5000: 2/10 (0.06–0.51) | 2/10 |
@@ -690,6 +700,7 @@ Success with Wilson 95% interval; strict = success with the object lifted (rules
 | pi05_v1 | pick_place_any | 20 | step 17000: 8/8 (0.68–1.00) | 8/8 → 6/8 → 7/8 → 7/8 |
 | pi05_v1_cont | pick_place_any | 8 | step 5000: 8/8 (0.68–1.00) | 8/8 → 7/8 → 7/8 → 7/8 |
 | pi05_v1_rec2_trim | pick_place_any | 8 | step 8000: 8/8 (0.68–1.00) | 6/8 → 7/8 → 6/8 → 8/8 |
+| dagger2confirm30 | pick_place_any | 1 | step 7000: 29/30 (0.83–0.99) | 29/30 |
 | dagger1confirm30 | pick_place_any | 2 | step 7000: 28/30 (0.79–0.98) | 28/30 → 26/30 |
 | v1confirm30 | pick_place_any | 3 | step 13000: 27/30 (0.74–0.97) | 27/30 → 23/30 → 26/30 |
 | pi05_dagger_clean | pick_place_any | 8 | step 7000: 7/8 (0.53–0.98) | 6/8 → 6/8 → 7/8 → 7/8 |
@@ -703,7 +714,7 @@ Success with Wilson 95% interval; strict = success with the object lifted (rules
 | pi05_v1_rec2 | pick_place_any | 8 | step 6000: 6/8 (0.41–0.93) | 5/8 → 6/8 → 5/8 → 6/8 |
 | pi05_2arm_v2 | pick_place_any | 12 | step 7000: 8/12 (0.39–0.86) | 8/12 → 7/12 → 8/12 → 8/12 |
 | v2armconfirm30 | pick_place_any | 1 | step 11000: 17/30 (0.39–0.73) | 17/30 |
-| pi05_lr5e5 | pick_place_any | 5 | step 5000: 5/16 (0.14–0.56) | 1/16 → 1/16 → 4/16 → 5/16 |
+| pi05_lr5e5 | pick_place_any | 6 | step 6000: 6/16 (0.18–0.61) | 1/16 → 4/16 → 5/16 → 6/16 |
 | full_v2 | pick_place_any | 5 | step 500: 0/8 (0.00–0.32) | 0/8 → 0/8 → 0/8 → 0/8 |
 | full_v1 | timing | 1 | step 500: 0/1 (0.00–0.79) | 0/1 |
 | pi05_dagger_clean | two_bins | 8 | step 5000: 7/8 (0.53–0.98) | 7/8 → 6/8 → 6/8 → 4/8 |
@@ -712,6 +723,7 @@ Success with Wilson 95% interval; strict = success with the object lifted (rules
 | pi05_v1 | two_bins | 20 | step 16000: 6/8 (0.41–0.93) | 3/8 → 2/8 → 5/8 → 3/8 |
 | pi05_v1_rec2 | two_bins | 8 | step 6000: 5/8 (0.31–0.86) | 3/8 → 5/8 → 3/8 → 3/8 |
 | pi05_v1_rec2_trim | two_bins | 8 | step 8000: 5/8 (0.31–0.86) | 2/8 → 2/8 → 4/8 → 5/8 |
+| dagger2confirm30 | two_bins | 1 | step 7000: 18/30 (0.42–0.75) | 18/30 |
 | pi05_curriculum2 | two_bins | 10 | step 9000: 8/16 (0.28–0.72) | 7/16 → 4/16 → 8/16 → 5/16 |
 | pi05_dagger1 | two_bins | 8 | step 8000: 4/8 (0.22–0.78) | 4/8 → 4/8 → 4/8 → 4/8 |
 | pi05_dagger_clean_lr1e5 | two_bins | 8 | step 5000: 4/8 (0.22–0.78) | 4/8 → 1/8 → 3/8 → 1/8 |
@@ -723,6 +735,6 @@ Success with Wilson 95% interval; strict = success with the object lifted (rules
 | pi05_2arm_v2 | two_bins | 12 | step 12000: 5/12 (0.19–0.68) | 1/12 → 4/12 → 4/12 → 5/12 |
 | pi05_recover | two_bins | 12 | step 11000: 6/16 (0.18–0.61) | 2/16 → 2/16 → 6/16 → 4/16 |
 | pi05_warm2arm | two_bins | 12 | step 12000: 5/16 (0.14–0.56) | 2/16 → 2/16 → 3/16 → 5/16 |
+| pi05_lr5e5 | two_bins | 6 | step 6000: 4/16 (0.10–0.49) | 0/16 → 0/16 → 1/16 → 4/16 |
 | v2armconfirm30 | two_bins | 1 | step 11000: 7/30 (0.12–0.41) | 7/30 |
-| pi05_lr5e5 | two_bins | 5 | step 5000: 1/16 (0.01–0.28) | 0/16 → 0/16 → 0/16 → 1/16 |
 | full_v2 | two_bins | 5 | step 500: 0/8 (0.00–0.32) | 0/8 → 0/8 → 0/8 → 0/8 |

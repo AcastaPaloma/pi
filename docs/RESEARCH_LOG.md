@@ -643,3 +643,10 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   pi05_v1_lr5e6 (H14 dose), **pi05_twobins2x** (H18: `PI_TASK_WEIGHTS=two_bins=2` in `pi_model/data.py`, checked by
   building the real training dataset and fetching samples: two_bins share 36% → 53%); A10: three confirmations
   and dagger11_fixed.
+- **2026-10-17 06:00 UTC** **dagger2_7000_confirm30 (strict, 30 shared seeds): 28/28/12/18 = 86/120** (baseline 83).
+  **two_bins 18/30 is the best yet** (baseline 12, previous best 15). The second cube reaches the bin 20/30 and is
+  never lifted in only 3 failures (was 8–10). This is the first evidence that the fixed-teacher/success-only DAgger
+  data plus a low-LR resume fixes the second-arm hover (H11/H13). But **handover fell 19 → 12**, so it is a
+  trade. pi05_dagger2 = pi05_dagger1 step 7000 resumed at LR 1e-5 on the cleaned data. Queued a two_bins +
+  handover video review of it (A10) to verify the successes and see the handover failures. pi05_lr5e5 step 6000:
+  6/16, 10/16, 5/16, 4/16 (recovering from ~0; from-base run at 5e-5).

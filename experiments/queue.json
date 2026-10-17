@@ -616,7 +616,7 @@
     {
       "name": "dagger2_7000_confirm30",
       "hypothesis": "Confirm pi05_dagger2 step 7000 (28/32 on the 8-episode ladder, its best) on the 30 shared seeds against the 83/120 baseline",
-      "status": "running",
+      "status": "done",
       "prefer_host": "129.213.124.160",
       "requires_on_host": [],
       "eval": "for T in pick_place_any bin handover two_bins; do MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.eval_sim --checkpoint exports/pi05_dagger2/step_0007000 --task $T --episodes 30 --episode-seconds 30 --execute 25 --delay 0 --device cuda --subtask oracle --seed 4000 --out outputs/eval_dagger2confirm30_step7000_$T; done",
@@ -628,12 +628,13 @@
         ]
       ],
       "host": "129.213.124.160",
-      "started": "2026-10-17T01:28"
+      "started": "2026-10-17T01:28",
+      "result": "strict 28/28/12/18 = 86/120 (baseline 83): best two_bins yet (second cube 20/30), handover down 19 -> 12"
     },
     {
       "name": "v1_cont_8000_confirm30",
       "hypothesis": "Confirm pi05_v1_cont step 8000 (26/32 on the 8-episode ladder, its best) on the 30 shared seeds against the 83/120 baseline",
-      "status": "queued",
+      "status": "running",
       "prefer_host": "129.213.124.160",
       "requires_on_host": [],
       "eval": "for T in pick_place_any bin handover two_bins; do MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.eval_sim --checkpoint exports/pi05_v1_cont/step_0008000 --task $T --episodes 30 --episode-seconds 30 --execute 25 --delay 0 --device cuda --subtask oracle --seed 4000 --out outputs/eval_v1contconfirm30_step8000_$T; done",
@@ -643,7 +644,23 @@
           "132.145.199.243",
           "exports/pi05_v1_cont/step_0008000/model.pt"
         ]
-      ]
+      ],
+      "host": "129.213.124.160",
+      "started": "2026-10-17T01:55"
+    },
+    {
+      "name": "dagger2_7000_twobins_video",
+      "hypothesis": "Verify on video the first two_bins rate above 50% on 30 seeds (pi05_dagger2 step 7000, 18/30), and look at how handover now fails (12/30, was 19)",
+      "status": "queued",
+      "requires_on_host": [],
+      "requires_elsewhere": [
+        [
+          "129.213.124.160",
+          "exports/pi05_dagger2/step_0007000/model.pt"
+        ]
+      ],
+      "prep_on_main": "ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@{HOST} 'test -e ~/pi/exports/pi05_dagger2/step_0007000/model.pt' || (ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@129.213.124.160 'tar cf - -C ~/pi exports/pi05_dagger2/step_0007000' | ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@{HOST} 'mkdir -p ~/pi && tar xf - -C ~/pi')",
+      "eval": "MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.eval_sim --checkpoint exports/pi05_dagger2/step_0007000 --task two_bins --episodes 6 --episode-seconds 30 --execute 25 --delay 0 --device cuda --subtask oracle --seed 5000 --out outputs/video_dagger2_7000_two_bins --video --full-video 2 ; MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.eval_sim --checkpoint exports/pi05_dagger2/step_0007000 --task handover --episodes 6 --episode-seconds 30 --execute 25 --delay 0 --device cuda --subtask oracle --seed 5000 --out outputs/video_dagger2_7000_handover --video --full-video 2"
     },
     {
       "name": "dagger_clean_8000_confirm30",
