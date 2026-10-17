@@ -876,3 +876,19 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   not bolted on during fine-tuning). Queue: rtc_s0, goal_s0, ki_s0 marked done with results. Steps: mem 5240,
   data_v11 820, mem_s1 1460, rtc_s1 3560, goal_s1 2580. dagger14 handover 260/300 (kept 225, success 173). All
   seven GPUs busy; scheduler and caffeinate alive.
+- **2026-10-17 19:50** Step-6000 scores (30 seeds, strict):
+
+  | run, step 6000 | delay 0 | delay 6 | delay 12 |
+  | --- | --- | --- | --- |
+  | control_s0 | 95 | 99 | 82 |
+  | rtc_s0 | 101 | 89 | (scoring) |
+  | baseline pi05_dagger2 7000 | 90 | 82 | 81 |
+
+  **H19 (RTC) refuted on seed 0:** at delay 6 RTC drops 12 points from its own delay-0 score while the matched
+  control gains 4 (89 vs 99); at step 3000 the picture was the same (82 / 75 vs the baseline's 82 / 81). rtc_s1
+  (step 4040) is the replicate; unless it reverses this, RTC adds nothing in this simulator.
+  **goal_s0 step 6000 without goals = 29 / 29 / 23 / 24 = 105**, the best single checkpoint so far (87, 96, 102,
+  105: mean 97.5, the same as the controls' 97.4). So training with goal images in 25% of samples costs nothing,
+  while feeding oracle goals at test time hurt at step 3000 (76); its with-goal score at 6000 is next. ki_vlm01
+  flow 0.085 at step 1580 (still rising). Steps: mem 5500, data_v11 1320, mem_s1 1760, rtc_s1 4040, goal_s1 3000.
+  dagger14 handover done (kept 225+, success 173+), now two_bins 80/300. All alive.
