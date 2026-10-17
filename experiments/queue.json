@@ -398,7 +398,7 @@
       "hypothesis": "H19 replicate (seed 1): with two seeds per arm, an add-on must beat both controls to count",
       "status": "queued",
       "train": "SET='pi05_rtc=true' SEED=1 PI_TRIM_STILL_TAIL_S=1 LR=1e-5 RESUME=runs/pi05_dagger2/step_0007000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdagclean_v1 runs/{RUN} 6000",
-      "eval": "GPU=0 VARIANTS='d0 d6 d12' bash scripts/box/c30_when_ready.sh runs/{RUN} 3000 6000",
+      "eval": "GPU=0 VARIANTS='d0 d6 d12' bash scripts/box/c30_when_ready.sh runs/{RUN} 3000 4000 5000 6000",
       "requires_on_host": [
         "runs/pi05_dagger2/step_0007000/model.pt",
         "data/sim_mixdagclean_v1"
@@ -409,7 +409,7 @@
       "hypothesis": "H21 replicate (seed 1)",
       "status": "queued",
       "train": "SET='max_subgoals=1' SEED=1 PI_TRIM_STILL_TAIL_S=1 LR=1e-5 RESUME=runs/pi05_dagger2/step_0007000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdagclean_v1 runs/{RUN} 6000",
-      "eval": "GPU=0 VARIANTS='d0 goal' bash scripts/box/c30_when_ready.sh runs/{RUN} 3000 6000",
+      "eval": "GPU=0 VARIANTS='d0 goal' bash scripts/box/c30_when_ready.sh runs/{RUN} 3000 4000 5000 6000",
       "requires_on_host": [
         "runs/pi05_dagger2/step_0007000/model.pt",
         "data/sim_mixdagclean_v1"
@@ -420,7 +420,7 @@
       "hypothesis": "H20 replicate (seed 1)",
       "status": "queued",
       "train": "SET='max_history=6' SEED=1 PI_TRIM_STILL_TAIL_S=1 LR=1e-5 RESUME=runs/pi05_dagger2/step_0007000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdagclean_v1 runs/{RUN} 6000",
-      "eval": "GPU=0 VARIANTS='d0' bash scripts/box/c30_when_ready.sh runs/{RUN} 3000 6000",
+      "eval": "GPU=0 VARIANTS='d0' bash scripts/box/c30_when_ready.sh runs/{RUN} 3000 4000 5000 6000",
       "requires_on_host": [
         "runs/pi05_dagger2/step_0007000/model.pt",
         "data/sim_mixdagclean_v1"
@@ -431,7 +431,7 @@
       "hypothesis": "H22 replicate (seed 1)",
       "status": "queued",
       "train": "SET='knowledge_insulation=true' SEED=1 PI_TRIM_STILL_TAIL_S=1 LR=1e-5 RESUME=runs/pi05_dagger2/step_0007000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdagclean_v1 runs/{RUN} 6000",
-      "eval": "GPU=0 VARIANTS='d0' bash scripts/box/c30_when_ready.sh runs/{RUN} 3000 6000",
+      "eval": "GPU=0 VARIANTS='d0' bash scripts/box/c30_when_ready.sh runs/{RUN} 3000 4000 5000 6000",
       "requires_on_host": [
         "runs/pi05_dagger2/step_0007000/model.pt",
         "data/sim_mixdagclean_v1"
@@ -439,8 +439,8 @@
     },
     {
       "name": "x_data_v11",
-      "hypothesis": "Track B batch 1: successful teacher takeovers from DAgger rounds 11 (handover + two_bins, takeover 1-15 s) and 12 (two_bins, takeover 8-22 s), both from pi05_dagger2 step 7000 on seeds 1100000+, added to sim_mixdagclean_v1, beat the control. Blocked until both are copied to the host",
-      "status": "blocked",
+      "hypothesis": "Track B batch 1: successful teacher takeovers from DAgger rounds 11 (handover + two_bins, takeover 1-15 s) and 12 (two_bins, takeover 8-22 s), both from pi05_dagger2 step 7000 on seeds 1100000+, added to sim_mixdagclean_v1, beat the control. Blocked until both are copied to the host. Unblocked 16:55: v11 (702 episodes, 554 successful) and v12 (245, 173) are on both H100 hosts",
+      "status": "queued",
       "requires_on_host": [
         "runs/pi05_dagger2/step_0007000/model.pt",
         "data/sim_mixdagclean_v1",
@@ -449,7 +449,21 @@
       ],
       "setup": "mkdir -p data/sim_mixdagclean_v2 && cd data/sim_mixdagclean_v2 && for d in ../sim_mixdagclean_v1/episode_*; do ln -sfn ../sim_mixdagclean_v1/$(basename $d) $(basename $d); done && for d in ../sim_dagger_v11/episode_*; do grep -qs '\"success\": true' $d/meta.json && ln -sfn $d episode_dag11_$(basename $d | cut -d_ -f2); done; for d in ../sim_dagger_v12/episode_*; do grep -qs '\"success\": true' $d/meta.json && ln -sfn $d episode_dag12_$(basename $d | cut -d_ -f2); done; true",
       "train": "SEED=0 PI_TRIM_STILL_TAIL_S=1 LR=1e-5 RESUME=runs/pi05_dagger2/step_0007000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdagclean_v2 runs/{RUN} 6000",
-      "eval": "GPU=0 VARIANTS='d0' bash scripts/box/c30_when_ready.sh runs/{RUN} 3000 6000"
+      "eval": "GPU=0 VARIANTS='d0' bash scripts/box/c30_when_ready.sh runs/{RUN} 3000 4000 5000 6000"
+    },
+    {
+      "name": "x_data_v11_s1",
+      "hypothesis": "Seed-1 twin of x_data_v11 (the control twins differ by 16 points at one checkpoint, so a data version needs two seeds)",
+      "status": "queued",
+      "requires_on_host": [
+        "runs/pi05_dagger2/step_0007000/model.pt",
+        "data/sim_mixdagclean_v1",
+        "data/sim_dagger_v11",
+        "data/sim_dagger_v12"
+      ],
+      "setup": "mkdir -p data/sim_mixdagclean_v2 && cd data/sim_mixdagclean_v2 && for d in ../sim_mixdagclean_v1/episode_*; do ln -sfn ../sim_mixdagclean_v1/$(basename $d) $(basename $d); done && for d in ../sim_dagger_v11/episode_*; do grep -qs '\"success\": true' $d/meta.json && ln -sfn $d episode_dag11_$(basename $d | cut -d_ -f2); done; for d in ../sim_dagger_v12/episode_*; do grep -qs '\"success\": true' $d/meta.json && ln -sfn $d episode_dag12_$(basename $d | cut -d_ -f2); done; true",
+      "train": "SEED=1 PI_TRIM_STILL_TAIL_S=1 LR=1e-5 RESUME=runs/pi05_dagger2/step_0007000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdagclean_v2 runs/{RUN} 6000",
+      "eval": "GPU=0 VARIANTS='d0' bash scripts/box/c30_when_ready.sh runs/{RUN} 3000 4000 5000 6000"
     }
   ],
   "a10": [
@@ -841,10 +855,11 @@
     {
       "name": "dagger11_generate",
       "hypothesis": "Track B data: DAgger from the best policy on the weak tasks (handover, two_bins), takeover 1-15 s, seeds 1100000+ (never the 4000+ confirmation seeds)",
-      "status": "running",
+      "status": "done",
       "host": "193.122.189.119",
       "started": "2026-10-17",
-      "eval": "MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.dagger --checkpoint runs/pi05_dagger2/step_0007000 --tasks handover,two_bins --episodes-per-task 400 --takeover-min 1 --takeover-max 15 --seed 1100000 --out data/sim_dagger_v11"
+      "eval": "MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.dagger --checkpoint runs/pi05_dagger2/step_0007000 --tasks handover,two_bins --episodes-per-task 400 --takeover-min 1 --takeover-max 15 --seed 1100000 --out data/sim_dagger_v11",
+      "result": "800 episodes: 702 kept, teacher success 554 (handover 400, two_bins 400)"
     },
     {
       "name": "dagger12_twobins_late",
@@ -861,13 +876,14 @@
     {
       "name": "failmine_dagger2",
       "hypothesis": "Track B step 2: mine the best policy's failures on the weak tasks (handover, two_bins) on 60 non-test seeds (5000+), with per-episode videos, to name the failure types before generating more data",
-      "status": "running",
+      "status": "done",
       "requires_on_host": [
         "runs/pi05_dagger2/step_0007000/model.pt"
       ],
       "eval": "for T in handover two_bins; do MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.eval_sim --checkpoint runs/pi05_dagger2/step_0007000 --task $T --episodes 60 --episode-seconds 30 --execute 25 --delay 0 --device cuda --dtype bf16 --subtask oracle --seed 5000 --tokenizer weights/paligemma/tokenizer.model --out outputs/failmine_dagger2_$T --video; done",
       "host": "193.122.189.119",
-      "started": "2026-10-17T15:50"
+      "started": "2026-10-17T15:50",
+      "result": "handover 35/60, two_bins 41/60 on seeds 5000+. Handover: 20 of 25 failures lifted the cube to carry height then hovered holding it short of or above the relay pad until timeout; 5 never lifted. two_bins: 12 of 19 had cube 1 in the bin but not cube 2 (7 lifted it, 5 never did); 4 never lifted cube 1"
     },
     {
       "name": "dagger13_handover",

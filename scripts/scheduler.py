@@ -39,12 +39,19 @@ def ssh(host, cmd, timeout=600):
 
 def gpu_busy(slot):
     host, gpu = slot.split(":")
-    # A training process on that GPU, or more than 10 GB of that GPU's memory in use.
-    code, out = ssh(host, f"nvidia-smi --query-gpu=index,memory.used --format=csv,noheader,nounits | awk -F', ' '$1=={gpu} {{print $2}}'")
-    try:
-        return int(out.split()[0]) > 10000
-    except (ValueError, IndexError):
+    # Busy if a training process runs on that GPU, or more than 25 GB is in use. Checkpoint scoring (~15 GB,
+    # hours of rollouts per finished run) leaves room for the next training, so it no longer blocks the slot.
+    code, out = ssh(host, f"nvidia-smi -i {gpu} --query-compute-apps=pid,used_memory --format=csv,noheader,nounits"
+                          " | while IFS=', ' read -r pid mem; do"
+                          " echo \"$mem $(grep -a -o -m1 pi_model.train /proc/$pid/cmdline 2>/dev/null)\"; done; echo END")
+    if "END" not in out:
         return True  # unreachable host: never launch blindly
+    lines = [l.split() for l in out.splitlines() if l.strip() and l.strip() != "END"]
+    try:
+        used = sum(int(l[0]) for l in lines)
+    except ValueError:
+        return True
+    return any("pi_model.train" in l for l in lines) or used > 25000
 
 
 def a10_busy(host):

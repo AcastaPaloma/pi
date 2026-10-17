@@ -755,3 +755,15 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   falling); no errors. A10: failmine_dagger2 started (the scheduler launched it at 15:50 when dagger12 ended);
   dagger11 two_bins 340/400 (kept 652, success 519).
 - **2026-10-17 16:26** [scheduler] 193.122.189.119 was idle; launched **dagger13_handover** (Track B: handover is the weakest task (16/30 strict at baseline) and the most variable; more teacher takeovers in its middle phase (4-16 s, around the pass) on seeds 1300000+. To be retargeted by failmine_dagger2 if it names a different failure)
+- **2026-10-17 16:33** (local clock; the 15:45-16:40 entries above carry estimated times) **Failure mining done**
+  (pi05_dagger2 step 7000, 60 non-test seeds 5000+, videos): handover 35/60, two_bins 41/60.
+  Handover: 20 of 25 failures lift the cube to carry height (~7 cm) and then hover holding it short of or above
+  the relay pad until timeout, while the receiving arm waits (videos 001, 002); 5 never lift it. two_bins: 12 of 19
+  have cube 1 in the bin and not cube 2 (7 lifted it, 5 never did); 4 never lift cube 1. Both weak tasks share one
+  failure mode, **hover while holding**, which is what DAgger takeovers label; dagger13_handover (takeover 4-16 s)
+  is running and matches it. dagger11 done (800 episodes, 702 kept, 554 successful); v11 and v12 copied to both
+  H100 hosts; **x_data_v11 queued with a seed-1 twin**, scored at 3000/4000/5000/6000 (as are the s1 add-on
+  replicates). **Scheduler fix:** a GPU counted as busy at >10 GB, so a finished run's 2+ h of checkpoint scoring
+  (~15 GB, light GPU load) blocked the next training. Now busy = a pi_model.train process on that GPU or >25 GB
+  (the first version missed training processes because grep saw NUL bytes in /proc/PID/cmdline; fixed with
+  grep -a and checked against a live run). Scheduler restarted.
