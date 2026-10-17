@@ -23,7 +23,7 @@ import torch
 from torch.utils.data import Dataset
 
 from .config import Pi07Config
-from .fast import FastTokenizer, fast_to_vocab
+from .fast import FastTokenizer, UniversalFast, fast_to_vocab
 from .prompt import PromptContext, no_dropout, pi05_prompt_ids, prompt_ids, sample_dropout
 from .vision import preprocess_images
 
@@ -200,6 +200,8 @@ class Pi07Dataset(Dataset):
         meta_dir = Path(meta_dir)
         self.stats = json.loads((meta_dir / "stats.json").read_text())
         self.fast = FastTokenizer.load(meta_dir / "fast") if objective == "action" else None
+        self.fast_universal = (UniversalFast(os.environ.get("PI_FAST_UNIVERSAL", "weights/fast_universal"))
+                               if objective == "action" and cfg.fast_tokenizer == "universal" else None)
         self.norm_state = Normalizer(self.stats["state_q01"], self.stats["state_q99"])
         self.norm_action = Normalizer(self.stats["action_q01"], self.stats["action_q99"])
         self.cameras = self.store.cameras
@@ -286,7 +288,11 @@ class Pi07Dataset(Dataset):
                 chunk = np.concatenate([chunk, np.repeat(chunk[-1:], H - len(chunk), axis=0)])
             actions = np.zeros((H, cfg.action_dim), dtype=np.float32)
             actions[:, :ACTION_DIMS] = self.norm_action(chunk)
-            fast = fast_to_vocab(self.fast.encode(chunk), cfg.text.vocab, cfg.fast_skip) + [self.tokenizer.eos_id]
+            codes = self.fast_universal.encode(actions[:, :ACTION_DIMS]) if self.fast_universal else self.fast.encode(chunk)
+            fast = fast_to_vocab(codes, cfg.text.vocab, cfg.fast_skip)
+            if cfg.backbone == "pi05":  # openpi's FAST target: "Action: " <action tokens> "|" <eos>
+                fast += self.tokenizer.encode("|")
+            fast += [self.tokenizer.eos_id]
             sample.update({"actions": actions, "action_step_valid": step_valid,
                            "action_valid": np.r_[np.ones(ACTION_DIMS, bool), np.zeros(cfg.action_dim - ACTION_DIMS, bool)],
                            "fast_ids": np.asarray(fast, dtype=np.int64),

@@ -56,10 +56,44 @@ def oracle_subtask(env: RobotEnv, obs, released_after_place: bool) -> str:
     return SUBTASKS["approach"]
 
 
+def oracle_goal_image(env, goal_env, steps, seed):
+    """Overhead frame `steps` control steps ahead if the scripted teacher took over now. The sim stands in for
+    π0.7's world model: the physics state is copied into a twin scene, so the real episode is untouched."""
+    import copy
+    import mujoco
+    from pi_sim.tasks import TaskTeacher
+    from .dagger import teacher_joint_action
+    spec = mujoco.mjtState.mjSTATE_INTEGRATION
+    state = np.empty(mujoco.mj_stateSize(env.model, spec))
+    mujoco.mj_getState(env.model, env.data, state, spec)
+    mujoco.mj_setState(goal_env.model, goal_env.data, state, spec)
+    mujoco.mj_forward(goal_env.model, goal_env.data)
+    for key in ("_joint_targets", "_ee_targets", "_orientations", "_touched", "home_positions"):
+        if hasattr(env, key):
+            setattr(goal_env, key, copy.deepcopy(getattr(env, key)))
+    goal_env._steps, goal_env._done, goal_env._success_steps = 0, False, 0
+    if hasattr(goal_env, "_task_success_steps"):
+        goal_env._task_success_steps = 0
+    teacher = TaskTeacher(goal_env, rng=np.random.default_rng(seed), observe_only=True)
+    teacher.observe()
+    for w in teacher.workers:
+        w.obj, w.ticks = goal_env.object_position(w.body), 0
+    for _ in range(steps):
+        _, _, terminated, truncated, _ = goal_env.step(teacher_joint_action(goal_env, teacher))
+        if terminated or truncated:
+            break
+    return goal_env.render_camera("overhead", native=True)
+
+
 def run_episode(env: RobotEnv, policy: Pi07Policy, *, seed, execute, delay, cfg_beta, subtask, image_size,
-                placement, visual_randomization, video_frames=None, generator=None, full_video_every=0):
-    """full_video_every > 0: record all cameras every that many control steps with captions (real-time video)."""
-    obs, info = env.reset(seed=seed, options={"placement_range": placement, "visual_randomization": visual_randomization})
+                placement, visual_randomization, video_frames=None, generator=None, full_video_every=0,
+                goal_env=None, goal_horizon_s=2.0):
+    """full_video_every > 0: record all cameras every that many control steps with captions (real-time video).
+    goal_env: a twin TaskEnv for oracle goal images (see oracle_goal_image), handed to goal-conditioned policies."""
+    options = {"placement_range": placement, "visual_randomization": visual_randomization}
+    obs, info = env.reset(seed=seed, options=options)
+    if goal_env is not None:
+        goal_env.reset(seed=seed, options=options)
     history = HistoryBuffer(policy.cameras, hz=env.control_hz)
     task = info["instruction"]
     released = False
@@ -99,6 +133,9 @@ def run_episode(env: RobotEnv, policy: Pi07Policy, *, seed, execute, delay, cfg_
 
     def act(**kwargs):
         t0 = time.monotonic()
+        if goal_env is not None:
+            goal = oracle_goal_image(env, goal_env, int(round(goal_horizon_s * env.control_hz)), seed)
+            kwargs["subgoals"] = {"overhead": policy.prepare_image(goal)}
         chunk = policy.act(history, context, cfg_beta=cfg_beta, generator=generator, **kwargs)
         timing["policy_s"] += time.monotonic() - t0
         return chunk
@@ -125,6 +162,8 @@ def run_episode(env: RobotEnv, policy: Pi07Policy, *, seed, execute, delay, cfg_
             if delay and len(prefix) < delay:
                 prefix = np.concatenate([prefix, np.repeat(prefix[-1:], delay - len(prefix), axis=0)])
             chunk = act(prefix_actions=prefix, delay=delay)
+            if delay:  # the committed actions run first for every model; RTC-trained ones already kept them
+                chunk = np.concatenate([prefix, chunk[delay:]])
             cursor = 0
             inference_calls += 1
         action = chunk[min(cursor, len(chunk) - 1)]
@@ -218,6 +257,9 @@ def main(argv=None):
     parser.add_argument("--task", default="pick_place",
                         help="pick_place (original left-arm task) or a ladder rung: pick_place_any, bin, handover, two_bins")
     parser.add_argument("--visual-randomization", action="store_true")
+    parser.add_argument("--goal", choices=("none", "oracle"), default="none",
+                        help="oracle: goal images from the scripted teacher run ahead in a twin scene (goal-conditioned models)")
+    parser.add_argument("--goal-horizon-s", type=float, default=2.0, help="How far ahead the oracle goal image is")
     parser.add_argument("--episode-seconds", type=float, default=20.0)
     parser.add_argument("--out", type=Path, help="Write results.json (and videos) here")
     parser.add_argument("--video", action="store_true")
@@ -230,7 +272,7 @@ def main(argv=None):
     image_size = policy.cfg.vision.image_size
     colors = [c for c in args.colors.split(",") if c in COLORS]
     shapes = [s for s in args.shapes.split(",") if s in ("cube", "cylinder")]
-    results, envs = [], {}
+    results, envs, goal_envs = [], {}, {}
     generator = torch.Generator(device=policy.device).manual_seed(args.seed)
     if args.out:
         args.out.mkdir(parents=True, exist_ok=True)
@@ -246,11 +288,16 @@ def main(argv=None):
                 second = next(c for c in ("blue", "red", "yellow", "green") if c != color)
                 envs[(color, shape)] = TaskEnv(args.task, control_mode="joint", object_color=color, second_color=second,
                                                object_shape=shape, control_hz=policy.hz, episode_seconds=args.episode_seconds)
+                if args.goal == "oracle":
+                    goal_envs[(color, shape)] = TaskEnv(args.task, control_mode="joint", object_color=color,
+                                                        second_color=second, object_shape=shape, control_hz=policy.hz,
+                                                        episode_seconds=args.episode_seconds)
         frames = [] if args.video else None
         result = run_episode(envs[(color, shape)], policy, seed=args.seed + i, execute=args.execute, delay=args.delay,
                              cfg_beta=args.cfg_beta, subtask=args.subtask, image_size=image_size,
                              placement=args.placement, visual_randomization=args.visual_randomization,
-                             video_frames=frames, generator=generator, full_video_every=args.full_video)
+                             video_frames=frames, generator=generator, full_video_every=args.full_video,
+                             goal_env=goal_envs.get((color, shape)), goal_horizon_s=args.goal_horizon_s)
         results.append(result)
         print(f"episode {i}: {result['object']:<14} success={result['success']} steps={result['steps']} "
               f"failure={result['failure']} calls={result['inference_calls']} closest={result['closest_hand_to_cube_m']:.3f}m "

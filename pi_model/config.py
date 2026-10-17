@@ -112,6 +112,12 @@ class Pi07Config:
     # Knowledge insulation (paper): the expert reads the backbone through a stop-gradient, so only
     # the FAST cross-entropy trains the VLM. False lets the flow loss train the backbone and vision too.
     knowledge_insulation: bool = True
+    # π0.7 add-ons for the π0.5 backbone (all off in pi05(), so earlier pi05 checkpoints load unchanged):
+    # pi05_rtc trains with the sampled RTC delay (the pi07 backbone always does); fast_tokenizer picks the FAST
+    # targets for knowledge insulation: "dataset" (fitted per dataset) or "universal" (physical-intelligence/fast,
+    # the tokenizer π0.5 was pretrained with). max_history > 1 turns on MEM and max_subgoals > 0 goal images.
+    pi05_rtc: bool = False
+    fast_tokenizer: str = "dataset"
     # "pi07": our Gemma 3 4B implementation. "pi05": π0.5's pretrained PaliGemma + action expert
     # (pi_model/pi05_backbone.py), with π0.7's data, prompts and evaluation.
     backbone: str = "pi07"

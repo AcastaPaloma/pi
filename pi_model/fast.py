@@ -116,3 +116,23 @@ def vocab_to_fast(vocab_ids, vocab_size: int, skip: int, fast_vocab: int):
         if 0 <= k < fast_vocab:
             out.append(k)
     return out
+
+
+class UniversalFast:
+    """π0.5's pretrained FAST tokenizer (physical-intelligence/fast, files in weights/fast_universal).
+
+    Same recipe as FastTokenizer but with a universal BPE: the chunk must already be normalized to [-1, 1]
+    (π0.5 uses 1st/99th-percentile scaling, as our Normalizer does), DCT along time, x scale, rounded,
+    flattened frequency-major and offset by min_token before BPE.
+    """
+
+    def __init__(self, path):
+        path = Path(path)
+        raw = json.loads((path / "processor_config.json").read_text())
+        self.scale, self.min_token, self.vocab_size = raw["scale"], raw["min_token"], raw["vocab_size"]
+        self.bpe = Tokenizer.from_file(str(path / "tokenizer.json"))
+
+    def encode(self, normalized_chunk) -> list[int]:
+        coeffs = np.around(dct(np.asarray(normalized_chunk, dtype=np.float64), axis=0, norm="ortho") * self.scale)
+        text = "".join(map(chr, np.maximum(coeffs.flatten() - self.min_token, 0).astype(int)))
+        return self.bpe.encode(text).ids

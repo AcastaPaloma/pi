@@ -680,3 +680,30 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   once there is room (public repo or a bigger plan). Mac inference verified after the MPS fix (bin 2/2,
   two_bins 1/2, live demo OK). The three H100 nodes are unreachable (released); the HF token was removed from
   both A10s.
+- **2026-10-17 13:45** **Training restarted: π0.7 add-ons on the π0.5 backbone (track A) plus a data loop (track B).**
+  The final models are π0.5 with π0.7's prompts and data; this round adds the π0.7 pieces π0.5 lacks, one per arm,
+  each against a matched control. Every arm resumes pi05_dagger2 step 7000 (86/120) on the frozen
+  sim_mixdagclean_v1 at LR 1e-5 for 6000 steps, trimmed tails, seed 0; only the add-on switch differs
+  (`SET=...` → `train.py --set`). Code: `pi_model/pi05_backbone.py` (all switches off = LeRobot's own path).
+
+  | run | host | hypothesis |
+  | --- | --- | --- |
+  | x_control_s0 / x_control_s1 | 192.222.52.191 GPU 0 / 1 | C0/C1: plain continuation, two seeds (run-to-run noise) |
+  | x_rtc_s0 | 192.222.55.167 GPU 0 | H19: training-time RTC holds success at delays 6 and 12 where the control drops |
+  | x_mem_s0 | 192.222.55.167 GPU 1 | H20: MEM history (6 frames, 1 s) helps handover and two_bins |
+  | x_goal_s0 | 192.222.55.167 GPU 2 | H21: goal images (oracle: scripted teacher 2 s ahead in a twin scene, an upper bound on a world model) |
+  | x_ki_s0 | 192.222.55.167 GPU 3 | H22: knowledge insulation (FAST CE trains the VLM, expert behind a stop-gradient) |
+  | dagger11_generate | A10 193.122.189.119 | track B: DAgger from the best policy on handover + two_bins, seeds 1100000+ |
+
+  Checks on the real checkpoint (`scripts/box/check_pi05_addons.py`, all pass): add-on path and sampler equal
+  LeRobot's with switches off; RTC at delay 0 equals plain and keeps the committed prefix; MEM with no valid past
+  frame equals π0.5's encoder; KI gives exactly zero flow gradient to the VLM. FAST CE at the start is 15.3 nats
+  (dataset tokenizer, 42 tokens/chunk) and 16.1 (π0.5's universal tokenizer, 82 tokens/chunk): the fine-tuned
+  VLM kept no FAST knowledge, so KI uses the dataset tokenizer. Fixes found on the way: (1) `eval_sim --delay`
+  never delayed models without RTC (the new chunk ran from index 0); now every model executes the committed
+  actions first. (2) OSMesa evaluation works on every box (bin 4/4 in 34 s on the main box), so the "no EGL"
+  relay is unnecessary; scoring is `scripts/box/confirm30.sh` (summary in `outputs/c30_summary.txt`) triggered by
+  `scripts/box/c30_when_ready.sh` at steps 3000 and 6000 on the training GPU. The baseline is re-scored under
+  OSMesa at delays 0/6/12 (base_dagger2_7000). Queued: seed-1 replicates of all four add-ons (an add-on must beat
+  both controls), x_data_v11 (blocked on the data), dagger12_twobins_late on the A10. The scheduler is back on the
+  new hosts; a 20-minute check is armed; the Mac runs `caffeinate -i -s`.

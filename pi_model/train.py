@@ -83,6 +83,19 @@ def build_model(cfg, *, gemma=None, device=torch.device("cpu"), checkpoint=None,
     return model.to(device), report
 
 
+def parse_override(cfg, item):
+    """'key=value' for a top-level config field, parsed to the field's current type."""
+    key, sep, value = item.partition("=")
+    if not sep or not hasattr(cfg, key) or key in ("vision", "text", "expert"):
+        raise SystemExit(f"--set needs KEY=VALUE with a top-level config field, got {item!r}")
+    current = getattr(cfg, key)
+    if isinstance(current, bool):
+        if value.lower() not in ("true", "false", "1", "0"):
+            raise SystemExit(f"--set {key} needs true or false, got {value!r}")
+        return key, value.lower() in ("true", "1")
+    return key, type(current)(value)
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--data", type=Path, required=True, help="Episode root from pi_sim.record")
@@ -118,6 +131,8 @@ def main(argv=None):
     parser.add_argument("--max-steps-per-epoch", type=int)
     parser.add_argument("--gradient-checkpointing", action="store_true")
     parser.add_argument("--fsdp", action="store_true", help="Shard parameters/grads/optimizer across GPUs (FSDP2)")
+    parser.add_argument("--set", action="append", default=[], metavar="KEY=VALUE",
+                        help="Override a top-level config field, e.g. --set max_history=6 --set pi05_rtc=true")
     args = parser.parse_args(argv)
 
     distributed = int(os.environ.get("WORLD_SIZE", "1")) > 1
@@ -138,6 +153,8 @@ def main(argv=None):
         cfg = cfg.with_(state_dropout=args.state_dropout)
     if args.no_knowledge_insulation:
         cfg = cfg.with_(knowledge_insulation=False)
+    for item in args.set:
+        cfg = cfg.with_(**dict([parse_override(cfg, item)]))
     device = pick_device(args.device)
     meta_dir = args.meta or args.data / "pi07_meta"
     tokenizer = load_tokenizer(args.tokenizer, cfg.text.vocab)

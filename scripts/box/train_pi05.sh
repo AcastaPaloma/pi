@@ -5,7 +5,9 @@
 #   VIRTUAL_ENV=~/lerobot-venv uv pip install --no-deps -e . && ... mujoco tokenizers sentencepiece av pyarrow scipy einops
 # and the PaliGemma tokenizer at weights/paligemma/tokenizer.model (google/paligemma-3b-pt-224, gated).
 #   GPUS=0 bash scripts/box/train_pi05.sh data/sim_mix_v1 runs/pi05_v1 20000
-# Options: RESUME=<checkpoint dir> warm start; META=<prepare() dir> reuse statistics (default <data>/pi07_meta).
+# Options: RESUME=<checkpoint dir> warm start; META=<prepare() dir> reuse statistics (default <data>/pi07_meta);
+# SEED=<int> data order and noise seed (default 0); SET="key=value ..." config overrides (π0.7 add-ons:
+# pi05_rtc=true, max_history=6, max_subgoals=1, knowledge_insulation=true fast_tokenizer=universal).
 set -euo pipefail
 DATA=${1:-data/sim_mix_v1}; OUT=${2:-runs/pi05_v1}; STEPS=${3:-20000}
 PY=${PY:-$HOME/lerobot-venv/bin/python}; GPUS=${GPUS:-0}
@@ -17,6 +19,8 @@ EXTRA=()
 [ -n "${RESUME:-}" ] && EXTRA+=(--resume "$RESUME")
 [ -n "${META:-}" ] && EXTRA+=(--meta "$META")
 [ -n "${EMA:-}" ] && EXTRA+=(--ema-decay "$EMA")
+[ -n "${SEED:-}" ] && EXTRA+=(--seed "$SEED")
+for kv in ${SET:-}; do EXTRA+=(--set "$kv"); done
 nohup "${LAUNCH[@]}" -m pi_model.train --data "$DATA" --config pi05 --tokenizer weights/paligemma/tokenizer.model "${EXTRA[@]}" \
     --out "$OUT" --steps "$STEPS" --batch-size ${BATCH:-32} --grad-accum 1 --lr ${LR:-2.5e-5} --warmup 1000 --bf16 \
     --gradient-checkpointing --device cuda:0 --num-workers 16 --log-every 20 --save-every ${SAVE_EVERY:-1000} \

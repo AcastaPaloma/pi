@@ -22,8 +22,11 @@ ROOT = Path(__file__).resolve().parent.parent
 QUEUE = ROOT / "experiments" / "queue.json"
 LOG = ROOT / "docs" / "RESEARCH_LOG.md"
 MAIN = "192.222.52.191"
-H100 = ["192.222.52.191:0", "192.222.52.191:1", "209.20.159.198:0", "209.20.157.232:0", "209.20.158.194:0"]
-A10 = ["129.213.124.160", "132.145.199.243"]
+# 2026-10-17 restart: the main box (2x H100), a 4x H100 node and one A10. Every box renders with OSMesa
+# (scripts/box/confirm30.sh), so checkpoints are evaluated on the GPU that trains them.
+H100 = ["192.222.52.191:0", "192.222.52.191:1",
+        "192.222.55.167:0", "192.222.55.167:1", "192.222.55.167:2", "192.222.55.167:3"]
+A10 = ["193.122.189.119"]
 INTERVAL = int(os.environ.get("INTERVAL", 60))  # the user wants no GPU idle: check every minute
 DRY_RUN = os.environ.get("DRY_RUN") == "1"   # print decisions only; one pass with no idle wait
 
