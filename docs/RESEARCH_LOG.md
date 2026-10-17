@@ -807,3 +807,24 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   Steps: rtc 5780, mem 3560, goal 4540, ki 5000+, rtc_s1 680. dagger13 300/400 (kept 247, success 187).
 - **2026-10-17 17:41** [scheduler] 192.222.55.167:0 was idle; launched **x_mem_s1** (H20 replicate (seed 1))
 - **2026-10-17 18:09** [scheduler] 193.122.189.119 was idle; launched **failmine_c1_5000** (Track B: failure types of the best checkpoint so far (x_control_s1 step 5000, 104/120 on the test seeds) on 60 non-test seeds (5000+) per weak task: does 'hover while holding' still dominate after the continuation?)
+- **2026-10-17 18:12** Scores so far (30 seeds, delay 0, strict totals of 120; mean over the checkpoints scored):
+
+  | run | 3000 | 4000 | 5000 | 6000 | mean |
+  | --- | --- | --- | --- | --- | --- |
+  | control_s0 | 82 | 103 | 96 | 95 | 94.0 |
+  | control_s1 | 98 | 101 | **104** | 100 | **100.8** |
+  | rtc_s0 | 90 | 92 | 83 | (scoring) | 88.3 |
+  | goal_s0, no goal image | 87 | 96 | | | 91.5 |
+  | mem_s0 | 94 | | | | 94.0 |
+  | ki_s0 | 2 | | | | collapsed |
+  | baseline pi05_dagger2 7000 | 90 | | | | |
+
+  Both controls finished: the plain low-LR continuation lifts pi05_dagger2 from 90 to a 97.4 mean over eight
+  checkpoints (best single: control_s1 step 5000 = 29 / 30 / 24 / 21 = 104). Checkpoint-to-checkpoint swings
+  within one run reach 21 points (control_s0 82 → 103), so only the means are compared. No add-on is above the
+  controls so far; rtc is below them at delay 0 (88 vs 97); goal and mem have only one or two checkpoints. On the
+  A10 (idle 17:45-18:09 after dagger13 finished, because its queue was empty; my miss), the scheduler started
+  **failmine_c1_5000** (failure types of the new best checkpoint), then **dagger14_from_best** and
+  **dagger15_twobins_late_best** (on-policy DAgger from control_s1 step 5000, seeds 1400000+/1500000+) follow.
+  dagger13 (328 kept, 254 successful) joined the data A/B batch before it started (v11 + v12 + v13).
+  Steps: rtc_s1 1660, goal_s1 900 (main box); mem 4140, goal 5260, ki 5860, mem_s1 340 (4x H100); no errors.
