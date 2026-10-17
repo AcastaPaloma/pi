@@ -732,3 +732,6 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   3640 / 3180, rtc 2820, mem 1600, goal 2120, ki 2380; no errors. A10: dagger11 finished handover and is at
   two_bins 100/400 (kept 447, teacher success 362 = 81%); dagger12 (late takeovers) 280/400, kept 167, success
   119 (71%), 113 skipped because the policy finished or failed before the takeover. Scheduler and caffeinate alive.
+- **2026-10-17 15:55** No new scores (control_s0 step 3000 and the baseline at delay 12 are being scored; rtc
+  passed 3000, its d0/d6/d12 scoring starts now). Steps: control 3820 / 3360, rtc 3040, mem 1720, goal 2280, ki
+  2560 (flow 0.064, flat). A10: dagger11 two_bins 140/400, dagger12 320/400. All alive.
