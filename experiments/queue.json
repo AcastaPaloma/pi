@@ -241,7 +241,7 @@
     {
       "name": "pi05_v1_cont_more",
       "hypothesis": "H16: does plain low-LR training on pi05_v1's own data keep improving? Continue pi05_v1_cont step 8000 on sim_mix_v1 at LR 1e-5 (trimmed) for 8k more steps",
-      "status": "queued",
+      "status": "running",
       "avoid_hosts": [
         "192.222.52.191"
       ],
@@ -250,7 +250,9 @@
       ],
       "prep_on_main": "ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@{HOST} 'mkdir -p ~/pi/runs/pi05_v1_cont_snap' && rsync -a -e 'ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes' runs/pi05_v1_cont/step_0008000 ubuntu@{HOST}:~/pi/runs/pi05_v1_cont_snap/",
       "train": "PI_TRIM_STILL_TAIL_S=1 LR=1e-5 RESUME=runs/pi05_v1_cont_snap/step_0008000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mix_v1 runs/{RUN} 8000",
-      "eval": "GPU=0 NAME={RUN} EPISODES=8 DELAY=0 TASKS='pick_place_any bin handover two_bins' MUJOCO_GL=egl bash scripts/box/eval_when_ready.sh runs/{RUN} 1000 2000 3000 4000 5000 6000 7000 8000"
+      "eval": "GPU=0 NAME={RUN} EPISODES=8 DELAY=0 TASKS='pick_place_any bin handover two_bins' MUJOCO_GL=egl bash scripts/box/eval_when_ready.sh runs/{RUN} 1000 2000 3000 4000 5000 6000 7000 8000",
+      "host": "209.20.158.194:0",
+      "started": "2026-10-17T01:25"
     }
   ],
   "a10": [
