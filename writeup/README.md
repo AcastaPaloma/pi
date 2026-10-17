@@ -1,6 +1,6 @@
 # Pi canvas
 
-A static, text-led visual write-up using the supplied SVG artwork, in two tabs. **Inference** (index.html, the entry page) replays the inference timeline block by block beside a 3D model of two SO-101 arms. **Training** (training.html) is the illustrated architecture and training article. No framework, external font request, or build step; three.js r169 (MIT) is vendored in vendor/ for the 3D stage.
+A static, text-led visual write-up using the supplied SVG artwork, in three tabs. **Inference** (index.html, the entry page) replays the inference timeline block by block beside a 3D model of two SO-101 arms. **Training** (training.html) is the illustrated architecture and training article. **Results** (results.html) shows rollout videos of the trained models. No framework, external font request, or build step; three.js r169 (MIT) is vendored in vendor/ for the 3D stage.
 
 ## Published site
 
@@ -16,6 +16,12 @@ Run npm run dev in this directory, then open <http://127.0.0.1:4173/>. Any stati
 - The walkthrough autoplays and loops. Each loop moves the robot on to its next two subtasks (Open the faucet, Scrub the plate, Put the sponge back, Close the faucet). Manual navigation pauses autoplay; Play resumes. Deep links use #inf-<block>, and older links without that prefix redirect to training.html.
 - inference-content.js holds the blocks: text, drawing bounds, and stage directives (beat, robot task time, caption, BAGEL progress, action chunks). robot-stage.js builds the scene in pi_sim coordinates, solves IK for every scripted waypoint at load, and choreographs camera dives, shutter captures, subgoal denoising, and action-chunk dots. Nothing runs a model.
 - assets/so101/ is generated from the vendored MuJoCo Menagerie SO-101 (Apache-2.0, LICENSE included) by scripts/build_so101_asset.py: visual meshes voxel-remeshed at 0.8 mm, decimated, quantized (about 300 KB gzipped). Rerun it after changing the vendored model.
+
+## Results tab
+
+- results.html shows rollout videos of trained checkpoints: the video on a dark stage at left, the clip list, plain-language intro and model glossary at right. It is written for readers without a machine-learning background. Arrow keys step through clips; #<clip id> deep-links one.
+- results-content.js holds models, tasks and clips; adding a clip is one entry plus its files in assets/results/. tests/results.test.mjs checks that every clip's video and poster exist and stay under 8 MB.
+- Videos come from scripts/record_showcase.py in the repository root (one episode on one of the 30 test layouts, same settings as the test, filmed from a fixed 3D viewpoint; H.264, about 1 MB per clip). Each clip states the model's success count over all 30 layouts, so a single clip is never presented as the whole result.
 
 ## Training tab: reading and navigation
 

@@ -87,9 +87,10 @@ def oracle_goal_image(env, goal_env, steps, seed):
 
 def run_episode(env: RobotEnv, policy: Pi07Policy, *, seed, execute, delay, cfg_beta, subtask, image_size,
                 placement, visual_randomization, video_frames=None, generator=None, full_video_every=0,
-                goal_env=None, goal_horizon_s=2.0):
+                goal_env=None, goal_horizon_s=2.0, frame_hook=None):
     """full_video_every > 0: record all cameras every that many control steps with captions (real-time video).
-    goal_env: a twin TaskEnv for oracle goal images (see oracle_goal_image), handed to goal-conditioned policies."""
+    goal_env: a twin TaskEnv for oracle goal images (see oracle_goal_image), handed to goal-conditioned policies.
+    frame_hook(env, t, info): called after every control step (scripts/record_showcase.py films the scene with it)."""
     options = {"placement_range": placement, "visual_randomization": visual_randomization}
     obs, info = env.reset(seed=seed, options=options)
     if goal_env is not None:
@@ -168,6 +169,8 @@ def run_episode(env: RobotEnv, policy: Pi07Policy, *, seed, execute, delay, cfg_
             inference_calls += 1
         action = chunk[min(cursor, len(chunk) - 1)]
         obs, reward, terminated, truncated, info = env.step(action)
+        if frame_hook is not None:
+            frame_hook(env, t, info)
         if shadow is not None:
             shadow.observe()
         if video_frames is not None and full_video_every and t % full_video_every == 0:
