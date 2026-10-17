@@ -502,6 +502,17 @@
         "runs/pi05_dagger2/step_0007000/model.pt",
         "data/sim_mixdagclean_v1"
       ]
+    },
+    {
+      "name": "x_control_r2_s0",
+      "hypothesis": "H24: low-LR continuation compounds. The first round lifted pi05_dagger2 from 90 to a 97.4 mean (best 104); a second identical round started from that best checkpoint (x_control_s1 step 5000) ends higher again, or shows the plateau. Scored at 3000-6000",
+      "status": "queued",
+      "train": "SEED=0 PI_TRIM_STILL_TAIL_S=1 LR=1e-5 RESUME=runs/x_control_s1/step_0005000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdagclean_v1 runs/{RUN} 6000",
+      "eval": "GPU=0 VARIANTS='d0' bash scripts/box/c30_when_ready.sh runs/{RUN} 3000 4000 5000 6000",
+      "requires_on_host": [
+        "runs/x_control_s1/step_0005000/model.pt",
+        "data/sim_mixdagclean_v1"
+      ]
     }
   ],
   "a10": [

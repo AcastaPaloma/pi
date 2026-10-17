@@ -861,3 +861,10 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   checkpoint) handover 40/300, success 28 of 36 kept. Steps: mem 4660, goal 5960, ki_vlm01 500, mem_s1 900,
   rtc_s1 2640, goal_s1 1720; no errors.
 - **2026-10-17 18:52** [scheduler] 192.222.55.167:2 was idle; launched **x_data_v11** (Track B batch 1: successful teacher takeovers from DAgger rounds 11 (handover + two_bins, takeover 1-15 s) and 12 (two_bins, takeover 8-22 s), both from pi05_dagger2 step 7000 on seeds 1100000+, added to sim_mixdagclean_v1, beat the control. Blocked until both are copied to the host. Unblocked 16:55: v11 (702 episodes, 554 successful) and v12 (245, 173) are on both H100 hosts. 18:05: v13 (handover takeovers 4-16 s; 328 kept, 254 successful) joins this batch before it started: batch 1 = successful takeovers of v11 + v12 + v13 (~980 episodes), all from pi05_dagger2 step 7000 with the fixed teacher)
+- **2026-10-17 19:10** New: **rtc_s0 step 6000, delay 0 = 28 / 28 / 21 / 24 = 101** (90, 92, 83, 101: mean
+  91.5); **mem_s0 step 4000 = 28 / 27 / 16 / 19 = 90** (94, 90: mean 92). Means so far at delay 0: controls 97.4
+  (8 checkpoints), goal without goals 95 (3), mem 92 (2), rtc 91.5 (4). No add-on is ahead of the controls.
+  The scheduler started **x_data_v11** (batch v11+v12+v13) on 4x H100 GPU 2 at 18:51. ki_vlm01 step 860: flow
+  0.035 (0.028 → 0.029 → 0.035, creeping up slowly; plain KI was at ~0.099 here), CE 9.1. Queue deepened with
+  **H24 x_control_r2_s0** (a second low-LR round from the best checkpoint; copied to the 4x H100 host). dagger14
+  handover 160/300 (kept 135, success 106). No errors; scheduler and caffeinate alive.
