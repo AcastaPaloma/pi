@@ -776,3 +776,19 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   then the scheduler starts the seed-1 replicates beside their final scoring), rtc 4900, mem 3020, goal 3860, ki
   4260 (flow 0.056). dagger13 handover 100/400, kept 84, teacher success 59 (70%). All alive.
 - **2026-10-17 16:55** [scheduler] 192.222.52.191:0 was idle; launched **x_rtc_s1** (H19 replicate (seed 1): with two seeds per arm, an add-on must beat both controls to count)
+- **2026-10-17 17:08** New 30-seed scores (delay 0, strict):
+
+  | run | step | pick | bin | handover | two_bins | total |
+  | --- | --- | --- | --- | --- | --- | --- |
+  | control_s0 | 3000 / 4000 | 24 / 28 | 29 / 28 | 15 / 25 | 14 / 22 | **82 / 103** |
+  | control_s1 | 3000 / 4000 | 25 / 29 | 29 / 28 | 21 / 18 | 23 / 26 | **98 / 101** |
+  | rtc_s0 | 3000 / 4000 | 27 / 29 | 28 / 27 | 16 / 14 | 19 / 22 | 90 / 92 |
+  | goal_s0 (no goal image) | 3000 | 24 | 27 | 17 | 19 | 87 |
+  | baseline pi05_dagger2 7000 | — | 29 | 27 | 16 | 18 | 90 |
+
+  The plain continuation keeps improving: both controls are at 101-103 at step 4000 (mean 102 vs baseline 90),
+  with two_bins 22-26 (baseline 18). So far no add-on beats the controls at delay 0 (rtc 92 at 4000 is 10 below
+  them; goal without goal images 87 at 3000 vs 90). Too early to call (watch rule; one seed per add-on, steps
+  5000/6000 and the s1 replicates pending). The scheduler started **x_rtc_s1** on main GPU 0 at 16:55 beside
+  control_s0's step-6000 scoring (62 GB used), as the busy-check fix intended. Steps: control_s0 done (6000),
+  control_s1 5800, rtc 5340, mem 3280, goal 4220, ki 4620 (flow 0.055). dagger13 200/400 (kept 164, success 122).
