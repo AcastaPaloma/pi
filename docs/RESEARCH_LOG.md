@@ -829,3 +829,9 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   dagger13 (328 kept, 254 successful) joined the data A/B batch before it started (v11 + v12 + v13).
   Steps: rtc_s1 1660, goal_s1 900 (main box); mem 4140, goal 5260, ki 5860, mem_s1 340 (4x H100); no errors.
 - **2026-10-17 18:18** [scheduler] 192.222.55.167:3 was idle; launched **x_ki_vlm01_s0** (H22b: KI collapsed (2/120) because the fresh FAST cross-entropy (15 nats at the start) rewrote the VLM features faster than the insulated expert could follow (flow loss 0.026 -> 0.098 in 500 steps). A loss weight cannot slow this under Adam, a learning-rate multiplier can: KI with the VLM at 0.1x LR keeps the expert's inputs nearly fixed while the VLM learns FAST)
+- **2026-10-17 18:28** All seven GPUs busy, no errors. rtc_s0 and ki_s0 finished at 6000; the scheduler started
+  **x_ki_vlm01_s0** (H22b) on 4x H100 GPU 3 at 18:18: step 140, CE 13.05, flow 0.028 (still in warmup, so the
+  first test of whether the slow VLM keeps the flow loss down comes over the next ~500 steps; plain KI's flow had
+  doubled by step 380). Steps: mem 4380, goal 5580, mem_s1 620, rtc_s1 2120, goal_s1 1300. A10:
+  failmine_c1_5000 on handover (episode 23 of 60). Separately, the write-up gained a Results tab with rollout
+  videos (scripts/record_showcase.py, filmed on main GPU 1 beside training); an experiment tree is in progress.
