@@ -848,3 +848,4 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
     continuation from the policy's own state differs from the demonstrations' futures. If step 6000 agrees, the
     world-model idea is not worth building in this form. ki_s0 step 4000: 0/120 (H22 collapse confirmed).
   Steps: mem 4400, goal 5580, ki_vlm01 140, mem_s1 620, rtc_s1 2140, goal_s1 1320; no errors.
+- **2026-10-17 18:37** [scheduler] 193.122.189.119 was idle; launched **dagger14_from_best** (Track B batch 2 (on-policy DAgger): takeovers from the current best policy (x_control_s1 step 5000) label the states it reaches now rather than those of pi05_dagger2; handover + two_bins, takeover 2-16 s, seeds 1400000+)

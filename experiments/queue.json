@@ -947,11 +947,13 @@
     {
       "name": "dagger14_from_best",
       "hypothesis": "Track B batch 2 (on-policy DAgger): takeovers from the current best policy (x_control_s1 step 5000) label the states it reaches now rather than those of pi05_dagger2; handover + two_bins, takeover 2-16 s, seeds 1400000+",
-      "status": "queued",
+      "status": "running",
       "requires_on_host": [
         "runs/x_control_s1/step_0005000/model.pt"
       ],
-      "eval": "MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.dagger --checkpoint runs/x_control_s1/step_0005000 --tasks handover,two_bins --episodes-per-task 300 --takeover-min 2 --takeover-max 16 --seed 1400000 --out data/sim_dagger_v14"
+      "eval": "MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.dagger --checkpoint runs/x_control_s1/step_0005000 --tasks handover,two_bins --episodes-per-task 300 --takeover-min 2 --takeover-max 16 --seed 1400000 --out data/sim_dagger_v14",
+      "host": "193.122.189.119",
+      "started": "2026-10-17T18:37"
     },
     {
       "name": "dagger15_twobins_late_best",
