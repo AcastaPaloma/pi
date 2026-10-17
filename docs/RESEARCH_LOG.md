@@ -792,3 +792,4 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   5000/6000 and the s1 replicates pending). The scheduler started **x_rtc_s1** on main GPU 0 at 16:55 beside
   control_s0's step-6000 scoring (62 GB used), as the busy-check fix intended. Steps: control_s0 done (6000),
   control_s1 5800, rtc 5340, mem 3280, goal 4220, ki 4620 (flow 0.055). dagger13 200/400 (kept 164, success 122).
+- **2026-10-17 17:17** [scheduler] 192.222.52.191:1 was idle; launched **x_goal_s1** (H21 replicate (seed 1))
