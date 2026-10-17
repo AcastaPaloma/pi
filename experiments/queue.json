@@ -463,7 +463,7 @@
     {
       "name": "x_data_v11",
       "hypothesis": "Track B batch 1: successful teacher takeovers from DAgger rounds 11 (handover + two_bins, takeover 1-15 s) and 12 (two_bins, takeover 8-22 s), both from pi05_dagger2 step 7000 on seeds 1100000+, added to sim_mixdagclean_v1, beat the control. Blocked until both are copied to the host. Unblocked 16:55: v11 (702 episodes, 554 successful) and v12 (245, 173) are on both H100 hosts. 18:05: v13 (handover takeovers 4-16 s; 328 kept, 254 successful) joins this batch before it started: batch 1 = successful takeovers of v11 + v12 + v13 (~980 episodes), all from pi05_dagger2 step 7000 with the fixed teacher",
-      "status": "queued",
+      "status": "running",
       "requires_on_host": [
         "runs/pi05_dagger2/step_0007000/model.pt",
         "data/sim_mixdagclean_v1",
@@ -473,7 +473,9 @@
       ],
       "setup": "mkdir -p data/sim_mixdagclean_v2 && cd data/sim_mixdagclean_v2 && for d in ../sim_mixdagclean_v1/episode_*; do ln -sfn ../sim_mixdagclean_v1/$(basename $d) $(basename $d); done && for d in ../sim_dagger_v11/episode_*; do grep -qs '\"success\": true' $d/meta.json && ln -sfn $d episode_dag11_$(basename $d | cut -d_ -f2); done; for d in ../sim_dagger_v12/episode_*; do grep -qs '\"success\": true' $d/meta.json && ln -sfn $d episode_dag12_$(basename $d | cut -d_ -f2); done; for d in ../sim_dagger_v13/episode_*; do grep -qs '\"success\": true' $d/meta.json && ln -sfn $d episode_dag13_$(basename $d | cut -d_ -f2); done; true",
       "train": "SEED=0 PI_TRIM_STILL_TAIL_S=1 LR=1e-5 RESUME=runs/pi05_dagger2/step_0007000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdagclean_v2 runs/{RUN} 6000",
-      "eval": "GPU=0 VARIANTS='d0' bash scripts/box/c30_when_ready.sh runs/{RUN} 3000 4000 5000 6000"
+      "eval": "GPU=0 VARIANTS='d0' bash scripts/box/c30_when_ready.sh runs/{RUN} 3000 4000 5000 6000",
+      "host": "192.222.55.167:2",
+      "started": "2026-10-17T18:51"
     },
     {
       "name": "x_data_v11_s1",
