@@ -1,4 +1,158 @@
 {
   "version": 1,
-  "sections": {}
+  "sections": {
+    "preface": [
+      {
+        "tag": "p",
+        "children": [
+          {
+            "text": "Papers are wayyy too complicated for no reason - this isn't that hard. Have fun reading! It's genuinely Google Gemma on crack."
+          }
+        ]
+      }
+    ],
+    "map": [
+      {
+        "tag": "p",
+        "children": [
+          {
+            "text": "π0.7 (Physical Intelligence, April 2026, arXiv 2604.15483) is a robot control model with about 5 billion parameters. It reads camera images, the robot's joint positions, and a text prompt, and outputs the robot's next 50 actions. Models of this kind are called vision-language-action models, or VLAs."
+          }
+        ]
+      },
+      {
+        "tag": "p",
+        "children": [
+          {
+            "text": "The paper's main idea is the prompt. Earlier models in the family (π0, π0.5, π0.6) were prompted with a short task description. π0.7 is also trained with a subtask instruction, episode metadata (how fast and how well the recorded robot performed, and whether it made a mistake), the control mode, and, in some examples, images of what the scene should look like a few seconds later. These labels let one model learn from mixed-quality data, including failed episodes, autonomous rollouts, and human video, without averaging good and bad behavior together. At runtime, you steer the model by choosing what to put in the prompt."
+          }
+        ]
+      },
+      {
+        "tag": "p",
+        "children": [
+          {
+            "text": "Three models work together at runtime:"
+          }
+        ]
+      },
+      {
+        "tag": "ul",
+        "children": [
+          {
+            "tag": "li",
+            "children": [
+              {
+                "tag": "strong",
+                "children": [
+                  {
+                    "text": "π0.7, the low-level policy."
+                  }
+                ]
+              },
+              {
+                "text": " Images, joint positions, and the prompt go in; a 50-step action chunk comes out. Covered in the Ingestion, Decision model, and Training losses chapters."
+              }
+            ]
+          },
+          {
+            "tag": "li",
+            "children": [
+              {
+                "tag": "strong",
+                "children": [
+                  {
+                    "text": "The high-level policy."
+                  }
+                ]
+              },
+              {
+                "text": " The same architecture, fine-tuned to write the next subtask as text, for example “turn on the faucet”. "
+              },
+              {
+                "tag": "br",
+                "children": []
+              },
+              {
+                "text": "This helps the low-level policy not lose sight of the goal. "
+              },
+              {
+                "tag": "br",
+                "children": []
+              },
+              {
+                "text": "Covered in the High-level policy chapter."
+              }
+            ]
+          },
+          {
+            "tag": "li",
+            "children": [
+              {
+                "tag": "strong",
+                "children": [
+                  {
+                    "text": "The world model."
+                  }
+                ]
+              },
+              {
+                "text": " A 14-billion-parameter image generator, initialized from ByteDance's BAGEL, that draws the subgoal images for the current subtask. Covered in the World model chapter; its diagram is still being drawn."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "tag": "p",
+        "children": [
+          {
+            "text": "The boxed sketch at the top of the canvas shows only the low-level policy: ingest the context, encode it with the Gemma 3 backbone (the “Encoder (VLM)”), and pass it to the action expert. The dashed “Decoder (VLM)” box is the backbone's text output. π0.7 uses it only during training, to predict discrete action tokens; the high-level policy uses the same output to write subtasks."
+          }
+        ]
+      },
+      {
+        "tag": "p",
+        "children": [
+          {
+            "text": "You do not have to read this in order. Each main section opens with what goes in, what comes out, and why. Its component notes are folded underneath; open them when you want the tensor-level detail. Clicking any box in the drawing opens its note. The routes below are shorter paths through the article."
+          }
+        ]
+      },
+      {
+        "tag": "p",
+        "children": [
+          {
+            "text": "The π0.7 paper does not print every number in the drawings. Layer sizes, patch sizes, the memory encoder's attention schedule, and the action tokenizer come from the work π0.7 builds on: Gemma 3, MEM, knowledge insulation, FAST, and π0. The text says when a detail is not stated in the π0.7 paper."
+          }
+        ]
+      }
+    ],
+    "observation-input": [
+      {
+        "tag": "p",
+        "children": [
+          {
+            "text": "Hopefully, straightforward enough: it's a little video. O = [B, V, 6, 3, 448, 448] holds, for each of B examples, V cameras × 6 frames, each frame 448 × 448 pixels in 3 color channels (red, green, blue)."
+          }
+        ]
+      },
+      {
+        "tag": "p",
+        "children": [
+          {
+            "text": "The frames are sampled 1 second apart, so the model sees the last 5 seconds. During training the whole history is dropped 30% of the time, and the rear camera, when present, is dropped 30% of the time. "
+          },
+          {
+            "tag": "strong",
+            "children": [
+              {
+                "text": "You'll see this \"dropping\" often; it's for robustness."
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
 }
