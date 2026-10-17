@@ -754,3 +754,4 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   ideally two seeds. Steps: control 4880 / 4280, rtc 4020, mem 2380, goal 3120, ki 3460 (flow 0.061, slowly
   falling); no errors. A10: failmine_dagger2 started (the scheduler launched it at 15:50 when dagger12 ended);
   dagger11 two_bins 340/400 (kept 652, success 519).
+- **2026-10-17 16:26** [scheduler] 193.122.189.119 was idle; launched **dagger13_handover** (Track B: handover is the weakest task (16/30 strict at baseline) and the most variable; more teacher takeovers in its middle phase (4-16 s, around the pass) on seeds 1300000+. To be retargeted by failmine_dagger2 if it names a different failure)

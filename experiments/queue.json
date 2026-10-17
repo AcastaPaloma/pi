@@ -872,11 +872,13 @@
     {
       "name": "dagger13_handover",
       "hypothesis": "Track B: handover is the weakest task (16/30 strict at baseline) and the most variable; more teacher takeovers in its middle phase (4-16 s, around the pass) on seeds 1300000+. To be retargeted by failmine_dagger2 if it names a different failure",
-      "status": "queued",
+      "status": "running",
       "requires_on_host": [
         "runs/pi05_dagger2/step_0007000/model.pt"
       ],
-      "eval": "MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.dagger --checkpoint runs/pi05_dagger2/step_0007000 --tasks handover --episodes-per-task 400 --takeover-min 4 --takeover-max 16 --seed 1300000 --out data/sim_dagger_v13"
+      "eval": "MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.dagger --checkpoint runs/pi05_dagger2/step_0007000 --tasks handover --episodes-per-task 400 --takeover-min 4 --takeover-max 16 --seed 1300000 --out data/sim_dagger_v13",
+      "host": "193.122.189.119",
+      "started": "2026-10-17T16:26"
     }
   ]
 }
