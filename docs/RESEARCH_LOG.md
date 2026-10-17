@@ -672,3 +672,11 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   moved it (12 → 18/30); (3) restarting from a converged checkpoint at full LR (2.5e-5) costs ~5k steps of dip;
   (4) 8-episode ladders misrank checkpoints, and only 30-seed confirmations are trustworthy; (5) failure-heavy
   recovery data with parked tails (recover2) made the best policy worse (73/120).
+- **2026-10-17 07:20 UTC** **Release to Hugging Face (private):** `KuanKuanKuan/so101-pi07-sim-models` is complete (the
+  three final models in full precision, 28.1 GB). `KuanKuanKuan/so101-pi07-sim-data` stopped at 40.7 of ~132 GB:
+  "Private storage limit reached" (about 70 GB on this plan). Still missing (~93 GB, staged as tar parts in
+  `~/hf_release/data` on 192.222.52.191): all of sim_recover2_v1, sim_ladder_v1 parts 000–001, sim_recover_v1
+  part 000, sim_twobins_mixed_v1 part 000, sim_dagger_v4. Re-running `scripts/box/hf_upload_release.py` resumes
+  once there is room (public repo or a bigger plan). Mac inference verified after the MPS fix (bin 2/2,
+  two_bins 1/2, live demo OK). The three H100 nodes are unreachable (released); the HF token was removed from
+  both A10s.
