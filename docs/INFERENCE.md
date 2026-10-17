@@ -49,12 +49,12 @@ Tasks: `pick_place_any`, `bin`, `handover`, `two_bins` (two-arm models), or `pic
 Drag the cube(s) and the destination on the table map, press Run, and watch an orbitable 3D view plus the
 policy's three cameras. Placements far outside the shaded training regions are a test of generalisation.
 
-## Copies on Hugging Face (private)
+## Copies on Hugging Face
 
-- `KuanKuanKuan/so101-pi07-sim-models`: the same three models in **full precision** (as saved by training).
-- `KuanKuanKuan/so101-pi07-sim-data`: every simulation dataset (about 130 GB as ~10 GB tar parts; restore with
-  `cat NAME/NAME.tar.part-* | tar xf -`), the training-mix manifests and the normalisation statistics. Both
-  repos are private; make them public on the Hub if you want to share them.
+- `KuanKuanKuan/so101-pi07-sim-models` (private): the same three models in **full precision** (as saved by training).
+- `KuanKuanKuan/so101-pi07-sim-data` (**public**, complete, 140.7 GB): every simulation dataset as ~10 GB tar parts (22 parts; restore with
+  `cat NAME/NAME.tar.part-* | tar xf -`), the training-mix manifests and the normalisation statistics.
+  The models repo is private; make it public on the Hub if you want to share it.
 
 ```bash
 .venv-infer/bin/hf download KuanKuanKuan/so101-pi07-sim-models pi05_dagger2_step7000/model.pt --local-dir hf_models
