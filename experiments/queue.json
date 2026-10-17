@@ -226,7 +226,7 @@
     {
       "name": "pi05_v2_mixrec2",
       "hypothesis": "H12 at full scale: train from the \u03c00.5 base on mix + recover2 with failed tails trimmed for 20k steps (pi05_recover used recover data untrimmed and reached 36/64 at best); compare with pi05_v1 and pi05_v2_clean",
-      "status": "queued",
+      "status": "running",
       "avoid_hosts": [
         "192.222.52.191"
       ],
@@ -234,7 +234,9 @@
         "data/sim_mixrec2_v1"
       ],
       "train": "PI_TRIM_STILL_TAIL_S=1 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixrec2_v1 runs/{RUN} 20000",
-      "eval": "GPU=0 NAME={RUN} EPISODES=8 DELAY=0 TASKS='pick_place_any bin handover two_bins' MUJOCO_GL=egl bash scripts/box/eval_when_ready.sh runs/{RUN} 2000 4000 6000 8000 10000 12000 14000 16000 18000 20000"
+      "eval": "GPU=0 NAME={RUN} EPISODES=8 DELAY=0 TASKS='pick_place_any bin handover two_bins' MUJOCO_GL=egl bash scripts/box/eval_when_ready.sh runs/{RUN} 2000 4000 6000 8000 10000 12000 14000 16000 18000 20000",
+      "host": "209.20.159.198:0",
+      "started": "2026-10-17T01:25"
     },
     {
       "name": "pi05_v1_cont_more",
