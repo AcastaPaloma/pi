@@ -849,3 +849,14 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
     world-model idea is not worth building in this form. ki_s0 step 4000: 0/120 (H22 collapse confirmed).
   Steps: mem 4400, goal 5580, ki_vlm01 140, mem_s1 620, rtc_s1 2140, goal_s1 1320; no errors.
 - **2026-10-17 18:37** [scheduler] 193.122.189.119 was idle; launched **dagger14_from_best** (Track B batch 2 (on-policy DAgger): takeovers from the current best policy (x_control_s1 step 5000) label the states it reaches now rather than those of pi05_dagger2; handover + two_bins, takeover 2-16 s, seeds 1400000+)
+- **2026-10-17 18:50** New: **control_s0 step 6000 at delay 6 = 29 / 28 / 21 / 21 = 99** (95 at delay 0). The
+  continued control loses nothing to a 6-step lag, which leaves RTC (H19) even less to fix in this sim.
+  **goal_s0 step 5000 without goals = 28 / 28 / 24 / 22 = 102** (87, 96, 102 so far; mean 95, the controls'
+  mean is 97.4); its with-goal score at 6000 is pending. **H22b looks right so far:** x_ki_vlm01_s0 at step 500
+  has flow 0.029 (plain KI 0.099 at the same point) while CE falls more slowly (11.4). **failmine_c1_5000** (best
+  checkpoint, 60 non-test seeds): handover 44/60 (pi05_dagger2: 35/60), two_bins 37/60 (41/60). The failure mode
+  is unchanged: handover 14 of 16 failures lift and then stall holding the cube; two_bins 18 of 23 have cube 1 in
+  the bin and cube 2 not (12 lifted, 6 never). The continuation fixed handover more than two_bins, so the data
+  loop's second-arm takeovers (dagger12, dagger15) target the right gap. dagger14 (on-policy from the best
+  checkpoint) handover 40/300, success 28 of 36 kept. Steps: mem 4660, goal 5960, ki_vlm01 500, mem_s1 900,
+  rtc_s1 2640, goal_s1 1720; no errors.
