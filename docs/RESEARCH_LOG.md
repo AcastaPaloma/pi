@@ -742,3 +742,15 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   control_s1 step 3000, rtc step 3000 (pick 27/30, bin 28/30 so far, success counts), baseline delay 12. KI flow
   0.063 at step 3040 (flat). Steps: control 4320 / 3800, rtc 3540, mem 2040, goal 2720, ki 3040; no errors.
 - **2026-10-17 15:51** [scheduler] 193.122.189.119 was idle; launched **failmine_dagger2** (Track B step 2: mine the best policy's failures on the weak tasks (handover, two_bins) on 60 non-test seeds (5000+), with per-episode videos, to name the failure types before generating more data)
+- **2026-10-17 16:40** **First control scores (30 seeds, delay 0, step 3000): control_s0 24 / 29 / 15 / 14 = 82,
+  control_s1 25 / 29 / 21 / 23 = 98.** Same recipe, only the seed differs, and they are 16 apart (handover 15
+  vs 21, two_bins 14 vs 23). Baseline at **delay 12: 25 / 26 / 15 / 15 = 81** (delay 6: 82, delay 0: 90).
+  **Consequence for the design:** the evaluation itself has an SE of about ±4.5 on a 120-episode total, so a
+  16-point gap between twins is mostly run/checkpoint variance, and a single checkpoint of a single run cannot
+  detect an add-on effect below ~15 points. Two changes, no run stopped: (1) every run is now also scored at steps
+  4000 and 5000 (watchers added), so each arm is judged on the mean of four checkpoints (3000-6000), which also
+  shows whether the s0/s1 gap is per-run or per-checkpoint; (2) the seed-1 replicates already queued stay the rule
+  (an add-on must beat both controls' means), and the data A/B (x_data_v11) will need the same: four checkpoints,
+  ideally two seeds. Steps: control 4880 / 4280, rtc 4020, mem 2380, goal 3120, ki 3460 (flow 0.061, slowly
+  falling); no errors. A10: failmine_dagger2 started (the scheduler launched it at 15:50 when dagger12 ended);
+  dagger11 two_bins 340/400 (kept 652, success 519).
