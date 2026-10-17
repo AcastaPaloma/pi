@@ -627,3 +627,19 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
 - **2026-10-17 01:28** [scheduler] 209.20.158.194:0 was idle; launched **pi05_v1_cont_more** (H16: does plain low-LR training on pi05_v1's own data keep improving? Continue pi05_v1_cont step 8000 on sim_mix_v1 at LR 1e-5 (trimmed) for 8k more steps)
 - **2026-10-17 01:28** [scheduler] 129.213.124.160 was idle; launched **dagger2_7000_confirm30** (Confirm pi05_dagger2 step 7000 (28/32 on the 8-episode ladder, its best) on the 30 shared seeds against the 83/120 baseline)
 - **2026-10-17 01:37** [scheduler] 192.222.52.191:1 was idle; launched **pi05_v1_cont2** (H14/H16: the low-LR continuation (pi05_v1_cont) never dipped and reached two_bins 7/8 at step 8000; continue it at LR 1e-5 on the cleaned DAgger data (trimmed) for 8k more steps)
+- **2026-10-17 05:45 UTC** **GPUs sat idle for hours overnight: the user's Mac slept, which stopped the scheduler
+  and the watcher.** Idle from (local time): A10#1 17:19, 209.20.159.198 19:30, 209.20.158.194 21:51, main GPUs 23:08.
+  Fixes: `caffeinate -i -w <scheduler pid>` keeps the Mac from idle-sleeping while the scheduler runs, and the
+  scheduler now waits 20 min after a launch before calling that slot idle again (the grace period is kept across
+  restarts in `outputs/last_launch.json`). pi05_2arm_ema had been double-booked onto 209.20.157.232 while
+  pi05_lr5e5 loaded (OOM), and pi05_v1_cont2 onto main GPU0 next to pi05_v2_clean after a restart (OOM, relaunched
+  on GPU1). Results finished while asleep (8-episode ladder, best checkpoint by total): pi05_dagger2 step 7000
+  28/32, pi05_v1_cont step 8000 26/32, pi05_dagger_clean step 8000 25/32, pi05_dagger_clean_lr1e5 step 5000 24/32,
+  pi05_recover finished (12000: 13/16 pick), pi05_v1_rec2_trim and pi05_curriculum2 finished. v1_cont step 4000 on
+  30 seeds: 26/26/17/15 = 84/120 (baseline 83). **Now running:** pi05_v2_clean (from base, cleaned data, 20k),
+  pi05_v1_cont2 (v1_cont 8000 + cleaned data at 1e-5), pi05_v2_mixrec2 (from base, mix+recover2 trimmed, 20k),
+  pi05_v1_cont_more (v1_cont 8000 on its own data at 1e-5), pi05_lr5e5 (209.20.157.232), and 30-seed confirmations
+  (dagger2 step 7000 first). **Queued:** pi05_dagger3 (round 3 from dagger2 step 7000 + DAgger v10, LR 1e-5),
+  pi05_v1_lr5e6 (H14 dose), **pi05_twobins2x** (H18: `PI_TASK_WEIGHTS=two_bins=2` in `pi_model/data.py`, checked by
+  building the real training dataset and fetching samples: two_bins share 36% → 53%); A10: three confirmations
+  and dagger11_fixed.

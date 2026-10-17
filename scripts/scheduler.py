@@ -165,8 +165,17 @@ def update_entry(cls, name, **fields):
 IDLE_ALERT = ROOT / "outputs" / "IDLE_ALERT"
 
 
+LAST_LAUNCH = ROOT / "outputs" / "last_launch.json"
+LAUNCH_GRACE_S = 1200  # a just-launched job can look idle for minutes while prep/setup/loading run
+
+
 def main():
     idle_counts = {}
+    # Persisted, so a restarted scheduler still honours the grace period of launches made just before it.
+    try:
+        last_launch = json.loads(LAST_LAUNCH.read_text())
+    except (OSError, ValueError):
+        last_launch = {}
     print(f"{datetime.now():%H:%M} scheduler started", flush=True)
     while True:
         queue = json.loads(QUEUE.read_text())
@@ -178,6 +187,8 @@ def main():
                 except Exception as exc:  # network hiccup: skip this round
                     print(f"{datetime.now():%H:%M} {slot} check failed: {exc}", flush=True)
                     continue
+                if time.time() - last_launch.get(slot, 0) < LAUNCH_GRACE_S:
+                    is_busy = True  # never double-book a slot whose job is still loading (pi05_2arm_ema, 2026-10-16)
                 idle_counts[slot] = 0 if is_busy else idle_counts.get(slot, 0) + (2 if DRY_RUN else 1)
                 if DRY_RUN:
                     print(f"{slot}: {'busy' if is_busy else 'IDLE'}", flush=True)
@@ -195,6 +206,8 @@ def main():
                         print("   would run:", resolve(entry.get("train") or entry.get("eval"), host, entry["name"])[:160], flush=True)
                         break
                     started = datetime.now().isoformat(timespec="minutes")
+                    last_launch[slot] = time.time()
+                    LAST_LAUNCH.write_text(json.dumps(last_launch))
                     orig["status"] = "running"  # also in memory, so no other slot launches it this round
                     update_entry(cls, entry["name"], status="running", host=slot, started=started)
                     code, out = launch(entry, host, gpu if cls == "h100" else None)

@@ -98,6 +98,11 @@ class EpisodeStore:
         if trim:
             trimmed = sum(trim_still_tail(e, float(trim)) for e in self.episodes)
             print(f"trimmed still tails of {trimmed}/{len(self.episodes)} failed episodes to {trim} s", flush=True)
+        weights = os.environ.get("PI_TASK_WEIGHTS")  # e.g. "two_bins=2": sample a task's episodes k times as often (H18)
+        if weights:
+            w = {k: int(v) for k, v in (item.split("=") for item in weights.split(","))}
+            self.episodes = [e for e in self.episodes for _ in range(max(1, w.get(e.meta.get("task_id"), 1)))]
+            print(f"task weights {w}: {len(self.episodes)} episode entries after repetition", flush=True)
         self.cameras = list(self.episodes[0].meta["cameras"])
         self.hz = int(self.episodes[0].meta["control_hz"])
         self.lengths = np.asarray([e.length for e in self.episodes])
