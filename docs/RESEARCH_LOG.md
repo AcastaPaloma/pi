@@ -771,3 +771,7 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   (82 and 98, mean 90) and to the baseline (90): RTC training costs nothing at delay 0, as H19 needs. Its delay 6
   and 12 scores are running (baseline: 82 and 81). Steps: control 5480 / 4900, rtc 4560, mem 2760, goal 3560, ki
   3960 (flow 0.054, still falling). dagger13 handover 20/400 (12 of 16 kept succeed). All alive.
+- **2026-10-17 16:48** No new scores (scoring: rtc 3000 at delays 6/12, ki 3000, goal 3000 with and without
+  oracle goals, control 4000s; mem just passed 3000). Steps: control 5880 / 5300 (they finish within ~15 / 40 min,
+  then the scheduler starts the seed-1 replicates beside their final scoring), rtc 4900, mem 3020, goal 3860, ki
+  4260 (flow 0.056). dagger13 handover 100/400, kept 84, teacher success 59 (70%). All alive.
