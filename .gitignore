@@ -9,3 +9,6 @@ configs/*.local.json
 
 data/
 runs/
+models/
+weights/
+.venv-infer/

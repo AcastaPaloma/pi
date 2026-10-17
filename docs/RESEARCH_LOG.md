@@ -656,3 +656,19 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   evaluation waiter on 209.20.157.232. Queue: 3 H100 runnable (dagger3, v1_lr5e6, twobins2x); A10 has 4 queued
   (two_bins/handover video of dagger2 7000, two confirmations, dagger11). Scheduler is under caffeinate; no idle
   alert; no errors.
+- **2026-10-17 06:10 UTC** **Training wrapped up at the user's request.** Scheduler, watcher and relays stopped;
+  all training/evaluation jobs killed (the in-flight pi05_v2_clean, pi05_v1_cont2, pi05_v2_mixrec2,
+  pi05_v1_cont_more, pi05_lr5e5 and the v1_cont step-8000 confirmation are abandoned; queue entries marked
+  cancelled). **Final models** (bf16, copied to the Mac's `models/`; see `docs/INFERENCE.md`):
+
+  | model | strict success on the 30 shared seeds (pick / bin / handover / two_bins) |
+  | --- | --- |
+  | pi05_dagger2 step 7000 (best two-arm) | 28 / 28 / 12 / 18 = 86/120 |
+  | pi05_v1 step 20000 (baseline, best handover) | 26 / 26 / 19 / 12 = 83/120 |
+  | pi05_single step 6000 (single arm) | pick_place 28/30 |
+
+  Main lessons: (1) the π0.5 pretrained backbone was what made vision work; (2) the second arm in two_bins was
+  the bottleneck, and fixed-teacher, success-only DAgger data with a low-LR (1e-5) resume was the first thing that
+  moved it (12 → 18/30); (3) restarting from a converged checkpoint at full LR (2.5e-5) costs ~5k steps of dip;
+  (4) 8-episode ladders misrank checkpoints, and only 30-seed confirmations are trustworthy; (5) failure-heavy
+  recovery data with parked tails (recover2) made the best policy worse (73/120).

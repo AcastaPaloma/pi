@@ -42,8 +42,8 @@ DEFAULT_VIEW = {"azimuth": 245.0, "elevation": -24.0, "distance": 0.85, "lookat"
 
 
 class Demo:
-    def __init__(self, checkpoint, device, dtype, denoise_steps, episode_seconds):
-        self.policy = Pi07Policy(checkpoint, device=device, dtype=dtype, denoise_steps=denoise_steps)
+    def __init__(self, checkpoint, device, dtype, denoise_steps, episode_seconds, tokenizer=None):
+        self.policy = Pi07Policy(checkpoint, device=device, dtype=dtype, denoise_steps=denoise_steps, tokenizer=tokenizer)
         self.episode_seconds = episode_seconds
         self.envs: dict = {}
         self.commands: queue.Queue = queue.Queue()
@@ -503,12 +503,13 @@ def main(argv=None):
     ap.add_argument("--port", type=int, default=8765)
     ap.add_argument("--host", default="127.0.0.1",
                     help="127.0.0.1 = tunnel only; 0.0.0.0 = anyone who can reach this machine (no authentication)")
-    ap.add_argument("--device", default="cuda")
+    ap.add_argument("--device", default="auto", help="cuda, mps (Apple GPU), cpu, or auto")
+    ap.add_argument("--tokenizer", type=Path, help="PaliGemma tokenizer.model (default: the path stored in the checkpoint)")
     ap.add_argument("--dtype", choices=("fp32", "bf16"), default="bf16")
     ap.add_argument("--denoise-steps", type=int, default=5)
     ap.add_argument("--episode-seconds", type=float, default=40.0)
     args = ap.parse_args(argv)
-    demo = Demo(args.checkpoint, args.device, args.dtype, args.denoise_steps, args.episode_seconds)
+    demo = Demo(args.checkpoint, args.device, args.dtype, args.denoise_steps, args.episode_seconds, tokenizer=args.tokenizer)
     threading.Thread(target=demo.worker, daemon=True).start()
     server = ThreadingHTTPServer((args.host, args.port), make_handler(demo))
     server.daemon_threads = True
