@@ -151,3 +151,13 @@ add('gentle',
   clip('bin_c1_5000_s4001', 'bin', 2, true, 9.0, 30),
   clip('handover_c1_5000_s4002', 'handover', 3, true, 12.0, 24),
   clip('two_bins_c1_5000_s4003', 'two_bins', 4, false, 30.0, 21));
+add('pi05-single',
+  clip('pick_place_single_6000_s4000', 'pick_place', 1, true, 4.0, 26));
+add('dagger',
+  clip('handover_dagger2_7000_s4002', 'handover', 3, true, 25.0, 16),
+  clip('two_bins_dagger2_7000_s4003', 'two_bins', 4, false, 30.0, 18));
+add('two-arms',
+  clip('handover_v1_8000_s4002', 'handover', 3, false, 30.0, undefined, 'Step 8,000'),
+  clip('two_bins_v1_8000_s4003', 'two_bins', 4, false, 30.0, undefined, 'Step 8,000'),
+  clip('handover_v1_20000_s4002', 'handover', 3, false, 30.0, 19, 'Step 20,000'),
+  clip('two_bins_v1_20000_s4003', 'two_bins', 4, true, 7.9, 12, 'Step 20,000'));
