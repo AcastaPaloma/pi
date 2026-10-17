@@ -439,14 +439,15 @@
     },
     {
       "name": "x_data_v11",
-      "hypothesis": "Track B: DAgger round 11 (handover + two_bins from pi05_dagger2 step 7000, fixed teacher, seeds from 1100000, successful takeovers only) added to sim_mixdagclean_v1 beats the control. Blocked until the A10 finishes the data and it is copied over",
+      "hypothesis": "Track B batch 1: successful teacher takeovers from DAgger rounds 11 (handover + two_bins, takeover 1-15 s) and 12 (two_bins, takeover 8-22 s), both from pi05_dagger2 step 7000 on seeds 1100000+, added to sim_mixdagclean_v1, beat the control. Blocked until both are copied to the host",
       "status": "blocked",
       "requires_on_host": [
         "runs/pi05_dagger2/step_0007000/model.pt",
         "data/sim_mixdagclean_v1",
-        "data/sim_dagger_v11"
+        "data/sim_dagger_v11",
+        "data/sim_dagger_v12"
       ],
-      "setup": "mkdir -p data/sim_mixdagclean_v2 && cd data/sim_mixdagclean_v2 && for d in ../sim_mixdagclean_v1/episode_*; do ln -sfn ../sim_mixdagclean_v1/$(basename $d) $(basename $d); done && for d in ../sim_dagger_v11/episode_*; do grep -qs '\"success\": true' $d/meta.json && ln -sfn $d episode_dag11_$(basename $d | cut -d_ -f2); done; true",
+      "setup": "mkdir -p data/sim_mixdagclean_v2 && cd data/sim_mixdagclean_v2 && for d in ../sim_mixdagclean_v1/episode_*; do ln -sfn ../sim_mixdagclean_v1/$(basename $d) $(basename $d); done && for d in ../sim_dagger_v11/episode_*; do grep -qs '\"success\": true' $d/meta.json && ln -sfn $d episode_dag11_$(basename $d | cut -d_ -f2); done; for d in ../sim_dagger_v12/episode_*; do grep -qs '\"success\": true' $d/meta.json && ln -sfn $d episode_dag12_$(basename $d | cut -d_ -f2); done; true",
       "train": "SEED=0 PI_TRIM_STILL_TAIL_S=1 LR=1e-5 RESUME=runs/pi05_dagger2/step_0007000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdagclean_v2 runs/{RUN} 6000",
       "eval": "GPU=0 VARIANTS='d0' bash scripts/box/c30_when_ready.sh runs/{RUN} 3000 6000"
     }
@@ -848,13 +849,32 @@
     {
       "name": "dagger12_twobins_late",
       "hypothesis": "Track B data, H11 follow-up: the second arm hovering in two_bins happens late, so take over at 8-22 s on two_bins only (seeds 1200000+)",
-      "status": "running",
+      "status": "done",
       "requires_on_host": [
         "runs/pi05_dagger2/step_0007000/model.pt"
       ],
       "eval": "MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.dagger --checkpoint runs/pi05_dagger2/step_0007000 --tasks two_bins --episodes-per-task 400 --takeover-min 8 --takeover-max 22 --seed 1200000 --episode-seconds 40 --out data/sim_dagger_v12",
       "host": "193.122.189.119",
-      "started": "2026-10-17T14:03"
+      "started": "2026-10-17T14:03",
+      "result": "400 episodes: 245 kept (155 finished or failed before the takeover), teacher success 173"
+    },
+    {
+      "name": "failmine_dagger2",
+      "hypothesis": "Track B step 2: mine the best policy's failures on the weak tasks (handover, two_bins) on 60 non-test seeds (5000+), with per-episode videos, to name the failure types before generating more data",
+      "status": "queued",
+      "requires_on_host": [
+        "runs/pi05_dagger2/step_0007000/model.pt"
+      ],
+      "eval": "for T in handover two_bins; do MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.eval_sim --checkpoint runs/pi05_dagger2/step_0007000 --task $T --episodes 60 --episode-seconds 30 --execute 25 --delay 0 --device cuda --dtype bf16 --subtask oracle --seed 5000 --tokenizer weights/paligemma/tokenizer.model --out outputs/failmine_dagger2_$T --video; done"
+    },
+    {
+      "name": "dagger13_handover",
+      "hypothesis": "Track B: handover is the weakest task (16/30 strict at baseline) and the most variable; more teacher takeovers in its middle phase (4-16 s, around the pass) on seeds 1300000+. To be retargeted by failmine_dagger2 if it names a different failure",
+      "status": "queued",
+      "requires_on_host": [
+        "runs/pi05_dagger2/step_0007000/model.pt"
+      ],
+      "eval": "MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.dagger --checkpoint runs/pi05_dagger2/step_0007000 --tasks handover --episodes-per-task 400 --takeover-min 4 --takeover-max 16 --seed 1300000 --out data/sim_dagger_v13"
     }
   ]
 }

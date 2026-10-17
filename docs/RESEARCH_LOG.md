@@ -735,3 +735,9 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
 - **2026-10-17 15:55** No new scores (control_s0 step 3000 and the baseline at delay 12 are being scored; rtc
   passed 3000, its d0/d6/d12 scoring starts now). Steps: control 3820 / 3360, rtc 3040, mem 1720, goal 2280, ki
   2560 (flow 0.064, flat). A10: dagger11 two_bins 140/400, dagger12 320/400. All alive.
+- **2026-10-17 16:15** dagger12_twobins_late done: 400 episodes, 245 kept, teacher success 173. It joins dagger11
+  in one A/B (x_data_v11 now = successful takeovers of v11 + v12; one data version, one A/B). A10 queue refilled:
+  **failmine_dagger2** (60 non-test seeds 5000+ on handover and two_bins with videos, to name failure types before
+  more data) then **dagger13_handover** (takeover 4-16 s, seeds 1300000+). Scores still running: control_s0 and
+  control_s1 step 3000, rtc step 3000 (pick 27/30, bin 28/30 so far, success counts), baseline delay 12. KI flow
+  0.063 at step 3040 (flat). Steps: control 4320 / 3800, rtc 3540, mem 2040, goal 2720, ki 3040; no errors.
