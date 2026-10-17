@@ -805,3 +805,4 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   (H19 weakening; delay 12 and step 6000 pending). Queue deepened with **H23 x_control_long_s0** (the same control
   for 12000 steps, since the controls are still climbing). The scheduler started x_goal_s1 on main GPU 1 at 17:17.
   Steps: rtc 5780, mem 3560, goal 4540, ki 5000+, rtc_s1 680. dagger13 300/400 (kept 247, success 187).
+- **2026-10-17 17:41** [scheduler] 192.222.55.167:0 was idle; launched **x_mem_s1** (H20 replicate (seed 1))
