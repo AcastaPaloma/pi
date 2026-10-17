@@ -848,11 +848,13 @@
     {
       "name": "dagger12_twobins_late",
       "hypothesis": "Track B data, H11 follow-up: the second arm hovering in two_bins happens late, so take over at 8-22 s on two_bins only (seeds 1200000+)",
-      "status": "queued",
+      "status": "running",
       "requires_on_host": [
         "runs/pi05_dagger2/step_0007000/model.pt"
       ],
-      "eval": "MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.dagger --checkpoint runs/pi05_dagger2/step_0007000 --tasks two_bins --episodes-per-task 400 --takeover-min 8 --takeover-max 22 --seed 1200000 --episode-seconds 40 --out data/sim_dagger_v12"
+      "eval": "MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.dagger --checkpoint runs/pi05_dagger2/step_0007000 --tasks two_bins --episodes-per-task 400 --takeover-min 8 --takeover-max 22 --seed 1200000 --episode-seconds 40 --out data/sim_dagger_v12",
+      "host": "193.122.189.119",
+      "started": "2026-10-17T14:03"
     }
   ]
 }

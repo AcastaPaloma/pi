@@ -714,3 +714,4 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   goal 44 GB, rtc 42 GB, so the step-3000 evaluations fit beside them. A10: dagger11 handover 40/400, teacher
   success 35 of 39 kept, ~100 episodes/h (≈8 h for 800). Baseline re-score still running (no summary line yet).
   Scheduler and caffeinate alive, no idle alert.
+- **2026-10-17 14:03** [scheduler] 193.122.189.119 was idle; launched **dagger12_twobins_late** (Track B data, H11 follow-up: the second arm hovering in two_bins happens late, so take over at 8-22 s on two_bins only (seeds 1200000+))
