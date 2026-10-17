@@ -1,4 +1,4 @@
-# Closed-loop results (generated 2026-10-17 01:56)
+# Closed-loop results (generated 2026-10-17 01:58)
 
 Success with Wilson 95% interval; strict = success with the object lifted (rules out pushing it into place); lift = object raised; closest = median hand-to-object distance.
 

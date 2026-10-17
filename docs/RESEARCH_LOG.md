@@ -651,3 +651,8 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   handover video review of it (A10) to verify the successes and see the handover failures. pi05_lr5e5 step 6000:
   6/16, 10/16, 5/16, 4/16 (recovering from ~0; from-base run at 5e-5).
 - **2026-10-17 01:57** [scheduler] 129.213.124.160 was idle; launched **v1_cont_8000_confirm30** (Confirm pi05_v1_cont step 8000 (26/32 on the 8-episode ladder, its best) on the 30 shared seeds against the 83/120 baseline)
+- **2026-10-17 06:00 UTC** Check: all H100s training (v2_clean 900, v1_cont2 560, v2_mixrec2 540, v1_cont_more 460,
+  lr5e5 6500); A10#1 started v1_cont_8000_confirm30; A10#2 holds the demo. Removed the dead pi05_2arm_ema
+  evaluation waiter on 209.20.157.232. Queue: 3 H100 runnable (dagger3, v1_lr5e6, twobins2x); A10 has 4 queued
+  (two_bins/handover video of dagger2 7000, two confirmations, dagger11). Scheduler is under caffeinate; no idle
+  alert; no errors.
