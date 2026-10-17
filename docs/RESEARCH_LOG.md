@@ -806,3 +806,4 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   for 12000 steps, since the controls are still climbing). The scheduler started x_goal_s1 on main GPU 1 at 17:17.
   Steps: rtc 5780, mem 3560, goal 4540, ki 5000+, rtc_s1 680. dagger13 300/400 (kept 247, success 187).
 - **2026-10-17 17:41** [scheduler] 192.222.55.167:0 was idle; launched **x_mem_s1** (H20 replicate (seed 1))
+- **2026-10-17 18:09** [scheduler] 193.122.189.119 was idle; launched **failmine_c1_5000** (Track B: failure types of the best checkpoint so far (x_control_s1 step 5000, 104/120 on the test seeds) on 60 non-test seeds (5000+) per weak task: does 'hover while holding' still dominate after the continuation?)
