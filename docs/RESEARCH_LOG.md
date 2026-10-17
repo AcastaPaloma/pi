@@ -741,3 +741,4 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   more data) then **dagger13_handover** (takeover 4-16 s, seeds 1300000+). Scores still running: control_s0 and
   control_s1 step 3000, rtc step 3000 (pick 27/30, bin 28/30 so far, success counts), baseline delay 12. KI flow
   0.063 at step 3040 (flat). Steps: control 4320 / 3800, rtc 3540, mem 2040, goal 2720, ki 3040; no errors.
+- **2026-10-17 15:51** [scheduler] 193.122.189.119 was idle; launched **failmine_dagger2** (Track B step 2: mine the best policy's failures on the weak tasks (handover, two_bins) on 60 non-test seeds (5000+), with per-episode videos, to name the failure types before generating more data)

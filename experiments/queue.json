@@ -861,11 +861,13 @@
     {
       "name": "failmine_dagger2",
       "hypothesis": "Track B step 2: mine the best policy's failures on the weak tasks (handover, two_bins) on 60 non-test seeds (5000+), with per-episode videos, to name the failure types before generating more data",
-      "status": "queued",
+      "status": "running",
       "requires_on_host": [
         "runs/pi05_dagger2/step_0007000/model.pt"
       ],
-      "eval": "for T in handover two_bins; do MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.eval_sim --checkpoint runs/pi05_dagger2/step_0007000 --task $T --episodes 60 --episode-seconds 30 --execute 25 --delay 0 --device cuda --dtype bf16 --subtask oracle --seed 5000 --tokenizer weights/paligemma/tokenizer.model --out outputs/failmine_dagger2_$T --video; done"
+      "eval": "for T in handover two_bins; do MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.eval_sim --checkpoint runs/pi05_dagger2/step_0007000 --task $T --episodes 60 --episode-seconds 30 --execute 25 --delay 0 --device cuda --dtype bf16 --subtask oracle --seed 5000 --tokenizer weights/paligemma/tokenizer.model --out outputs/failmine_dagger2_$T --video; done",
+      "host": "193.122.189.119",
+      "started": "2026-10-17T15:50"
     },
     {
       "name": "dagger13_handover",
