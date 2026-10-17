@@ -868,3 +868,11 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   0.035 (0.028 → 0.029 → 0.035, creeping up slowly; plain KI was at ~0.099 here), CE 9.1. Queue deepened with
   **H24 x_control_r2_s0** (a second low-LR round from the best checkpoint; copied to the 4x H100 host). dagger14
   handover 160/300 (kept 135, success 106). No errors; scheduler and caffeinate alive.
+- **2026-10-17 19:30** No new scores. **H22b weakening:** x_ki_vlm01_s0 flow loss 0.028 → 0.029 → 0.035 → **0.070**
+  at steps 140 / 500 / 860 / 1220 while CE falls 13.1 → 7.2. The 0.1x VLM learning rate delayed the drift rather
+  than preventing it: the flow loss took off once warmup ended (step 1000) and the VLM reached its full 1e-6.
+  Third check in a row with the same direction; the run continues to 6000 and its step-3000 score decides. If it
+  collapses too, KI is closed for this setup (the FAST objective has to be learned from pretraining, as in π0.5,
+  not bolted on during fine-tuning). Queue: rtc_s0, goal_s0, ki_s0 marked done with results. Steps: mem 5240,
+  data_v11 820, mem_s1 1460, rtc_s1 3560, goal_s1 2580. dagger14 handover 260/300 (kept 225, success 173). All
+  seven GPUs busy; scheduler and caffeinate alive.

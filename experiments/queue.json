@@ -358,12 +358,13 @@
     {
       "name": "x_rtc_s0",
       "hypothesis": "H19: training-time RTC (delay 0-12 committed actions, flow time 0, no loss) keeps success at delay 0 and holds it at delays 6 and 12, where the control drops",
-      "status": "running",
+      "status": "done",
       "host": "192.222.55.167:0",
       "started": "2026-10-17",
       "train": "SET='pi05_rtc=true' SEED=0 PI_TRIM_STILL_TAIL_S=1 LR=1e-5 RESUME=runs/pi05_dagger2/step_0007000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdagclean_v1 runs/{RUN} 6000",
       "eval": "GPU=0 VARIANTS='d0 d6 d12' bash scripts/box/c30_when_ready.sh runs/{RUN} 3000 6000",
-      "eval_note": null
+      "eval_note": null,
+      "result": "delay 0: 90 / 92 / 83 / 101 at steps 3000-6000 (mean 91.5); step 3000 at delays 6 / 12: 82 / 75 (baseline 82 / 81)"
     },
     {
       "name": "x_mem_s0",
@@ -378,23 +379,24 @@
     {
       "name": "x_goal_s0",
       "hypothesis": "H21: goal images (overhead future frame in training; at eval the scripted teacher run 2 s ahead in a twin scene, an upper bound on a world model) raise success; also scored without goals",
-      "status": "running",
+      "status": "done",
       "host": "192.222.55.167:2",
       "started": "2026-10-17",
       "train": "SET='max_subgoals=1' SEED=0 PI_TRIM_STILL_TAIL_S=1 LR=1e-5 RESUME=runs/pi05_dagger2/step_0007000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdagclean_v1 runs/{RUN} 6000",
       "eval": "GPU=0 VARIANTS='d0 goal' bash scripts/box/c30_when_ready.sh runs/{RUN} 3000 6000",
-      "eval_note": null
+      "eval_note": null,
+      "result": "without goals: 87 / 96 / 102 at 3000-5000; with oracle goals at 3000: 76"
     },
     {
       "name": "x_ki_s0",
       "hypothesis": "H22: knowledge insulation (FAST tokens train the VLM by cross-entropy, the expert reads it through a stop-gradient) beats flow-into-VLM fine-tuning. FAST CE starts at 15.3 nats, so the VLM is pushed hard early",
-      "status": "running",
+      "status": "done",
       "host": "192.222.55.167:3",
       "started": "2026-10-17",
       "train": "SET='knowledge_insulation=true' SEED=0 PI_TRIM_STILL_TAIL_S=1 LR=1e-5 RESUME=runs/pi05_dagger2/step_0007000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdagclean_v1 runs/{RUN} 6000",
       "eval": "GPU=0 VARIANTS='d0' bash scripts/box/c30_when_ready.sh runs/{RUN} 3000 6000",
       "eval_note": null,
-      "result": "step 3000: 1 / 1 / 0 / 0 = 2/120 (hand reaches the cube, never lifts); flow loss 2.4x the control's"
+      "result": "2 / 0 at steps 3000 / 4000 (collapsed)"
     },
     {
       "name": "x_rtc_s1",
