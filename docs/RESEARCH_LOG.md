@@ -650,3 +650,4 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   trade. pi05_dagger2 = pi05_dagger1 step 7000 resumed at LR 1e-5 on the cleaned data. Queued a two_bins +
   handover video review of it (A10) to verify the successes and see the handover failures. pi05_lr5e5 step 6000:
   6/16, 10/16, 5/16, 4/16 (recovering from ~0; from-base run at 5e-5).
+- **2026-10-17 01:57** [scheduler] 129.213.124.160 was idle; launched **v1_cont_8000_confirm30** (Confirm pi05_v1_cont step 8000 (26/32 on the 8-episode ladder, its best) on the 30 shared seeds against the 83/120 baseline)
