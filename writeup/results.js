@@ -1,4 +1,4 @@
-import { nodes, tasks } from './results-content.js?v=20261017-x2';
+import { nodes, tasks } from './results-content.js?v=20261017-x3';
 
 const $ = id => document.getElementById(id);
 const video = $('video'), tree = $('tree');
@@ -30,11 +30,11 @@ for (const node of nodes) {
     const bar = el('span', 'bar'), fill = el('i');
     fill.style.width = `${Math.max(2, 100 * node.score.value / node.score.of)}%`;
     bar.append(fill);
-    const num = el('span');
+    const num = el('span', 'node-num');
     num.append(el('b', '', String(node.score.value)), ` / ${node.score.of}`);
     score.append(bar, num);
   }
-  if (node.clips.length) score.append(el('span', 'node-clips', `▶ ${node.clips.length}`));
+  score.append(el('span', 'node-clips', node.clips.length ? `▶ ${node.clips.length}` : ''));  // fixed slot keeps the bars aligned
   head.append(score);
   head.addEventListener('click', () => select(node, 0, true));
   li.append(head);

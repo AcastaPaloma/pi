@@ -5,7 +5,7 @@
 .stage-empty p{margin:0}.stage-empty-title{font:italic 24px/1.25 Georgia,'Times New Roman',serif;color:#efece6;margin-bottom:10px!important}
 .stage-empty-note{font:13px/1.5 Arial,sans-serif;color:#a8a49c;max-width:300px}
 .clip-card{position:absolute;left:16px;top:14px;max-width:min(72%,440px);display:flex;flex-direction:column;gap:3px;background:#fbfbfaeb;border:1px solid #d8d8d4cc;border-radius:5px;padding:9px 12px;box-shadow:0 6px 18px #1a1a1a14;pointer-events:none}
-.clip-label{font:10.5px/1.35 Arial,sans-serif;letter-spacing:.04em;text-transform:uppercase;color:var(--secondary)}
+.clip-label{font:11px/1.35 Arial,sans-serif;color:var(--secondary)}
 .clip-title{font:italic 21px/1.2 Georgia,'Times New Roman',serif;color:var(--accent)}
 .clip-outcome{font:12px/1.35 Arial,sans-serif;color:var(--ink)}
 .outcome-mark{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:1px;background:#2f7d4f}.outcome-mark.is-miss{background:#b0472c}
@@ -40,11 +40,11 @@
 .node[data-kind=dead] .node-name{color:var(--secondary)}
 .node[aria-current=true] .node-name{color:var(--accent)}
 .node-score{display:flex;align-items:center;gap:8px;font:12px/1 Arial,sans-serif;color:var(--secondary);white-space:nowrap;font-variant-numeric:tabular-nums}
-.node-score b{font-weight:400;color:var(--ink)}
+.node-score b{font-weight:400;color:var(--ink)}.node-num{min-width:54px;text-align:right}
 .bar{display:block;width:64px;height:3px;border-radius:2px;background:#e6e5e0;overflow:hidden}
 .bar i{display:block;height:100%;background:var(--accent)}
 .node[data-kind=dead] .bar i{background:#a9a9a2}.node[data-kind=running] .bar i{background:#7d8fc0}
-.node-clips{font:11px/1 Arial,sans-serif;color:var(--accent);margin-left:2px}
+.node-clips{display:inline-block;width:24px;font:11px/1 Arial,sans-serif;color:var(--accent);margin-left:2px}
 
 /* detail, opened under the selected node */
 .node-detail{padding:4px 0 18px}
