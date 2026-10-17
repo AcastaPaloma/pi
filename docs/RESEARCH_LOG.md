@@ -767,3 +767,7 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   (~15 GB, light GPU load) blocked the next training. Now busy = a pi_model.train process on that GPU or >25 GB
   (the first version missed training processes because grep saw NUL bytes in /proc/PID/cmdline; fixed with
   grep -a and checked against a live run). Scheduler restarted.
+- **2026-10-17 16:34** **rtc step 3000, delay 0: 27 / 28 / 16 / 19 = 90**, equal to the controls' mean at step 3000
+  (82 and 98, mean 90) and to the baseline (90): RTC training costs nothing at delay 0, as H19 needs. Its delay 6
+  and 12 scores are running (baseline: 82 and 81). Steps: control 5480 / 4900, rtc 4560, mem 2760, goal 3560, ki
+  3960 (flow 0.054, still falling). dagger13 handover 20/400 (12 of 16 kept succeed). All alive.
