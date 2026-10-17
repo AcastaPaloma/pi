@@ -835,3 +835,16 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   doubled by step 380). Steps: mem 4380, goal 5580, mem_s1 620, rtc_s1 2120, goal_s1 1300. A10:
   failmine_c1_5000 on handover (episode 23 of 60). Separately, the write-up gained a Results tab with rollout
   videos (scripts/record_showcase.py, filmed on main GPU 1 beside training); an experiment tree is in progress.
+- **2026-10-17 18:30** Two negative signals at step 3000 (one seed each; steps 4000-6000 and the s1 replicates
+  still to come, so not a verdict yet):
+  - **H19 (RTC):** rtc_s0 at delays 0 / 6 / 12 = **90 / 82 / 75**, against the non-RTC baseline's 90 / 82 / 81.
+    Training with committed prefixes did not make the policy more robust to lag, and at 12 steps it is 6 worse.
+    In this sim the naive switch (old chunk's committed actions, then the new chunk from step d) costs little
+    beyond the stale observation, so RTC's smoothing has little to fix; its real case is jerky hardware with
+    latency. Step 6000 at delays 0/6/12 decides.
+  - **H21 (goal images):** goal_s0 step 3000 **with** oracle goals = 23 / 24 / 15 / 14 = **76**, **without** = 87.
+    Showing the model where the scene should be in 2 s made it worse. Candidate reasons: goals were present in only
+    25% of training samples (the paper's dropout), so the model rarely learned to use them; and the teacher's
+    continuation from the policy's own state differs from the demonstrations' futures. If step 6000 agrees, the
+    world-model idea is not worth building in this form. ki_s0 step 4000: 0/120 (H22 collapse confirmed).
+  Steps: mem 4400, goal 5580, ki_vlm01 140, mem_s1 620, rtc_s1 2140, goal_s1 1320; no errors.
