@@ -1,6 +1,6 @@
-import { artwork, macros, steps, details, annotations } from './content.js?v=20261014-r2';
+import { artwork, macros, steps, details, annotations } from './content.js?v=20261017-r1';
 import { clamp, fitBounds, zoomAt, constrainCamera } from './camera.mjs';
-import { buildReadingEntries, readingIndex } from './reading.mjs?v=20261014-r2';
+import { buildReadingEntries, readingIndex } from './reading.mjs?v=20261017-r1';
 
 import { validateCopy, renderNodes } from './rich-text.mjs';
 

@@ -1,6 +1,6 @@
 // Supplied SVGs, chapters, and named reading destinations. Bounds are
 // [x, y, width, height] on the 2048-wide logical canvas. Article prose lives in article.js.
-export { annotations } from './article.js?v=20261014-r2';
+export { annotations } from './article.js?v=20261017-r1';
 
 export const artwork = {
   "src": "./assets/full-backbone.svg",
@@ -15,7 +15,14 @@ export const artwork = {
       "x": 0,
       "y": 0,
       "scale": 1,
-      "clip": "M0 0H4118.033V571.427H2670.249V2257.114H0Z"
+      "clip": "M0 0H4118.033V571.427H2670.249V2257.114H0ZM1262 174V547H2705V174Z"
+    },
+    {
+      "id": "overview",
+      "src": "./assets/backbone-overview.svg",
+      "x": 1260.839,
+      "y": 172.488,
+      "scale": 1
     },
     {
       "id": "decision",

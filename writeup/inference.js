@@ -1,6 +1,6 @@
 import { drawing, steps, lanes, task, subtasks } from './inference-content.js?v=20261015-i1';
 import { clamp, fitBounds, constrainCamera } from './camera.mjs';
-import { readingIndex } from './reading.mjs?v=20261014-r2';
+import { readingIndex } from './reading.mjs?v=20261017-r1';
 
 const $ = id => document.getElementById(id);
 const reader = $('reader'), viewport = $('viewport'), world = $('world');

@@ -1,6 +1,6 @@
-import { applyCopy, expandAll, focusPassage, previewPassage, refreshReadingMeasurements } from './app.js?v=20261014-r2';
+import { applyCopy, expandAll, focusPassage, previewPassage, refreshReadingMeasurements } from './app.js?v=20261017-r1';
 import { serializeBody, validateCopy } from './rich-text.mjs';
-import { steps, details } from './content.js?v=20261014-r2';
+import { steps, details } from './content.js?v=20261017-r1';
 
 const initialPassage = location.hash.slice(1).split('/').pop();
 const ids = new Set([...steps, ...details].map(item => item.id));
