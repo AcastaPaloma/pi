@@ -715,3 +715,13 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   success 35 of 39 kept, ~100 episodes/h (≈8 h for 800). Baseline re-score still running (no summary line yet).
   Scheduler and caffeinate alive, no idle alert.
 - **2026-10-17 14:03** [scheduler] 193.122.189.119 was idle; launched **dagger12_twobins_late** (Track B data, H11 follow-up: the second arm hovering in two_bins happens late, so take over at 8-22 s on two_bins only (seeds 1200000+))
+- **2026-10-17 14:30** **Baseline re-scored under OSMesa (30 seeds, delay 0): pi05_dagger2 step 7000 =
+  29 / 27 / 16 / 18 = 90/120** (86 on the A10 with EGL; handover 16 vs 12). Renderer or GPU differences alone move
+  the total by ~4 and handover by ~4, which sets the scale: an add-on needs a clear margin over both controls
+  (scored on the same boxes) to count. Delays 6 and 12 are running next. KI trend (100-step means): as FAST CE falls
+  13.0 → 9.3 → 6.4 → 5.9, the flow loss rises 0.026 → 0.033 → 0.099 → 0.098 and has plateaued for ~200 steps
+  (other arms ~0.027). This is the risk noted at launch: the CE gradient rewrites the VLM features that the
+  insulated expert reads. Not acting yet (watch rule); its step-3000 score decides. If KI loses, the follow-up is
+  H22b: the same with the CE weighted 0.1, so the VLM moves slowly enough for the expert to keep up. Steps:
+  control_s0 1680, control_s1 1380, rtc 780, mem 440, goal 580, ki 660; no errors. A10: the scheduler started
+  dagger12_twobins_late beside dagger11 (GPU 19.6 GB, 86%); dagger11 handover 140/400, teacher success 110/130.
