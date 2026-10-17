@@ -35,7 +35,7 @@
     {
       "name": "pi05_v1_rec2_trim",
       "hypothesis": "H12: failed scripted demos end with both hands parked for 10-25 s until the time limit (44% of failed two_bins demos; 13% of all samples, 20% of two_bins steps); sampling them teaches the policy to stop, the hover seen in two_bins failures. A/B twin of pi05_v1_rec2 (same resume, data, steps) with PI_TRIM_STILL_TAIL_S=1",
-      "status": "running",
+      "status": "done",
       "avoid_hosts": [
         "192.222.52.191"
       ],
@@ -49,7 +49,7 @@
     {
       "name": "pi05_curriculum2",
       "hypothesis": "H1b: easy rungs first learns fastest; stage 2 adds handover and two_bins plus recover2 data",
-      "status": "running",
+      "status": "done",
       "prefer_host": "209.20.158.194",
       "requires_on_host": [
         "runs/pi05_easy"
@@ -68,7 +68,7 @@
     {
       "name": "pi05_dagger_clean",
       "hypothesis": "H2b done right (H12 corollary): pi05_dagger1 collapsed (22/32 at resume -> 7/32 -> 3/32) on data where 38% of DAgger continuations are teacher failures and 62% of DAgger steps are parked tails. Resume pi05_v1 step 20000 on mix + recover2 + only teacher-successful DAgger (v1-v6) and mixed-order two_bins demos, with PI_TRIM_STILL_TAIL_S=1; plus DAgger v7 from the fixed teacher | 16:35 UTC: made main-box native (the step-20000 video shows the remaining two_bins failures are arms hovering off-centre without grasping, the states fixed-teacher DAgger labels); evaluation relayed to A10#1",
-      "status": "running",
+      "status": "done",
       "prep_on_main": "ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@129.213.124.160 'tar cf - -C ~/pi/data sim_dagger_v5 sim_dagger_v7 sim_dagger_v9' | tar xf - -C data; ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@132.145.199.243 'tar cf - -C ~/pi/data sim_dagger_v6 sim_dagger_v8 sim_twobins_mixed_v1' | tar xf - -C data 2>/dev/null; true",
       "setup": "mkdir -p data/sim_mixdagclean_v1 && cd data/sim_mixdagclean_v1 && for d in ../sim_mix_v1/episode_*; do ln -sfn $d $(basename $d); done && for d in ../sim_recover2_v1/episode_*; do ln -sfn $d episode_rec2_$(basename $d | cut -d_ -f2); done && for v in 1 2 3 4 5 6 7 8 9; do for d in ../sim_dagger_v$v/episode_*; do grep -qs '\"success\": true' $d/meta.json && ln -sfn $d episode_dag${v}_$(basename $d | cut -d_ -f2); done; done; for d in ../sim_twobins_mixed_v1/episode_*; do grep -qs '\"success\": true' $d/meta.json && ln -sfn $d episode_tbmix_$(basename $d | cut -d_ -f2); done; true",
       "train": "PI_TRIM_STILL_TAIL_S=1 RESUME=runs/pi05_v1/step_0020000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdagclean_v1 runs/{RUN} 8000",
@@ -85,7 +85,7 @@
     {
       "name": "pi05_v1_cont",
       "hypothesis": "H16: pi05_v1 was still improving at its last step (30-seed strict 75 -> 76 -> 83/120 at 13k/17k/20k). Plain continuation on its own data (sim_mix_v1) with parked tails trimmed and a lower peak LR (1e-5) is the baseline every new-data continuation (DAgger, recover2) must beat",
-      "status": "running",
+      "status": "done",
       "prefer_host": "192.222.52.191",
       "requires_on_host": [
         "runs/pi05_v1/step_0020000",
@@ -99,7 +99,7 @@
     {
       "name": "pi05_dagger_clean_lr1e5",
       "hypothesis": "H14 test: pi05_v1_cont (same data, LR 1e-5) showed no post-resume dip (21/32 at step 1000), while every LR-2.5e-5 continuation fell to 7-12/32. Same as pi05_dagger_clean (resume pi05_v1 step 20000, cleaned DAgger data, trimmed) but LR 1e-5, which separates the LR effect from the new-data effect",
-      "status": "running",
+      "status": "done",
       "prep_on_main": "ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@{HOST} 'mkdir -p ~/pi/runs/pi05_v1_snap' && rsync -a -e 'ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes' runs/pi05_v1/step_0020000 ubuntu@{HOST}:~/pi/runs/pi05_v1_snap/ && rsync -a -e 'ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes' data/sim_recover2_v1 data/sim_dagger_v1 data/sim_dagger_v2 data/sim_dagger_v3 data/sim_dagger_v4 data/sim_dagger_v5 data/sim_dagger_v6 data/sim_dagger_v7 data/sim_dagger_v9 data/sim_twobins_mixed_v1 ubuntu@{HOST}:~/pi/data/ 2>/dev/null; true",
       "setup": "mkdir -p data/sim_mixdagclean_v1 && cd data/sim_mixdagclean_v1 && for d in ../sim_mix_v1/episode_*; do ln -sfn $d $(basename $d); done && for d in ../sim_recover2_v1/episode_*; do ln -sfn $d episode_rec2_$(basename $d | cut -d_ -f2); done && for v in 1 2 3 4 5 6 7 8 9; do for d in ../sim_dagger_v$v/episode_*; do grep -qs '\"success\": true' $d/meta.json && ln -sfn $d episode_dag${v}_$(basename $d | cut -d_ -f2); done; done; for d in ../sim_twobins_mixed_v1/episode_*; do grep -qs '\"success\": true' $d/meta.json && ln -sfn $d episode_tbmix_$(basename $d | cut -d_ -f2); done; true",
       "train": "PI_TRIM_STILL_TAIL_S=1 LR=1e-5 RESUME=runs/pi05_v1_snap/step_0020000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdagclean_v1 runs/{RUN} 8000",
@@ -125,7 +125,7 @@
     {
       "name": "pi05_dagger2",
       "hypothesis": "H2b round 2: resume the best checkpoint so far (pi05_dagger1 step 7000, 27/32 on the ladder) on the cleaned data of pi05_dagger_clean (mix + recover2 + teacher-successful DAgger v1-v9 + mixed-order two_bins, tails trimmed). Compare with pi05_dagger_clean, which resumes pi05_v1 step 20000 on the same data | 19:35 UTC: switched to LR 1e-5 (every LR-2.5e-5 continuation dipped to 3-12/32; pi05_v1_cont at 1e-5 did not), so it pairs with pi05_dagger_clean_lr1e5 and isolates the resume point",
-      "status": "running",
+      "status": "done",
       "prep_on_main": "ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@{HOST} 'mkdir -p ~/pi/runs/pi05_dagger1_snap' && rsync -a -e 'ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes' runs/pi05_dagger1/step_0007000 ubuntu@{HOST}:~/pi/runs/pi05_dagger1_snap/ && rsync -a -e 'ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes' data/sim_recover2_v1 data/sim_dagger_v1 data/sim_dagger_v2 data/sim_dagger_v3 data/sim_dagger_v4 data/sim_dagger_v5 data/sim_dagger_v6 data/sim_dagger_v7 data/sim_dagger_v9 data/sim_twobins_mixed_v1 ubuntu@{HOST}:~/pi/data/ 2>/dev/null; true",
       "setup": "mkdir -p data/sim_mixdagclean_v1 && cd data/sim_mixdagclean_v1 && for d in ../sim_mix_v1/episode_*; do ln -sfn $d $(basename $d); done && for d in ../sim_recover2_v1/episode_*; do ln -sfn $d episode_rec2_$(basename $d | cut -d_ -f2); done && for v in 1 2 3 4 5 6 7 8 9; do for d in ../sim_dagger_v$v/episode_*; do grep -qs '\"success\": true' $d/meta.json && ln -sfn $d episode_dag${v}_$(basename $d | cut -d_ -f2); done; done; for d in ../sim_twobins_mixed_v1/episode_*; do grep -qs '\"success\": true' $d/meta.json && ln -sfn $d episode_tbmix_$(basename $d | cut -d_ -f2); done; true",
       "train": "PI_TRIM_STILL_TAIL_S=1 LR=1e-5 RESUME=runs/pi05_dagger1_snap/step_0007000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdagclean_v1 runs/{RUN} 8000",
@@ -174,7 +174,7 @@
     {
       "name": "pi05_2arm_ema",
       "hypothesis": "H8/H9: checkpoint-to-checkpoint swings (pi05_2arm_v2 4/12\u21920/12, pi05_warm2arm 11/16\u21925/16) come from raw weights; an EMA (0.999) of the 2arm_v2 recipe stabilises them | 12:15 UTC: demoted \u2014 averaging pi05_v1 steps 13000-18000 gave no gain (74/120 vs 75/76), so EMA is expected to help little",
-      "status": "running",
+      "status": "failed",
       "prep_on_main": "ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@{HOST} 'mkdir -p ~/pi/runs/pi05_single' && rsync -a -e 'ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes' runs/pi05_single/step_0006000 ubuntu@{HOST}:~/pi/runs/pi05_single/ && rsync -a -e 'ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes' data/sim_recover2_v1 ubuntu@{HOST}:~/pi/data/",
       "setup": "mkdir -p data/sim_mixrec2_v1 && cd data/sim_mixrec2_v1 && for d in ../sim_mix_v1/episode_*; do ln -sfn $d $(basename $d); done && for d in ../sim_recover2_v1/episode_*; do ln -sfn $d episode_rec2_$(basename $d | cut -d_ -f2); done",
       "train": "EMA=0.999 RESUME=runs/pi05_single/step_0006000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixrec2_v1 runs/{RUN} 10000",
@@ -193,7 +193,62 @@
         ]
       },
       "host": "209.20.157.232:0",
-      "started": "2026-10-16T19:07"
+      "started": "2026-10-16T19:07",
+      "error": "launched onto 209.20.157.232 while pi05_lr5e5 was still loading (GPU looked empty); OOM. Scheduler fixed to wait after a launch."
+    },
+    {
+      "name": "pi05_v2_clean",
+      "hypothesis": "H17: train from the \u03c00.5 base on the cleaned, larger data (mix + recover2 + teacher-successful DAgger v1-v9 + mixed-order two_bins, failed tails trimmed) for 20k steps; pi05_v1 (83/120) was the same recipe on sim_mix_v1 only. No resume, so no restart dip",
+      "status": "running",
+      "prefer_host": "192.222.52.191",
+      "requires_on_host": [
+        "data/sim_mixdagclean_v1"
+      ],
+      "train": "PI_TRIM_STILL_TAIL_S=1 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdagclean_v1 runs/{RUN} 20000",
+      "mac_after_launch": "EVAL=ubuntu@129.213.124.160 RUN={RUN} EVAL_KEY='~/.ssh/id_ed25519_evalbox' nohup bash scripts/relay_checkpoints.sh 2000 4000 6000 8000 10000 12000 14000 16000 18000 20000 > outputs/relay_{RUN}.log 2>&1 & ssh -n -o BatchMode=yes ubuntu@129.213.124.160 'cd ~/pi && (RUN={RUN} PY=~/lerobot-venv/bin/python DELAY=0 setsid nohup bash scripts/box/eval_ladder_when_ready.sh 2000 4000 6000 8000 10000 12000 14000 16000 18000 20000 > logs/eval_ladder_{RUN}.log 2>&1 < /dev/null &)'",
+      "host": "192.222.52.191:0",
+      "started": "2026-10-17T01:22"
+    },
+    {
+      "name": "pi05_v1_cont2",
+      "hypothesis": "H14/H16: the low-LR continuation (pi05_v1_cont) never dipped and reached two_bins 7/8 at step 8000; continue it at LR 1e-5 on the cleaned DAgger data (trimmed) for 8k more steps",
+      "status": "running",
+      "prefer_host": "192.222.52.191",
+      "requires_on_host": [
+        "runs/pi05_v1_cont/step_0008000",
+        "data/sim_mixdagclean_v1"
+      ],
+      "train": "PI_TRIM_STILL_TAIL_S=1 LR=1e-5 RESUME=runs/pi05_v1_cont/step_0008000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdagclean_v1 runs/{RUN} 8000",
+      "mac_after_launch": "EVAL=ubuntu@129.213.124.160 RUN={RUN} EVAL_KEY='~/.ssh/id_ed25519_evalbox' nohup bash scripts/relay_checkpoints.sh 1000 2000 3000 4000 5000 6000 7000 8000 > outputs/relay_{RUN}.log 2>&1 & ssh -n -o BatchMode=yes ubuntu@129.213.124.160 'cd ~/pi && (RUN={RUN} PY=~/lerobot-venv/bin/python DELAY=0 setsid nohup bash scripts/box/eval_ladder_when_ready.sh 1000 2000 3000 4000 5000 6000 7000 8000 > logs/eval_ladder_{RUN}.log 2>&1 < /dev/null &)'",
+      "host": "192.222.52.191:0",
+      "started": "2026-10-17T01:23"
+    },
+    {
+      "name": "pi05_v2_mixrec2",
+      "hypothesis": "H12 at full scale: train from the \u03c00.5 base on mix + recover2 with failed tails trimmed for 20k steps (pi05_recover used recover data untrimmed and reached 36/64 at best); compare with pi05_v1 and pi05_v2_clean",
+      "status": "queued",
+      "avoid_hosts": [
+        "192.222.52.191"
+      ],
+      "requires_on_host": [
+        "data/sim_mixrec2_v1"
+      ],
+      "train": "PI_TRIM_STILL_TAIL_S=1 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixrec2_v1 runs/{RUN} 20000",
+      "eval": "GPU=0 NAME={RUN} EPISODES=8 DELAY=0 TASKS='pick_place_any bin handover two_bins' MUJOCO_GL=egl bash scripts/box/eval_when_ready.sh runs/{RUN} 2000 4000 6000 8000 10000 12000 14000 16000 18000 20000"
+    },
+    {
+      "name": "pi05_v1_cont_more",
+      "hypothesis": "H16: does plain low-LR training on pi05_v1's own data keep improving? Continue pi05_v1_cont step 8000 on sim_mix_v1 at LR 1e-5 (trimmed) for 8k more steps",
+      "status": "queued",
+      "avoid_hosts": [
+        "192.222.52.191"
+      ],
+      "requires_on_host": [
+        "data/sim_mix_v1"
+      ],
+      "prep_on_main": "ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@{HOST} 'mkdir -p ~/pi/runs/pi05_v1_cont_snap' && rsync -a -e 'ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes' runs/pi05_v1_cont/step_0008000 ubuntu@{HOST}:~/pi/runs/pi05_v1_cont_snap/",
+      "train": "PI_TRIM_STILL_TAIL_S=1 LR=1e-5 RESUME=runs/pi05_v1_cont_snap/step_0008000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mix_v1 runs/{RUN} 8000",
+      "eval": "GPU=0 NAME={RUN} EPISODES=8 DELAY=0 TASKS='pick_place_any bin handover two_bins' MUJOCO_GL=egl bash scripts/box/eval_when_ready.sh runs/{RUN} 1000 2000 3000 4000 5000 6000 7000 8000"
     }
   ],
   "a10": [
@@ -459,7 +514,7 @@
     {
       "name": "dagger10_fixed",
       "hypothesis": "H2b next round: fixed-teacher DAgger from the best checkpoint so far (pi05_dagger1 step 7000, 27/32), whose failure states differ from pi05_v1's; data for the round after pi05_dagger2",
-      "status": "running",
+      "status": "done",
       "requires_on_host": [],
       "prep_on_main": "ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@{HOST} 'test -e ~/pi/exports/pi05_dagger1/step_0007000/model.pt' || (ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@129.213.124.160 'tar cf - -C ~/pi exports/pi05_dagger1/step_0007000' | ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@{HOST} 'mkdir -p ~/pi && tar xf - -C ~/pi')",
       "eval": "MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.dagger --checkpoint exports/pi05_dagger1/step_0007000 --episodes-per-task 150 --takeover-min 1 --takeover-max 15 --out data/sim_dagger_v10 --seed 1005000",
@@ -469,7 +524,7 @@
     {
       "name": "v1_cont_4000_confirm30",
       "hypothesis": "H16/H14: does the low-LR continuation of pi05_v1 on its own data (no dip, 21 and 19/32 on the ladder) improve on the 83/120 baseline by step 4000? Same 30 seeds",
-      "status": "running",
+      "status": "done",
       "prefer_host": "129.213.124.160",
       "requires_on_host": [],
       "eval": "for T in pick_place_any bin handover two_bins; do MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.eval_sim --checkpoint exports/pi05_v1_cont/step_0004000 --task $T --episodes 30 --episode-seconds 30 --execute 25 --delay 0 --device cuda --subtask oracle --seed 4000 --out outputs/eval_v1contconfirm30_step4000_$T; done",
@@ -482,6 +537,66 @@
       ],
       "host": "129.213.124.160",
       "started": "2026-10-16T16:50"
+    },
+    {
+      "name": "dagger2_7000_confirm30",
+      "hypothesis": "Confirm pi05_dagger2 step 7000 (28/32 on the 8-episode ladder, its best) on the 30 shared seeds against the 83/120 baseline",
+      "status": "queued",
+      "prefer_host": "129.213.124.160",
+      "requires_on_host": [],
+      "eval": "for T in pick_place_any bin handover two_bins; do MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.eval_sim --checkpoint exports/pi05_dagger2/step_0007000 --task $T --episodes 30 --episode-seconds 30 --execute 25 --delay 0 --device cuda --subtask oracle --seed 4000 --out outputs/eval_dagger2confirm30_step7000_$T; done",
+      "prep_on_main": "ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@{HOST} 'test -e ~/pi/exports/pi05_dagger2/step_0007000/model.pt' || (ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@129.213.124.160 'tar cf - -C ~/pi exports/pi05_dagger2/step_0007000' | ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@{HOST} 'mkdir -p ~/pi && tar xf - -C ~/pi')",
+      "requires_elsewhere": [
+        [
+          "129.213.124.160",
+          "exports/pi05_dagger2/step_0007000/model.pt"
+        ]
+      ]
+    },
+    {
+      "name": "v1_cont_8000_confirm30",
+      "hypothesis": "Confirm pi05_v1_cont step 8000 (26/32 on the 8-episode ladder, its best) on the 30 shared seeds against the 83/120 baseline",
+      "status": "queued",
+      "prefer_host": "129.213.124.160",
+      "requires_on_host": [],
+      "eval": "for T in pick_place_any bin handover two_bins; do MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.eval_sim --checkpoint exports/pi05_v1_cont/step_0008000 --task $T --episodes 30 --episode-seconds 30 --execute 25 --delay 0 --device cuda --subtask oracle --seed 4000 --out outputs/eval_v1contconfirm30_step8000_$T; done",
+      "prep_on_main": "ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@{HOST} 'test -e ~/pi/exports/pi05_v1_cont/step_0008000/model.pt' || (ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@132.145.199.243 'tar cf - -C ~/pi exports/pi05_v1_cont/step_0008000' | ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@{HOST} 'mkdir -p ~/pi && tar xf - -C ~/pi')",
+      "requires_elsewhere": [
+        [
+          "132.145.199.243",
+          "exports/pi05_v1_cont/step_0008000/model.pt"
+        ]
+      ]
+    },
+    {
+      "name": "dagger_clean_8000_confirm30",
+      "hypothesis": "Confirm pi05_dagger_clean step 8000 (25/32 on the 8-episode ladder, its best) on the 30 shared seeds against the 83/120 baseline",
+      "status": "queued",
+      "prefer_host": "129.213.124.160",
+      "requires_on_host": [],
+      "eval": "for T in pick_place_any bin handover two_bins; do MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.eval_sim --checkpoint exports/pi05_dagger_clean/step_0008000 --task $T --episodes 30 --episode-seconds 30 --execute 25 --delay 0 --device cuda --subtask oracle --seed 4000 --out outputs/eval_daggercleanconfirm30_step8000_$T; done",
+      "prep_on_main": "ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@{HOST} 'test -e ~/pi/exports/pi05_dagger_clean/step_0008000/model.pt' || (ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@129.213.124.160 'tar cf - -C ~/pi exports/pi05_dagger_clean/step_0008000' | ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@{HOST} 'mkdir -p ~/pi && tar xf - -C ~/pi')",
+      "requires_elsewhere": [
+        [
+          "129.213.124.160",
+          "exports/pi05_dagger_clean/step_0008000/model.pt"
+        ]
+      ]
+    },
+    {
+      "name": "dagger_clean_lr1e5_5000_confirm30",
+      "hypothesis": "Confirm pi05_dagger_clean_lr1e5 step 5000 (24/32 on the 8-episode ladder, its best) on the 30 shared seeds against the 83/120 baseline",
+      "status": "queued",
+      "prefer_host": "129.213.124.160",
+      "requires_on_host": [],
+      "eval": "for T in pick_place_any bin handover two_bins; do MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.eval_sim --checkpoint exports/pi05_dagger_clean_lr1e5/step_0005000 --task $T --episodes 30 --episode-seconds 30 --execute 25 --delay 0 --device cuda --subtask oracle --seed 4000 --out outputs/eval_daggercleanlr1e5confirm30_step5000_$T; done",
+      "prep_on_main": "ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@{HOST} 'test -e ~/pi/exports/pi05_dagger_clean_lr1e5/step_0005000/model.pt' || (ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@129.213.124.160 'tar cf - -C ~/pi exports/pi05_dagger_clean_lr1e5/step_0005000' | ssh -i ~/.ssh/id_ed25519_evalbox -o BatchMode=yes ubuntu@{HOST} 'mkdir -p ~/pi && tar xf - -C ~/pi')",
+      "requires_elsewhere": [
+        [
+          "129.213.124.160",
+          "exports/pi05_dagger_clean_lr1e5/step_0005000/model.pt"
+        ]
+      ]
     }
   ]
 }
