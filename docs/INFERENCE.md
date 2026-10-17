@@ -49,11 +49,20 @@ Tasks: `pick_place_any`, `bin`, `handover`, `two_bins` (two-arm models), or `pic
 Drag the cube(s) and the destination on the table map, press Run, and watch an orbitable 3D view plus the
 policy's three cameras. Placements far outside the shaded training regions are a test of generalisation.
 
-## Optional: keep the weights on Hugging Face
+## Copies on Hugging Face (private)
 
-The Mac copy is the only copy once the GPU boxes are released. To also keep a private copy on the Hub
-(your token is already in `~/.cache/huggingface/token`):
+- `KuanKuanKuan/so101-pi07-sim-models`: the same three models in **full precision** (as saved by training).
+- `KuanKuanKuan/so101-pi07-sim-data`: every simulation dataset (about 130 GB as ~10 GB tar parts; restore with
+  `cat NAME/NAME.tar.part-* | tar xf -`), the training-mix manifests and the normalisation statistics. Both
+  repos are private; make them public on the Hub if you want to share them.
 
 ```bash
-.venv-infer/bin/hf upload <your-username>/so101-pi07-sim models/pi05_dagger2_step7000 pi05_dagger2_step7000 --private
+.venv-infer/bin/hf download KuanKuanKuan/so101-pi07-sim-models pi05_dagger2_step7000/model.pt --local-dir hf_models
 ```
+
+## Note on Apple Silicon
+
+Inference on MPS was silently wrong until `pi_model/data.py:to_device` stopped using non-blocking copies off
+CUDA. A temporary CPU tensor could be freed before the async copy finished, which truncated the prompt mask to
+11 of 175 tokens. The arms then went to the wrong places. Now MPS matches CUDA (checked action by action
+on the same scene), and bin succeeds 2/2 and two_bins 1/2 on the Mac.

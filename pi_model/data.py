@@ -373,7 +373,9 @@ def to_device(batch, device, image_dtype=torch.float32):
         if not torch.is_tensor(v):
             out[k] = v
             continue
-        v = v.to(device, non_blocking=True)
+        # Non-blocking copies are only safe on CUDA: on Apple MPS a temporary CPU tensor can be freed before the
+        # async copy finishes, which silently truncated the prompt mask and broke Mac inference.
+        v = v.to(device, non_blocking=torch.device(device).type == "cuda")
         if k in ("images", "subgoals"):
             v = preprocess_images(v).to(image_dtype)
         out[k] = v
