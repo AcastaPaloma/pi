@@ -396,13 +396,15 @@
     {
       "name": "x_rtc_s1",
       "hypothesis": "H19 replicate (seed 1): with two seeds per arm, an add-on must beat both controls to count",
-      "status": "queued",
+      "status": "running",
       "train": "SET='pi05_rtc=true' SEED=1 PI_TRIM_STILL_TAIL_S=1 LR=1e-5 RESUME=runs/pi05_dagger2/step_0007000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdagclean_v1 runs/{RUN} 6000",
       "eval": "GPU=0 VARIANTS='d0 d6 d12' bash scripts/box/c30_when_ready.sh runs/{RUN} 3000 4000 5000 6000",
       "requires_on_host": [
         "runs/pi05_dagger2/step_0007000/model.pt",
         "data/sim_mixdagclean_v1"
-      ]
+      ],
+      "host": "192.222.52.191:0",
+      "started": "2026-10-17T16:55"
     },
     {
       "name": "x_goal_s1",

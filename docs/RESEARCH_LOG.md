@@ -775,3 +775,4 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   oracle goals, control 4000s; mem just passed 3000). Steps: control 5880 / 5300 (they finish within ~15 / 40 min,
   then the scheduler starts the seed-1 replicates beside their final scoring), rtc 4900, mem 3020, goal 3860, ki
   4260 (flow 0.056). dagger13 handover 100/400, kept 84, teacher success 59 (70%). All alive.
+- **2026-10-17 16:55** [scheduler] 192.222.52.191:0 was idle; launched **x_rtc_s1** (H19 replicate (seed 1): with two seeds per arm, an add-on must beat both controls to count)
