@@ -21,6 +21,7 @@ from PIL import Image
 
 from pi_model.eval_sim import run_episode
 from pi_model.policy import Pi07Policy
+from pi_sim.env import RobotEnv
 from pi_sim.tasks import TaskEnv
 
 VIEW = {"azimuth": 245.0, "elevation": -24.0, "distance": 0.85, "lookat": [0.0, -0.07, 0.05]}
@@ -30,7 +31,7 @@ ORDER = ["red", "green", "blue", "yellow"]
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--checkpoint", type=Path, required=True)
-    ap.add_argument("--task", required=True, choices=("pick_place_any", "bin", "handover", "two_bins"))
+    ap.add_argument("--task", required=True, choices=("pick_place", "pick_place_any", "bin", "handover", "two_bins"))
     ap.add_argument("--seed", type=int, default=4000)
     ap.add_argument("--out", type=Path, required=True, help="Output path without extension")
     ap.add_argument("--fps", type=int, default=25)
@@ -48,8 +49,12 @@ def main():
     i = args.seed - 4000 if args.seed >= 4000 else args.seed
     color = ORDER[i % len(ORDER)]
     second = next(c for c in ("blue", "red", "yellow", "green") if c != color)
-    env = TaskEnv(args.task, control_mode="joint", object_color=color, second_color=second, object_shape="cube",
-                  control_hz=policy.hz, episode_seconds=args.episode_seconds)
+    if args.task == "pick_place":  # the single-arm task, built as pi_model.eval_sim builds it
+        env = RobotEnv(task="pick_place", control_mode="joint", object_color=color, object_shape="cube",
+                       control_hz=policy.hz, episode_seconds=args.episode_seconds)
+    else:
+        env = TaskEnv(args.task, control_mode="joint", object_color=color, second_color=second, object_shape="cube",
+                      control_hz=policy.hz, episode_seconds=args.episode_seconds)
     env.model.vis.global_.offwidth = max(args.width, env.model.vis.global_.offwidth)
     env.model.vis.global_.offheight = max(args.height, env.model.vis.global_.offheight)
     renderer = mujoco.Renderer(env.model, height=args.height, width=args.width)

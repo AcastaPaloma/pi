@@ -4,19 +4,23 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#fbfbfa">
-  <meta name="description" content="Video rollouts of the trained π0.7-recipe policies driving two simulated SO-101 arms on their own: random layouts, four tasks, and how often each model succeeds.">
+  <meta name="description" content="Everything we tried while training two simulated SO-101 arms with the π0.7 recipe, as a tree of experiments with video rollouts and scores.">
   <title>π0.7 results · Kuan Yi Wang</title>
   <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./style.css?v=20261017-r1">
-  <link rel="stylesheet" href="./results.css?v=20261017-x1">
-  <script type="module" src="./results.js?v=20261017-x1"></script>
+  <link rel="stylesheet" href="./results.css?v=20261017-x2">
+  <script type="module" src="./results.js?v=20261017-x2"></script>
 </head>
 <body class="results-page">
-  <a class="skip-link" href="#reader">Skip to the list of clips</a>
+  <a class="skip-link" href="#reader">Skip to the experiment tree</a>
   <main class="workspace">
     <section class="results-stage" aria-label="Rollout video">
       <video id="video" playsinline muted autoplay loop controls preload="metadata"></video>
-      <div class="clip-card" id="clip-card" aria-live="polite">
+      <div class="stage-empty" id="stage-empty" hidden>
+        <p class="stage-empty-title" id="empty-title"></p>
+        <p class="stage-empty-note">No video for this step. Experiments marked ▶ have videos.</p>
+      </div>
+      <div class="clip-card" id="clip-card" aria-live="polite" hidden>
         <span class="clip-label" id="clip-label"></span>
         <span class="clip-title" id="clip-title"></span>
         <span class="clip-outcome" id="clip-outcome"></span>
@@ -27,26 +31,24 @@
         <nav class="page-tabs" aria-label="Write-up sections"><a href="./">Inference</a><a href="training.html">Training</a><a href="results.html" aria-current="page">Results</a></nav>
         <span class="step-counter" id="counter"></span>
       </div>
-      <div class="reader" id="reader" tabindex="0" aria-label="Results text and clip list">
+      <div class="reader" id="reader" tabindex="0" aria-label="Experiment tree">
         <article id="article" class="results-article">
           <section class="reading-block">
             <h2>Results</h2>
-            <p>Every clip is the trained model driving two simulated SO-101 arms by itself. Nothing is scripted: the cubes, the bin and the target are placed at random, and the model sees only its three cameras and a one-line instruction such as “Hand the blue cube over to the left arm and put it in the bin.”</p>
-            <p class="results-scoreline" id="scoreline"></p>
+            <p>Every video is a trained model driving two simulated SO-101 arms by itself. Nothing is scripted: the cubes, the bin and the target land somewhere new each time, and the model sees only its three cameras and one sentence, such as “Hand the blue cube over to the left arm and put it in the bin.”</p>
+            <p class="results-lede">Below is everything we tried, in order. Each dot is one experiment; click it to see what changed and to watch it run.</p>
+          </section>
+          <section class="reading-block tree-block">
+            <div class="tree-legend" aria-hidden="true"><span class="lg lg-main">kept</span><span class="lg lg-dead">dropped</span><span class="lg lg-running">running now</span></div>
+            <ol class="tree" id="tree"></ol>
           </section>
           <section class="reading-block">
-            <h3>Rollouts</h3>
-            <div class="clip-list" id="clip-list" role="list"></div>
-          </section>
-          <section class="reading-block">
-            <h3>The models</h3>
-            <dl class="model-list" id="model-list"></dl>
-            <p class="results-note">Each clip is one of the 30 random layouts the models are scored on, filmed with the same settings as the test. The success counts come from all 30. A step is one update of the model’s weights during training; a checkpoint is the model saved at a given step.</p>
+            <p class="results-note">Scores count a trial as a success only when the object was really picked up, not pushed into place. Two-arm models are tested on the same 30 random layouts for each of the four tasks (120 trials). Scores before October 17 were measured with an earlier renderer; the same model scores 86 there and 90 now.</p>
           </section>
         </article>
       </div>
     </aside>
   </main>
-  <noscript><div class="no-script">This page needs JavaScript to list the clips.</div></noscript>
+  <noscript><div class="no-script">This page needs JavaScript to draw the experiment tree.</div></noscript>
 </body>
 </html>

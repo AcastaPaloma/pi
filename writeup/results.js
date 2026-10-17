@@ -1,9 +1,8 @@
-import { clips, models, tasks } from './results-content.js?v=20261017-x1';
+import { nodes, tasks } from './results-content.js?v=20261017-x2';
 
 const $ = id => document.getElementById(id);
-const video = $('video'), list = $('clip-list');
-const order = Object.keys(tasks);
-const sorted = [...clips].sort((a, b) => order.indexOf(a.task) - order.indexOf(b.task));
+const video = $('video'), tree = $('tree');
+let current = null, clipIndex = 0;
 
 function el(tag, cls, text) {
   const node = document.createElement(tag);
@@ -12,68 +11,112 @@ function el(tag, cls, text) {
   return node;
 }
 
-function outcome(clip) {
-  return clip.success ? `Done in ${clip.seconds.toFixed(1)} s` : `Not finished in ${clip.seconds.toFixed(0)} s`;
-}
+const outcome = c => c.success ? `Done in ${c.seconds.toFixed(1)} s` : `Not finished in ${Math.round(c.seconds)} s`;
+const clipName = c => (c.label ? `${c.label} · ` : '') + tasks[c.task].short;
 
-const buttons = new Map();
-let group = null;
-for (const clip of sorted) {
-  if (clip.task !== group) {
-    group = clip.task;
-    list.append(el('div', 'clip-group', tasks[group].name));
+const items = new Map();
+for (const node of nodes) {
+  const li = el('li', 'node');
+  li.dataset.kind = node.kind;
+  li.dataset.depth = String(node.depth);
+  li.id = node.id;
+  const head = el('button', 'node-head');
+  head.type = 'button';
+  head.setAttribute('aria-expanded', 'false');
+  head.append(el('span', 'node-when', node.when + (node.kind === 'running' ? ' · running' : node.kind === 'dead' ? ' · dropped' : '')),
+    el('span', 'node-name', node.name));
+  const score = el('span', 'node-score');
+  if (node.score) {
+    const bar = el('span', 'bar'), fill = el('i');
+    fill.style.width = `${Math.max(2, 100 * node.score.value / node.score.of)}%`;
+    bar.append(fill);
+    const num = el('span');
+    num.append(el('b', '', String(node.score.value)), ` / ${node.score.of}`);
+    score.append(bar, num);
   }
-  const task = tasks[clip.task], model = models[clip.model];
-  const button = el('button', 'clip-item');
-  button.type = 'button';
-  button.setAttribute('role', 'listitem');
-  const thumb = el('img');
-  thumb.src = clip.poster;
-  thumb.alt = '';
-  thumb.loading = 'lazy';
-  const text = el('span', 'clip-text');
-  text.append(el('span', 'clip-name', model.name),
-    el('span', 'clip-meta', `${task.setup} · layout ${clip.layout} of 30 · ${outcome(clip)}`),
-    el('span', 'clip-rate', `Succeeds in ${clip.rate} of 30 random layouts`));
-  button.append(thumb, text);
-  button.addEventListener('click', () => select(clip, true));
-  buttons.set(clip.id, button);
-  list.append(button);
+  if (node.clips.length) score.append(el('span', 'node-clips', `▶ ${node.clips.length}`));
+  head.append(score);
+  head.addEventListener('click', () => select(node, 0, true));
+  li.append(head);
+  items.set(node.id, li);
+  tree.append(li);
 }
 
-const modelList = $('model-list');
-for (const model of Object.values(models)) {
-  const dt = el('dt', '', model.name);
-  dt.append(el('span', '', model.run));
-  modelList.append(dt, el('dd', '', `${model.about} Succeeds in ${model.score} of 120 test trials (30 per task).`));
+function detail(node) {
+  const box = el('div', 'node-detail');
+  const para = (label, text) => { const p = el('p'); p.append(el('span', '', label), text); return p; };
+  box.append(para('What changed', node.changed), para('Result', node.result));
+  if (node.score?.label) box.append(el('p', 'score-note', `Score shown: ${node.score.label}, ${node.score.value} of ${node.score.of}.`));
+  box.append(para(node.kind === 'main' ? 'Next' : node.kind === 'running' ? 'Now' : 'Why we moved on', node.next));
+  if (node.clips.length > 1) {
+    const chips = el('div', 'chips');
+    chips.setAttribute('role', 'group');
+    chips.setAttribute('aria-label', 'Videos for this experiment');
+    node.clips.forEach((c, i) => {
+      const chip = el('button', 'chip');
+      chip.type = 'button';
+      chip.setAttribute('aria-pressed', String(i === clipIndex));
+      chip.append(el('i', c.success ? '' : 'is-miss'), clipName(c));
+      chip.addEventListener('click', () => select(node, i, true));
+      chips.append(chip);
+    });
+    box.append(chips);
+  }
+  return box;
 }
-const best = models.best;
-$('scoreline').innerHTML = '';
-$('scoreline').append('The best model so far succeeds in ', el('strong', '', `${best.score} of 120`),
-  ' random trials, 30 per task, up from ', el('strong', '', `${models.previous.score}`),
-  ' for the previous best. The clips are added as training goes on.');
 
-function select(clip, userChose) {
-  const task = tasks[clip.task], model = models[clip.model];
-  for (const [id, button] of buttons) button.setAttribute('aria-current', String(id === clip.id));
-  $('clip-label').textContent = `${task.setup} · ${model.name}`;
+function show(node) {
+  const c = node.clips[clipIndex];
+  $('stage-empty').hidden = Boolean(c);
+  $('clip-card').hidden = !c;
+  video.hidden = !c;
+  if (!c) {
+    video.pause();
+    video.removeAttribute('src');
+    video.load();
+    $('empty-title').textContent = node.name;
+    return;
+  }
+  const task = tasks[c.task];
+  $('clip-label').textContent = `${node.name}${c.label ? ' · ' + c.label : ''}`;
   $('clip-title').textContent = task.name;
-  const outcomeLine = $('clip-outcome');
-  outcomeLine.textContent = '';
-  outcomeLine.append(el('i', `outcome-mark${clip.success ? '' : ' is-miss'}`), outcome(clip), el('span', 'clip-goal', ` · ${task.goal}`));
-  $('counter').textContent = `${sorted.indexOf(clip) + 1} of ${sorted.length} clips`;
-  video.poster = clip.poster;
-  video.src = clip.video;
-  video.setAttribute('aria-label', `${model.name}: ${task.name}. ${task.goal} ${outcome(clip)}.`);
+  const line = $('clip-outcome');
+  line.textContent = '';
+  line.append(el('i', `outcome-mark${c.success ? '' : ' is-miss'}`), outcome(c),
+    el('span', 'clip-goal', c.rate !== undefined ? ` · succeeds in ${c.rate} of ${c.of || 30} random layouts` : ` · layout ${c.layout} of 30`));
+  video.poster = c.poster;
+  video.src = c.video;
+  video.setAttribute('aria-label', `${node.name}: ${task.name}. ${task.goal} ${outcome(c)}.`);
   video.play().catch(() => {});
-  if (userChose) history.replaceState(null, '', `#${clip.id}`);
 }
 
-const fromHash = sorted.find(c => c.id === location.hash.slice(1));
-if (sorted.length) select(fromHash || sorted[0], false);
+function select(node, index, userChose) {
+  current = node;
+  clipIndex = Math.min(index, Math.max(0, node.clips.length - 1));
+  for (const [id, li] of items) {
+    const on = id === node.id;
+    li.setAttribute('aria-current', String(on));
+    li.querySelector('.node-head').setAttribute('aria-expanded', String(on));
+    li.querySelector('.node-detail')?.remove();
+    if (on) li.append(detail(node));
+  }
+  show(node);
+  $('counter').textContent = `${nodes.indexOf(node) + 1} of ${nodes.length}`;
+  if (userChose) history.replaceState(null, '', `#${node.id}${clipIndex ? '/' + clipIndex : ''}`);
+}
+
+// Start at the hash, else the best model so far (the latest kept experiment with a video).
+const [hashId, hashClip] = location.hash.slice(1).split('/');
+const start = nodes.find(n => n.id === hashId) || [...nodes].reverse().find(n => n.kind === 'main' && n.clips.length) || nodes[0];
+select(start, Number(hashClip) || 0, false);
+if (hashId) items.get(start.id).scrollIntoView({ block: 'center' });
+
 addEventListener('keydown', e => {
-  if (e.target === video || e.target.closest('input, textarea, [contenteditable], a, button') || !sorted.length) return;
-  const current = sorted.findIndex(c => buttons.get(c.id).getAttribute('aria-current') === 'true');
-  if (e.key === 'ArrowDown' || e.key === 'ArrowRight') { e.preventDefault(); select(sorted[Math.min(sorted.length - 1, current + 1)], true); }
-  if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') { e.preventDefault(); select(sorted[Math.max(0, current - 1)], true); }
+  if (e.target === video || e.target.closest('input, textarea, [contenteditable], a') || e.metaKey || e.ctrlKey) return;
+  const i = nodes.indexOf(current);
+  const go = (node, k) => { e.preventDefault(); select(node, k, true); items.get(node.id).scrollIntoView({ block: 'nearest' }); };
+  if (e.key === 'ArrowDown' && i < nodes.length - 1) go(nodes[i + 1], 0);
+  if (e.key === 'ArrowUp' && i > 0) go(nodes[i - 1], 0);
+  if (e.key === 'ArrowRight' && clipIndex < current.clips.length - 1) go(current, clipIndex + 1);
+  if (e.key === 'ArrowLeft' && clipIndex > 0) go(current, clipIndex - 1);
 });
