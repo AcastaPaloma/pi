@@ -450,13 +450,15 @@
     {
       "name": "x_ki_vlm01_s0",
       "hypothesis": "H22b: KI collapsed (2/120) because the fresh FAST cross-entropy (15 nats at the start) rewrote the VLM features faster than the insulated expert could follow (flow loss 0.026 -> 0.098 in 500 steps). A loss weight cannot slow this under Adam, a learning-rate multiplier can: KI with the VLM at 0.1x LR keeps the expert's inputs nearly fixed while the VLM learns FAST",
-      "status": "queued",
+      "status": "running",
       "train": "SET='knowledge_insulation=true vlm_lr_scale=0.1' SEED=0 PI_TRIM_STILL_TAIL_S=1 LR=1e-5 RESUME=runs/pi05_dagger2/step_0007000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdagclean_v1 runs/{RUN} 6000",
       "eval": "GPU=0 VARIANTS='d0' bash scripts/box/c30_when_ready.sh runs/{RUN} 3000 4000 5000 6000",
       "requires_on_host": [
         "runs/pi05_dagger2/step_0007000/model.pt",
         "data/sim_mixdagclean_v1"
-      ]
+      ],
+      "host": "192.222.55.167:3",
+      "started": "2026-10-17T18:18"
     },
     {
       "name": "x_data_v11",

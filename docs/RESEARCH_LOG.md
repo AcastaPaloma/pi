@@ -828,3 +828,4 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   **dagger15_twobins_late_best** (on-policy DAgger from control_s1 step 5000, seeds 1400000+/1500000+) follow.
   dagger13 (328 kept, 254 successful) joined the data A/B batch before it started (v11 + v12 + v13).
   Steps: rtc_s1 1660, goal_s1 900 (main box); mem 4140, goal 5260, ki 5860, mem_s1 340 (4x H100); no errors.
+- **2026-10-17 18:18** [scheduler] 192.222.55.167:3 was idle; launched **x_ki_vlm01_s0** (H22b: KI collapsed (2/120) because the fresh FAST cross-entropy (15 nats at the start) rewrote the VLM features faster than the insulated expert could follow (flow loss 0.026 -> 0.098 in 500 steps). A loss weight cannot slow this under Adam, a learning-rate multiplier can: KI with the VLM at 0.1x LR keeps the expert's inputs nearly fixed while the VLM learns FAST)
