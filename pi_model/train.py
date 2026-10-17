@@ -193,11 +193,13 @@ def main(argv=None):
         print(f"device={device} world={world} params={ {k: round(v / 1e6, 1) for k, v in params.items()} }M samples={len(dataset)} "
               f"tokenizer={tokenizer.name}" + (f" gemma_vlm_fraction={report['vlm_fraction']:.3f}" if report else ""), flush=True)
 
-    decay, no_decay = [], []
+    groups = {}
     for name, p in model.named_parameters():
-        (no_decay if p.ndim < 2 or "norm" in name or "embedding" in name else decay).append(p)
-    optimizer = torch.optim.AdamW([{"params": decay, "weight_decay": args.weight_decay},
-                                   {"params": no_decay, "weight_decay": 0.0}], lr=args.lr, betas=(0.9, 0.95))
+        vlm = cfg.vlm_lr_scale != 1.0 and ".paligemma_with_expert.paligemma." in f".{name}"
+        wd = 0.0 if p.ndim < 2 or "norm" in name or "embedding" in name else args.weight_decay
+        groups.setdefault((wd, vlm), []).append(p)
+    optimizer = torch.optim.AdamW([{"params": ps, "weight_decay": wd, "lr_scale": cfg.vlm_lr_scale if vlm else 1.0}
+                                   for (wd, vlm), ps in groups.items()], lr=args.lr, betas=(0.9, 0.95))
     ema = None
     if args.ema_decay > 0:
         if args.fsdp:
@@ -226,7 +228,7 @@ def main(argv=None):
             if (i + 1) % args.grad_accum:
                 continue
             for group in optimizer.param_groups:
-                group["lr"] = lr_at(step, base=args.lr, warmup=args.warmup, total=args.steps)
+                group["lr"] = lr_at(step, base=args.lr, warmup=args.warmup, total=args.steps) * group["lr_scale"]
             if args.grad_clip:
                 torch.nn.utils.clip_grad_norm_(model.parameters(), args.grad_clip)
             optimizer.step()
@@ -248,7 +250,7 @@ def main(argv=None):
                         tensor = torch.tensor(averaged[k], device=device)
                         dist.all_reduce(tensor)
                         averaged[k] = float(tensor) / world
-                record = {"step": step, **averaged, "lr": optimizer.param_groups[0]["lr"],
+                record = {"step": step, **averaged, "lr": max(g["lr"] for g in optimizer.param_groups),
                           "elapsed_s": round(time.monotonic() - started, 1),
                           "samples_per_s": round(step * args.batch_size * args.grad_accum * world / (time.monotonic() - started), 1)}
                 running = {}

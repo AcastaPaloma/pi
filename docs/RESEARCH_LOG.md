@@ -793,3 +793,15 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   control_s0's step-6000 scoring (62 GB used), as the busy-check fix intended. Steps: control_s0 done (6000),
   control_s1 5800, rtc 5340, mem 3280, goal 4220, ki 4620 (flow 0.055). dagger13 200/400 (kept 164, success 122).
 - **2026-10-17 17:17** [scheduler] 192.222.52.191:1 was idle; launched **x_goal_s1** (H21 replicate (seed 1))
+- **2026-10-17 17:35** **H22 (knowledge insulation) refuted as run: x_ki_s0 step 3000 = 1 / 1 / 0 / 0 = 2/120.**
+  Config verified (knowledge_insulation true); the hand reaches the cube (4 mm) but never lifts it, matching its flow
+  loss staying 2.4x the control's after the FAST cross-entropy rewrote the VLM in the first ~500 steps. The run
+  finishes (never stop early) and its later checkpoints are scored. Its seed-1 replicate is cancelled (it would
+  replicate a collapse). Follow-up **H22b: x_ki_vlm01_s0**, KI with the VLM at 0.1x learning rate. A smaller CE
+  weight would not help: under KI the VLM only receives CE gradients and Adam normalises their scale, so only the
+  VLM's learning rate slows the drift (new `vlm_lr_scale` config field; separate optimizer groups carry an
+  `lr_scale` that the schedule multiplies; parameter split checked). **rtc_s0 step 3000 at delay 6: 25 / 28 / 13 /
+  16 = 82**, the same as the baseline at delay 6 (82), so at step 3000 RTC training has not bought delay robustness
+  (H19 weakening; delay 12 and step 6000 pending). Queue deepened with **H23 x_control_long_s0** (the same control
+  for 12000 steps, since the controls are still climbing). The scheduler started x_goal_s1 on main GPU 1 at 17:17.
+  Steps: rtc 5780, mem 3560, goal 4540, ki 5000+, rtc_s1 680. dagger13 300/400 (kept 247, success 187).

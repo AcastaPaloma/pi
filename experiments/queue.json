@@ -336,22 +336,24 @@
     {
       "name": "x_control_s0",
       "hypothesis": "C0: control for the \u03c00.7 add-ons: resume pi05_dagger2 step 7000 on sim_mixdagclean_v1 at LR 1e-5 for 6000 steps, nothing else changed (seed 0)",
-      "status": "running",
+      "status": "done",
       "host": "192.222.52.191:0",
       "started": "2026-10-17",
       "train": "SEED=0 PI_TRIM_STILL_TAIL_S=1 LR=1e-5 RESUME=runs/pi05_dagger2/step_0007000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdagclean_v1 runs/{RUN} 6000",
       "eval": null,
-      "eval_note": "manual watchers (d0 at 3000; d0 d6 d12 at 6000)"
+      "eval_note": "manual watchers (d0 at 3000; d0 d6 d12 at 6000)",
+      "result": "steps 3000/4000 = 82/103 (scoring 5000, 6000 and delays 6/12 pending)"
     },
     {
       "name": "x_control_s1",
       "hypothesis": "C1: the same control with seed 1, to measure run-to-run noise on the 30 seeds",
-      "status": "running",
+      "status": "done",
       "host": "192.222.52.191:1",
       "started": "2026-10-17",
       "train": "SEED=1 PI_TRIM_STILL_TAIL_S=1 LR=1e-5 RESUME=runs/pi05_dagger2/step_0007000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdagclean_v1 runs/{RUN} 6000",
       "eval": null,
-      "eval_note": "manual watcher (d0)"
+      "eval_note": "manual watcher (d0)",
+      "result": "steps 3000/4000 = 98/101 (5000, 6000 pending)"
     },
     {
       "name": "x_rtc_s0",
@@ -391,7 +393,8 @@
       "started": "2026-10-17",
       "train": "SET='knowledge_insulation=true' SEED=0 PI_TRIM_STILL_TAIL_S=1 LR=1e-5 RESUME=runs/pi05_dagger2/step_0007000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdagclean_v1 runs/{RUN} 6000",
       "eval": "GPU=0 VARIANTS='d0' bash scripts/box/c30_when_ready.sh runs/{RUN} 3000 6000",
-      "eval_note": null
+      "eval_note": null,
+      "result": "step 3000: 1 / 1 / 0 / 0 = 2/120 (hand reaches the cube, never lifts); flow loss 2.4x the control's"
     },
     {
       "name": "x_rtc_s1",
@@ -433,8 +436,20 @@
     {
       "name": "x_ki_s1",
       "hypothesis": "H22 replicate (seed 1)",
-      "status": "queued",
+      "status": "cancelled",
       "train": "SET='knowledge_insulation=true' SEED=1 PI_TRIM_STILL_TAIL_S=1 LR=1e-5 RESUME=runs/pi05_dagger2/step_0007000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdagclean_v1 runs/{RUN} 6000",
+      "eval": "GPU=0 VARIANTS='d0' bash scripts/box/c30_when_ready.sh runs/{RUN} 3000 4000 5000 6000",
+      "requires_on_host": [
+        "runs/pi05_dagger2/step_0007000/model.pt",
+        "data/sim_mixdagclean_v1"
+      ],
+      "result": "Not run: x_ki_s0 collapsed to 2/120 at step 3000, so a seed replicate of the same recipe tests nothing; replaced by x_ki_vlm01_s0 (H22b)"
+    },
+    {
+      "name": "x_ki_vlm01_s0",
+      "hypothesis": "H22b: KI collapsed (2/120) because the fresh FAST cross-entropy (15 nats at the start) rewrote the VLM features faster than the insulated expert could follow (flow loss 0.026 -> 0.098 in 500 steps). A loss weight cannot slow this under Adam, a learning-rate multiplier can: KI with the VLM at 0.1x LR keeps the expert's inputs nearly fixed while the VLM learns FAST",
+      "status": "queued",
+      "train": "SET='knowledge_insulation=true vlm_lr_scale=0.1' SEED=0 PI_TRIM_STILL_TAIL_S=1 LR=1e-5 RESUME=runs/pi05_dagger2/step_0007000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdagclean_v1 runs/{RUN} 6000",
       "eval": "GPU=0 VARIANTS='d0' bash scripts/box/c30_when_ready.sh runs/{RUN} 3000 4000 5000 6000",
       "requires_on_host": [
         "runs/pi05_dagger2/step_0007000/model.pt",
@@ -468,6 +483,17 @@
       "setup": "mkdir -p data/sim_mixdagclean_v2 && cd data/sim_mixdagclean_v2 && for d in ../sim_mixdagclean_v1/episode_*; do ln -sfn ../sim_mixdagclean_v1/$(basename $d) $(basename $d); done && for d in ../sim_dagger_v11/episode_*; do grep -qs '\"success\": true' $d/meta.json && ln -sfn $d episode_dag11_$(basename $d | cut -d_ -f2); done; for d in ../sim_dagger_v12/episode_*; do grep -qs '\"success\": true' $d/meta.json && ln -sfn $d episode_dag12_$(basename $d | cut -d_ -f2); done; true",
       "train": "SEED=1 PI_TRIM_STILL_TAIL_S=1 LR=1e-5 RESUME=runs/pi05_dagger2/step_0007000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdagclean_v2 runs/{RUN} 6000",
       "eval": "GPU=0 VARIANTS='d0' bash scripts/box/c30_when_ready.sh runs/{RUN} 3000 4000 5000 6000"
+    },
+    {
+      "name": "x_control_long_s0",
+      "hypothesis": "H23: the plain continuation is still climbing (controls 82/98 at step 3000, 103/101 at 4000 vs baseline 90), so the 6000-step budget may be too short: the same recipe over 12000 steps (LR decays over twice as long) ends higher. Also the right budget for the phase-2 combination run",
+      "status": "queued",
+      "train": "SEED=0 PI_TRIM_STILL_TAIL_S=1 LR=1e-5 RESUME=runs/pi05_dagger2/step_0007000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdagclean_v1 runs/{RUN} 12000",
+      "eval": "GPU=0 VARIANTS='d0' bash scripts/box/c30_when_ready.sh runs/{RUN} 4000 6000 8000 10000 12000",
+      "requires_on_host": [
+        "runs/pi05_dagger2/step_0007000/model.pt",
+        "data/sim_mixdagclean_v1"
+      ]
     }
   ],
   "a10": [
