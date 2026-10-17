@@ -725,3 +725,10 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   H22b: the same with the CE weighted 0.1, so the VLM moves slowly enough for the expert to keep up. Steps:
   control_s0 1680, control_s1 1380, rtc 780, mem 440, goal 580, ki 660; no errors. A10: the scheduler started
   dagger12_twobins_late beside dagger11 (GPU 19.6 GB, 86%); dagger11 handover 140/400, teacher success 110/130.
+- **2026-10-17 15:45** Baseline at **delay 6: 24 / 26 / 16 / 16 = 82/120** (−8 from delay 0; pick and two_bins
+  lose most), so a 120 ms lag costs a non-RTC policy real success: the bar for H19 is visible. Delay 12 is
+  running. KI's flow loss is coming back down (0.098 at ~600 → 0.064 at ~2400) while CE settles at 4.8 (FAST token
+  accuracy 13%); still 2.5× the other arms (~0.023). control_s0 passed 3000 (its score is running). Steps: control
+  3640 / 3180, rtc 2820, mem 1600, goal 2120, ki 2380; no errors. A10: dagger11 finished handover and is at
+  two_bins 100/400 (kept 447, teacher success 362 = 81%); dagger12 (late takeovers) 280/400, kept 167, success
+  119 (71%), 113 skipped because the policy finished or failed before the takeover. Scheduler and caffeinate alive.
