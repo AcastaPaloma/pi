@@ -707,3 +707,10 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   OSMesa at delays 0/6/12 (base_dagger2_7000). Queued: seed-1 replicates of all four add-ons (an add-on must beat
   both controls), x_data_v11 (blocked on the data), dagger12_twobins_late on the A10. The scheduler is back on the
   new hosts; a 20-minute check is armed; the Mac runs `caffeinate -i -s`.
+- **2026-10-17 14:10** Check 1 after the restart. Steps: control_s0 1120, control_s1 900 (shares GPU 1 with the
+  baseline re-score), rtc 200, mem 120, goal 160, ki 180; no NaN, error or OOM. Speeds (samples/s): control 14.9,
+  rtc 15.0, ki 12.7, goal 11.4, mem 8.6, so mem needs ~6.2 h for 6000 steps and ki ~4.2 h. KI's FAST CE is
+  falling during warmup (13.4 → 10.6 by step 180, token accuracy 0.9% → 1.8%). Memory: mem 58 GB, ki 50 GB,
+  goal 44 GB, rtc 42 GB, so the step-3000 evaluations fit beside them. A10: dagger11 handover 40/400, teacher
+  success 35 of 39 kept, ~100 episodes/h (≈8 h for 800). Baseline re-score still running (no summary line yet).
+  Scheduler and caffeinate alive, no idle alert.
