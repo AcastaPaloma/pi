@@ -1516,11 +1516,13 @@
     {
       "name": "failmine_b2_6000",
       "hypothesis": "Track B analysis (not a tree node): failure types of the new best (x_data_b2 step 6000, 107) on 60 non-test seeds (5000+) per weak task, to aim round 19. Does 'hover while holding' still dominate after on-policy rescues?",
-      "status": "queued",
+      "status": "running",
       "requires_on_host": [
         "runs/x_data_b2/step_0006000/model.pt"
       ],
-      "eval": "for T in handover two_bins; do MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.eval_sim --checkpoint runs/x_data_b2/step_0006000 --task $T --episodes 60 --episode-seconds 30 --execute 25 --delay 0 --device cuda --dtype bf16 --subtask oracle --seed 5000 --tokenizer weights/paligemma/tokenizer.model --out outputs/failmine_b2_6000_$T --video; done"
+      "eval": "for T in handover two_bins; do MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.eval_sim --checkpoint runs/x_data_b2/step_0006000 --task $T --episodes 60 --episode-seconds 30 --execute 25 --delay 0 --device cuda --dtype bf16 --subtask oracle --seed 5000 --tokenizer weights/paligemma/tokenizer.model --out outputs/failmine_b2_6000_$T --video; done",
+      "host": "193.122.189.119",
+      "started": "2026-10-18T07:24"
     }
   ]
 }

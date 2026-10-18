@@ -1165,3 +1165,4 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   and 98 at 3000). x_control_lr5e6_s0 finished (94, 91 so far); the scheduler started **x_twobins2x_s1** on main GPU 1 at
   06:50. A10: robust round-two 4000 done, robust new-best running. Steps: combo 2000, data_b2_s1 4200, ema 5320,
   control_s2 4240, goal75_s1 2800. Site synced (104 scores, 2 new clips). All GPUs busy; queue three deep.
+- **2026-10-18 07:24** [scheduler] 193.122.189.119 was idle; launched **failmine_b2_6000** (Track B analysis (not a tree node): failure types of the new best (x_data_b2 step 6000, 107) on 60 non-test seeds (5000+) per weak task, to aim round 19. Does 'hover while holding' still dominate after on-policy rescues?)
