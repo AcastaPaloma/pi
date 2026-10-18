@@ -915,3 +915,11 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   step-3000 score is next. Steps: data_v11 2840, data_v11_s1 500, mem_s1 2600, rtc_s1 5520, goal_s1 4140.
   dagger15 two_bins 80/300 (kept 44, success 31; 36 skipped: the policy finished or failed before the late
   takeover). All seven GPUs busy; scheduler and caffeinate alive.
+- **2026-10-17 21:10** **H21 (goal images, paper's 25% share) refuted on seed 0:** goal_s0 step 6000 = **105 without
+  goals, 90 with oracle goals** (28 / 27 / 12 / 23; handover collapses from 23 to 12). Same direction as step 3000
+  (87 vs 76). Training with goal images costs nothing (its without-goal mean 97.5 equals the controls'), but giving
+  the model a goal image at test time hurts, so a world model built to supply them would make this policy worse.
+  H21b (x_goal75_s0, goals in 75% of samples) is queued as the last test of this idea. rtc_s1 step 3000 at delays
+  0 / 6 = 86 / 84. rtc_s1 finished; the scheduler started **x_control_long_s0** (H23, 12000 steps) on main GPU 0
+  at 21:09, a minute after the GPU dropped to scoring only. ki_vlm01 flow 0.070 at 3400 (step-3000 score running).
+  Steps: data_v11 3360, data_v11_s1 960, mem_s1 2920, goal_s1 4540. dagger15 180/300 (kept 98, success 70).
