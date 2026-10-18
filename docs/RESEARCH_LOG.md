@@ -1080,3 +1080,10 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   x_control_r2_s0 (89, 99, 95): level so far. **rtc_s1 step 5000 at delay 6 = 78** (97 at delay 0). Steps:
   control_long 8460, lr5e6 560, control_r2_s1 3520, data_b2 5320, goal75 4760, twobins2x 4160. Site synced.
 - **2026-10-18 03:13** [scheduler] 193.122.189.119 was idle; launched **robust_x_mem_s0_6000** (H26 coverage: randomized-visuals score of the add-on runs' final checkpoints, so every arm has a robustness number next to its default-look score)
+- **2026-10-18 03:30** Two early positives (single checkpoints, watch): **H21b x_goal75_s0 step 3000 with oracle
+  goals = 27 / 29 / 22 / 21 = 99 vs 93 without**, and **step 4000 without goals = 28 / 26 / 25 / 24 = 103**; with
+  goals in 75% of training samples the goal image helps rather than hurts (the 25% runs: with-goal mean 84.6 vs
+  93.8). **H18 x_twobins2x_r2 step 3000 = 28 / 27 / 16 / 24 = 95**, two_bins 24/30 vs 16/30 for its reference
+  x_control_r2_s0 at the same step. A10 queue extended with randomized scores for x_control_r2_s0 4000 and
+  x_goal75_s0 4000 (checkpoints copied); finished robust jobs marked done. Steps: control_long 8900, lr5e6 1000,
+  control_r2_s1 4020, data_b2 5820, goal75 5120, twobins2x 4660. Site synced (76 scores). All GPUs busy.

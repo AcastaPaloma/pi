@@ -1195,7 +1195,7 @@
     {
       "name": "robust_x_control_s0_6000",
       "hypothesis": "H26: the low-LR continuation's gain is mostly on the default look. Under visual randomization (the training distribution) the previous best scores 94 and the best continuation checkpoint 95, against 90 and 104 on the default look. Robust scores of more continuation checkpoints say whether the continuation improved the policy or only its default-look score",
-      "status": "running",
+      "status": "done",
       "requires_on_host": [
         "runs/x_control_s0/step_0006000/model.pt"
       ],
@@ -1212,7 +1212,7 @@
     {
       "name": "robust_x_control_s1_6000",
       "hypothesis": "H26: the low-LR continuation's gain is mostly on the default look. Under visual randomization (the training distribution) the previous best scores 94 and the best continuation checkpoint 95, against 90 and 104 on the default look. Robust scores of more continuation checkpoints say whether the continuation improved the policy or only its default-look score",
-      "status": "running",
+      "status": "done",
       "requires_on_host": [
         "runs/x_control_s1/step_0006000/model.pt"
       ],
@@ -1229,7 +1229,7 @@
     {
       "name": "robust_x_goal_s0_6000",
       "hypothesis": "H26: the low-LR continuation's gain is mostly on the default look. Under visual randomization (the training distribution) the previous best scores 94 and the best continuation checkpoint 95, against 90 and 104 on the default look. Robust scores of more continuation checkpoints say whether the continuation improved the policy or only its default-look score",
-      "status": "running",
+      "status": "done",
       "requires_on_host": [
         "runs/x_goal_s0/step_0006000/model.pt"
       ],
@@ -1264,7 +1264,7 @@
     {
       "name": "robust_x_control_s0_4000",
       "hypothesis": "H26: the low-LR continuation's gain is mostly on the default look. Under visual randomization (the training distribution) the previous best scores 94 and the best continuation checkpoint 95, against 90 and 104 on the default look. Robust scores of more continuation checkpoints say whether the continuation improved the policy or only its default-look score",
-      "status": "running",
+      "status": "done",
       "requires_on_host": [
         "runs/x_control_s0/step_0004000/model.pt"
       ],
@@ -1281,7 +1281,7 @@
     {
       "name": "robust_x_rtc_s0_6000",
       "hypothesis": "H26 coverage: randomized-visuals score of the add-on runs' final checkpoints, so every arm has a robustness number next to its default-look score",
-      "status": "running",
+      "status": "done",
       "requires_on_host": [
         "runs/x_rtc_s0/step_0006000/model.pt"
       ],
@@ -1313,6 +1313,38 @@
       },
       "host": "193.122.189.119",
       "started": "2026-10-18T03:12"
+    },
+    {
+      "name": "robust_x_control_r2_s0_4000",
+      "hypothesis": "H26 coverage: randomized-visuals score of the strongest new checkpoints (round two 99, goal75 103 on the default look)",
+      "status": "queued",
+      "requires_on_host": [
+        "runs/x_control_r2_s0/step_0004000/model.pt"
+      ],
+      "eval": "for T in pick_place_any bin handover two_bins; do MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.eval_sim --checkpoint runs/x_control_r2_s0/step_0004000 --task $T --episodes 30 --episode-seconds 30 --execute 25 --delay 0 --device cuda --dtype bf16 --subtask oracle --seed 4000 --visual-randomization --tokenizer weights/paligemma/tokenizer.model --out outputs/robust_x_control_r2_s0_4000_$T; done",
+      "site": {
+        "title": "Second round, new colours",
+        "short": "Round 2, colours",
+        "note": "The same model tested with random colours and lighting, to see whether its score holds up.",
+        "parent": "robust",
+        "kind": "eval"
+      }
+    },
+    {
+      "name": "robust_x_goal75_s0_4000",
+      "hypothesis": "H26 coverage: randomized-visuals score of the strongest new checkpoints (round two 99, goal75 103 on the default look)",
+      "status": "queued",
+      "requires_on_host": [
+        "runs/x_goal75_s0/step_0004000/model.pt"
+      ],
+      "eval": "for T in pick_place_any bin handover two_bins; do MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.eval_sim --checkpoint runs/x_goal75_s0/step_0004000 --task $T --episodes 30 --episode-seconds 30 --execute 25 --delay 0 --device cuda --dtype bf16 --subtask oracle --seed 4000 --visual-randomization --tokenizer weights/paligemma/tokenizer.model --out outputs/robust_x_goal75_s0_4000_$T; done",
+      "site": {
+        "title": "Goal pictures (more), new colours",
+        "short": "Goals+, colours",
+        "note": "The same model tested with random colours and lighting, to see whether its score holds up.",
+        "parent": "robust",
+        "kind": "eval"
+      }
     }
   ]
 }
