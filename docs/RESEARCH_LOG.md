@@ -1205,3 +1205,8 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   89 / 90 / 91** at 3000-5000 (the third control seed runs lower; the first-round control mean over three seeds is
   ~95, which every earlier comparison should be read against); **x_goal75_s1 step 4000 = 89** without goals. Email
   still pending: combo at 5300, goal75_s1 at 5080. A10: dagger19 handover 160/400. Site synced (115 scores).
+- **2026-10-18 09:22** The user made the models repo public. Uploading the best default-look checkpoint of every
+  finished run (16 more, best first, one loop per H100 box; the collapsed KI runs are skipped, their configs and logs
+  are in records/). Armed in the 20-minute check: when x_goal75_s1 and x_combo_b2_tb2 have all scores, their best
+  checkpoints upload, then one email goes to the user with the results and the list of running and queued runs to
+  choose terminations from. Nothing is stopped by me; the HF token leaves the boxes at the end.
