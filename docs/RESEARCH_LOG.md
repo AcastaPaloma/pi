@@ -1061,3 +1061,9 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   Steps: control_long 7060, control_r2 5280, control_r2_s1 1880, data_b2 4020, goal75 3720, twobins2x 2640. Site
   synced. All GPUs busy; scheduler and caffeinate alive.
 - **2026-10-18 02:20** [scheduler] 193.122.189.119 was idle; launched **robust_x_control_s0_4000** (H26: the low-LR continuation's gain is mostly on the default look. Under visual randomization (the training distribution) the previous best scores 94 and the best continuation checkpoint 95, against 90 and 104 on the default look. Robust scores of more continuation checkpoints say whether the continuation improved the policy or only its default-look score)
+- **2026-10-18 02:28** New: **x_control_r2_s0 step 4000 = 99** (89, 99); **x_data_b2 step 3000 = 28 / 27 / 19 / 22 =
+  96** (its reference x_control_r2_s0 had 89 at 3000; one checkpoint, watch); **x_goal75_s0 step 3000 without goals
+  = 93** (with-goal score pending, the H21b test); **x_control_long_s0 step 6000 = 90** (92 at 4000; mid-schedule,
+  LR still 4e-6, compare at 8000-12000). A10: robust_x_control_s0_4000 running, then rtc/mem robustness. Steps:
+  control_long 7520, control_r2 5720, control_r2_s1 2440, data_b2 4460, goal75 4080, twobins2x 3160. Site synced
+  (68 scores). All GPUs busy; scheduler and caffeinate alive.
