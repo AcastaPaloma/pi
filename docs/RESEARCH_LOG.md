@@ -1068,3 +1068,4 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   control_long 7520, control_r2 5720, control_r2_s1 2440, data_b2 4460, goal75 4080, twobins2x 3160. Site synced
   (68 scores). All GPUs busy; scheduler and caffeinate alive.
 - **2026-10-18 02:40** [scheduler] 192.222.52.191:1 was idle; launched **x_control_lr5e6_s0** (H27: the continuation's learning rate matters (2.5e-5 dipped earlier, 1e-5 gained 7 points on the default look). Half of it (5e-6) from the same resume keeps the gain with less drift, which H26 suggests is the risk (default-look gains that do not carry to randomized visuals). Scored on the default look and, for the best checkpoint, with visual randomization)
+- **2026-10-18 02:46** [scheduler] 193.122.189.119 was idle; launched **robust_x_rtc_s0_6000** (H26 coverage: randomized-visuals score of the add-on runs' final checkpoints, so every arm has a robustness number next to its default-look score)

@@ -1259,7 +1259,7 @@
     {
       "name": "robust_x_rtc_s0_6000",
       "hypothesis": "H26 coverage: randomized-visuals score of the add-on runs' final checkpoints, so every arm has a robustness number next to its default-look score",
-      "status": "queued",
+      "status": "running",
       "requires_on_host": [
         "runs/x_rtc_s0/step_0006000/model.pt"
       ],
@@ -1270,7 +1270,9 @@
         "note": "The same final model tested with random colours and lighting, to see whether its score holds up.",
         "parent": "robust",
         "kind": "eval"
-      }
+      },
+      "host": "193.122.189.119",
+      "started": "2026-10-18T02:46"
     },
     {
       "name": "robust_x_mem_s0_6000",
