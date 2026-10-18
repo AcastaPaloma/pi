@@ -1171,3 +1171,4 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   round two (4000) 91; goal 6000 ~101; batch 2 **102**, the highest, and two_bins holds at 25 under randomization.
   New: **x_control_lr5e6_s0 step 5000 = 96** (94, 91, 96). A10: failmine_b2_6000 running. Steps: combo 2580,
   twobins2x_s1 880, ema 5820, control_s2 4760, data_b2_s1 4700, goal75_s1 3220. Site synced (105 scores).
+- **2026-10-18 07:37** [scheduler] 192.222.55.167:3 was idle; launched **x_round3_b2mix** (H30: rounds compound when each starts from the newest best. A plain low-LR round from x_data_b2 step 6000 (107) on the batch-2 mix with no new data; it is also the matched reference for batch 3 (dagger18, rescued from that same checkpoint))

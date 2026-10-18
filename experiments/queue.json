@@ -738,7 +738,7 @@
     {
       "name": "x_round3_b2mix",
       "hypothesis": "H30: rounds compound when each starts from the newest best. A plain low-LR round from x_data_b2 step 6000 (107) on the batch-2 mix with no new data; it is also the matched reference for batch 3 (dagger18, rescued from that same checkpoint)",
-      "status": "queued",
+      "status": "running",
       "setup": "mkdir -p data/sim_mixdagclean_b2 && cd data/sim_mixdagclean_b2 && for d in ../sim_mixdagclean_v1/episode_*; do ln -sfn ../sim_mixdagclean_v1/$(basename $d) $(basename $d); done && for v in 14 15; do for d in ../sim_dagger_v$v/episode_*; do grep -qs '\"success\": true' $d/meta.json && ln -sfn $d episode_dag${v}_$(basename $d | cut -d_ -f2); done; done; true",
       "train": "SEED=0 PI_TRIM_STILL_TAIL_S=1 LR=1e-5 RESUME=runs/x_data_b2/step_0006000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdagclean_b2 runs/{RUN} 6000",
       "eval": "GPU=0 VARIANTS='d0' bash scripts/box/c30_when_ready.sh runs/{RUN} 3000 4000 5000 6000",
@@ -754,7 +754,9 @@
         "note": "Plain extra training starting from the best model so far (107), with no new data, to see whether each round keeps adding points.",
         "parent": "rescues-2",
         "kind": "test"
-      }
+      },
+      "host": "192.222.55.167:3",
+      "started": "2026-10-18T07:36"
     },
     {
       "name": "x_control_long_s1",
