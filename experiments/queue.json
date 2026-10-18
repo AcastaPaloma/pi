@@ -515,7 +515,7 @@
       ],
       "host": "192.222.52.191:0",
       "started": "2026-10-17T21:09",
-      "result": "92 / 90 / 102 / 103 at steps 4000-10000 (12000 scoring)"
+      "result": "92 / 90 / 102 / 103 / 95 at steps 4000-12000 (mean 96.4)"
     },
     {
       "name": "x_control_r2_s0",
@@ -770,6 +770,28 @@
         "note": "The same longer training repeated with a different random start.",
         "parent": "longer",
         "kind": "replicate"
+      }
+    },
+    {
+      "name": "x_data_b3",
+      "hypothesis": "Track B batch 3 (on-policy, second iteration): successful takeovers from DAgger round 18 (345 successful, rescued from the new best x_data_b2 step 6000) added to the batch-2 mix, resumed from that checkpoint. Clean A/B against x_round3_b2mix (same resume and mix, no round-18 data). Tests whether the on-policy loop keeps paying",
+      "status": "queued",
+      "setup": "mkdir -p data/sim_mixdagclean_b2 && cd data/sim_mixdagclean_b2 && for d in ../sim_mixdagclean_v1/episode_*; do ln -sfn ../sim_mixdagclean_v1/$(basename $d) $(basename $d); done && for v in 14 15; do for d in ../sim_dagger_v$v/episode_*; do grep -qs '\"success\": true' $d/meta.json && ln -sfn $d episode_dag${v}_$(basename $d | cut -d_ -f2); done; done; cd .. && mkdir -p sim_mixdagclean_b3 && cd sim_mixdagclean_b3 && for d in ../sim_mixdagclean_b2/episode_*; do ln -sfn ../sim_mixdagclean_b2/$(basename $d) $(basename $d); done && for d in ../sim_dagger_v18/episode_*; do grep -qs '\"success\": true' $d/meta.json && ln -sfn $d episode_dag18_$(basename $d | cut -d_ -f2); done; true",
+      "train": "SEED=0 PI_TRIM_STILL_TAIL_S=1 LR=1e-5 RESUME=runs/x_data_b2/step_0006000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdagclean_b3 runs/{RUN} 6000",
+      "eval": "GPU=0 VARIANTS='d0' bash scripts/box/c30_when_ready.sh runs/{RUN} 3000 4000 5000 6000",
+      "requires_on_host": [
+        "runs/x_data_b2/step_0006000/model.pt",
+        "data/sim_mixdagclean_v1",
+        "data/sim_dagger_v14",
+        "data/sim_dagger_v15",
+        "data/sim_dagger_v18"
+      ],
+      "site": {
+        "title": "Rescues from the newest best model",
+        "short": "Rescues, round 3",
+        "note": "A third batch of rescues, collected from the best model so far (107), added to the data. Compared with the same training without them.",
+        "parent": "rescues-2",
+        "kind": "test"
       }
     }
   ],
@@ -1462,13 +1484,14 @@
     {
       "name": "dagger18_from_b2",
       "hypothesis": "Track B batch 3 (on-policy): batch 2, rescued from the best checkpoint of its time, is the first data version to lead its reference; the next batch is rescued from the new best (x_data_b2 step 6000, 107/120) on handover and two_bins, takeover 2-16 s, seeds 1800000+. Data collection only; its A/B gets a site node when queued",
-      "status": "running",
+      "status": "done",
       "requires_on_host": [
         "runs/x_data_b2/step_0006000/model.pt"
       ],
       "eval": "MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.dagger --checkpoint runs/x_data_b2/step_0006000 --tasks handover,two_bins --episodes-per-task 300 --takeover-min 2 --takeover-max 16 --seed 1800000 --out data/sim_dagger_v18",
       "host": "193.122.189.119",
-      "started": "2026-10-18T04:49"
+      "started": "2026-10-18T04:49",
+      "result": "600 episodes: 459 kept, teacher success 345"
     },
     {
       "name": "robust_x_data_b2_6000",
@@ -1485,6 +1508,15 @@
         "parent": "robust",
         "kind": "eval"
       }
+    },
+    {
+      "name": "failmine_b2_6000",
+      "hypothesis": "Track B analysis (not a tree node): failure types of the new best (x_data_b2 step 6000, 107) on 60 non-test seeds (5000+) per weak task, to aim round 19. Does 'hover while holding' still dominate after on-policy rescues?",
+      "status": "queued",
+      "requires_on_host": [
+        "runs/x_data_b2/step_0006000/model.pt"
+      ],
+      "eval": "for T in handover two_bins; do MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.eval_sim --checkpoint runs/x_data_b2/step_0006000 --task $T --episodes 60 --episode-seconds 30 --execute 25 --delay 0 --device cuda --dtype bf16 --subtask oracle --seed 5000 --tokenizer weights/paligemma/tokenizer.model --out outputs/failmine_b2_6000_$T --video; done"
     }
   ]
 }

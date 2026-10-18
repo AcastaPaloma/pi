@@ -1152,3 +1152,9 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   3000: 82, 98). Steps: combo 960, lr5e6 5440, ema 4340, control_s2 3260, data_b2_s1 3200, goal75_s1 1940. dagger18
   two_bins 240/300. Site synced (99 scores). All GPUs busy.
 - **2026-10-18 06:37** [scheduler] 193.122.189.119 was idle; launched **robust_x_control_r2_s0_4000** (H26 coverage: randomized-visuals score of the strongest new checkpoints (round two 99, goal75 103 on the default look))
+- **2026-10-18 06:50** dagger18 done (600 episodes, 459 kept, 345 successful); v18 copied to both H100 hosts and
+  **x_data_b3** queued (batch 3: the batch-2 mix plus round-18 successes, resumed from the new best; reference
+  x_round3_b2mix; site field set). A10: robust round-two 4000 running (requeued after the old-code crash), then the
+  new best's robustness, then **failmine_b2_6000** (failure types of the 107 checkpoint on non-test seeds, to aim round
+  19; analysis only, not a tree node). New: x_control_lr5e6_s0 step 4000 = 91 (94, 91); rtc_s1 step 6000 at delay 12 =
+  81. Steps: combo 1460, lr5e6 5960, ema 4840, control_s2 3740, data_b2_s1 3700, goal75_s1 2380. Site synced.
