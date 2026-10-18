@@ -1174,3 +1174,13 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
 - **2026-10-18 07:37** [scheduler] 192.222.55.167:3 was idle; launched **x_round3_b2mix** (H30: rounds compound when each starts from the newest best. A plain low-LR round from x_data_b2 step 6000 (107) on the batch-2 mix with no new data; it is also the matched reference for batch 3 (dagger18, rescued from that same checkpoint))
 - **2026-10-18 08:19** [scheduler] 192.222.55.167:2 was idle; launched **x_control_long_s1** (H23 replicate (seed 1): the 12000-step control climbed to 102-103 by steps 8000-10000 as its LR decayed; a second seed decides whether a longer schedule beats the 6000-step one (mean 97.4))
 - **2026-10-18 08:23** [scheduler] 192.222.55.167:1 was idle; launched **x_data_b3** (Track B batch 3 (on-policy, second iteration): successful takeovers from DAgger round 18 (345 successful, rescued from the new best x_data_b2 step 6000) added to the batch-2 mix, resumed from that checkpoint. Clean A/B against x_round3_b2mix (same resume and mix, no round-18 data). Tests whether the on-policy loop keeps paying)
+- **2026-10-18 08:42** Catching up after a ~70-minute gap between checks. **Both queues had run dry:** the scheduler
+  launched x_round3_b2mix, x_control_long_s1 and x_data_b3 (08:19-08:21), emptying the H100 queue, and the A10 idled
+  after failmine_b2_6000 (alert at 08:39). Refilled: **x_data_b3_s1** and **x_round3_b2mix_s1** (the batch-3 A/B's two
+  seeds), **H31 x_goal75_b2** (goal images in 75% of samples on the batch-2 mix from the best checkpoint, scored with
+  and without oracle goals), and A10 **dagger19_handover_b2** (batch 4: handover takeovers from the best, seeds 1900000+).
+  **failmine_b2_6000** (best checkpoint, 60 non-test seeds): handover 40/60, two_bins 46/60, so handover is now the
+  weakest task. New scores: **x_data_b2_s1 step 5000 = 28 / 30 / 17 / 24 = 99** (95 at 3000); **x_control_ema_s0 step
+  6000 = 95** (95, 94, ., 95); **x_control_lr5e6_s0 step 6000 = 95** (94, 91, 96, 95: mean 94.0, below the 1e-5
+  controls' 97.4: H27 refuted); **x_goal75_s1 step 3000 = 94** without goals (with-goal pending); **x_combo_b2_tb2
+  step 3000 = 88**. x_data_b2_s1 and x_control_s2 finished. Site synced (113 scores, 6 new clips).
