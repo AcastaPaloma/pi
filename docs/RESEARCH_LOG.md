@@ -1257,3 +1257,4 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   x_data_b3: 102, 104 (finished; 5000/6000 scoring). **User email sent** with the results, every experiment's standing,
   what is on Hugging Face (22 checkpoints, DAgger rounds 11-19) and the list of running/queued runs for terminations.
   x_goal75_s1 6000 and x_combo 6000 are on HF. Queue: x_round4_r3, A10 robustness for round three and batch 3.
+- **2026-10-18 12:27** [scheduler] 193.122.189.119 was idle; launched **robust_x_round3_b2mix_3000** (H26 coverage: randomized-visuals score of a strong new checkpoint)

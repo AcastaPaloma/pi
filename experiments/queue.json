@@ -1720,7 +1720,7 @@
     {
       "name": "robust_x_round3_b2mix_3000",
       "hypothesis": "H26 coverage: randomized-visuals score of a strong new checkpoint",
-      "status": "queued",
+      "status": "running",
       "requires_on_host": [
         "runs/x_round3_b2mix/step_0003000/model.pt"
       ],
@@ -1731,7 +1731,9 @@
         "note": "The same model tested with random colours and lighting.",
         "parent": "robust",
         "kind": "eval"
-      }
+      },
+      "host": "193.122.189.119",
+      "started": "2026-10-18T12:27"
     },
     {
       "name": "robust_x_data_b3_3000",
