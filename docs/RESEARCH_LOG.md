@@ -1151,3 +1151,4 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   6000-step controls' 97.4); the seed-1 twin is queued. **x_control_ema_s0 step 3000 = 95** (first-round controls at
   3000: 82, 98). Steps: combo 960, lr5e6 5440, ema 4340, control_s2 3260, data_b2_s1 3200, goal75_s1 1940. dagger18
   two_bins 240/300. Site synced (99 scores). All GPUs busy.
+- **2026-10-18 06:37** [scheduler] 193.122.189.119 was idle; launched **robust_x_control_r2_s0_4000** (H26 coverage: randomized-visuals score of the strongest new checkpoints (round two 99, goal75 103 on the default look))
