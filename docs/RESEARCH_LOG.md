@@ -1222,3 +1222,4 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   site sync (an scp, 11 min) and one scheduler check (600 s timeout); the connection recovered, the stuck copy was
   killed, the sync re-ran and pushed (122 scores, 2 new clips). New: x_combo_b2_tb2 finished training (scoring 5000 /
   6000); x_goal75_s1 at 5840 (with-goal 6000 pending), so the user email is still waiting. dagger19 380/400.
+- **2026-10-18 10:10** [scheduler] 192.222.52.191:0 was idle; launched **x_data_b3_s1** (Seed-1 twin of x_data_b3: data versions and their references need two seeds)
