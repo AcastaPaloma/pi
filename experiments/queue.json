@@ -499,13 +499,15 @@
     {
       "name": "x_control_long_s0",
       "hypothesis": "H23: the plain continuation is still climbing (controls 82/98 at step 3000, 103/101 at 4000 vs baseline 90), so the 6000-step budget may be too short: the same recipe over 12000 steps (LR decays over twice as long) ends higher. Also the right budget for the phase-2 combination run",
-      "status": "queued",
+      "status": "running",
       "train": "SEED=0 PI_TRIM_STILL_TAIL_S=1 LR=1e-5 RESUME=runs/pi05_dagger2/step_0007000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdagclean_v1 runs/{RUN} 12000",
       "eval": "GPU=0 VARIANTS='d0' bash scripts/box/c30_when_ready.sh runs/{RUN} 4000 6000 8000 10000 12000",
       "requires_on_host": [
         "runs/pi05_dagger2/step_0007000/model.pt",
         "data/sim_mixdagclean_v1"
-      ]
+      ],
+      "host": "192.222.52.191:0",
+      "started": "2026-10-17T21:09"
     },
     {
       "name": "x_control_r2_s0",

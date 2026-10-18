@@ -923,3 +923,4 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   0 / 6 = 86 / 84. rtc_s1 finished; the scheduler started **x_control_long_s0** (H23, 12000 steps) on main GPU 0
   at 21:09, a minute after the GPU dropped to scoring only. ki_vlm01 flow 0.070 at 3400 (step-3000 score running).
   Steps: data_v11 3360, data_v11_s1 960, mem_s1 2920, goal_s1 4540. dagger15 180/300 (kept 98, success 70).
+- **2026-10-17 21:09** [scheduler] 192.222.52.191:0 was idle; launched **x_control_long_s0** (H23: the plain continuation is still climbing (controls 82/98 at step 3000, 103/101 at 4000 vs baseline 90), so the 6000-step budget may be too short: the same recipe over 12000 steps (LR decays over twice as long) ends higher. Also the right budget for the phase-2 combination run)
