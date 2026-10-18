@@ -1233,3 +1233,7 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   goal75_s1 with-goal 6000) are the last numbers before the user email. The scheduler started x_round3_b2mix_s1 at
   10:11. Steps: data_b3_s1 80, twobins2x_s1 5240, round3 4080, data_b3 2940, control_long_s1 3000.
 - **2026-10-18 10:28** [scheduler] 193.122.189.119 was idle; launched **robust_x_combo_b2_tb2_4000** (H26 coverage: randomized-visuals score of a strong new checkpoint)
+- **2026-10-18 10:38** v19 is on both H100 hosts (310 episodes); its HF upload had not started (the chained command was
+  cut off by a timeout), started now. A10: robust_x_combo_b2_tb2_4000 running (checkpoints for both new robustness jobs
+  arrived). Email still pending: x_combo_b2_tb2 6000 and x_goal75_s1 6000 (with and without goals) are being scored.
+  Steps: data_b3_s1 600, twobins2x_s1 5760, round3 4600, round3_s1 580, data_b3 3460, control_long_s1 3580. All busy.
