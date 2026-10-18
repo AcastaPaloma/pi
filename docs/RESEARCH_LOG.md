@@ -1210,3 +1210,9 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   are in records/). Armed in the 20-minute check: when x_goal75_s1 and x_combo_b2_tb2 have all scores, their best
   checkpoints upload, then one email goes to the user with the results and the list of running and queued runs to
   choose terminations from. Nothing is stopped by me; the HF token leaves the boxes at the end.
+- **2026-10-18 09:37** **All 16 best checkpoints of finished runs are on Hugging Face** (both upload loops ALL_DONE, no
+  failures); the public models repo now holds every experiment's best model except the collapsed KI runs. New:
+  **x_goal75_s1 step 3000 with oracle goals = 93, without = 94** (seed 0 had 99 vs 93): the second seed does not repeat
+  the goal benefit at 3000; its 6000 pair decides H21b. **x_combo_b2_tb2 step 4000 = 29 / 30 / 20 / 22 = 101** (88,
+  101). Steps: combo 5840, goal75_s1 5480, twobins2x_s1 4240, round3 3080, data_b3 1800, control_long_s1 1880.
+  dagger19 handover 260/400. Site synced (119 scores).
