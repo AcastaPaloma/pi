@@ -1216,3 +1216,9 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   the goal benefit at 3000; its 6000 pair decides H21b. **x_combo_b2_tb2 step 4000 = 29 / 30 / 20 / 22 = 101** (88,
   101). Steps: combo 5840, goal75_s1 5480, twobins2x_s1 4240, round3 3080, data_b3 1800, control_long_s1 1880.
   dagger19 handover 260/400. Site synced (119 scores).
+- **2026-10-18 10:12** **Main GPU 0 sat idle 09:45-10:09:** x_combo_b2_tb2 finished and every queued H100 entry required
+  runs/x_data_b2/step_0006000, which existed only on the 4x H100 host (my miss when queueing). Copied it to the main
+  box; the scheduler launched **x_data_b3_s1** there at 10:09. A transient network stall to the main box also hung one
+  site sync (an scp, 11 min) and one scheduler check (600 s timeout); the connection recovered, the stuck copy was
+  killed, the sync re-ran and pushed (122 scores, 2 new clips). New: x_combo_b2_tb2 finished training (scoring 5000 /
+  6000); x_goal75_s1 at 5840 (with-goal 6000 pending), so the user email is still waiting. dagger19 380/400.
