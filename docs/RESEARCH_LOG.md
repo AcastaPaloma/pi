@@ -1143,3 +1143,11 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   goal75_s1 1520; control_long finished (12000 scoring). dagger18 two_bins 140/300 (total kept 341, success 260).
   4x H100 GPU 3 at 75 GB (EMA training plus one scoring job; stable). Site synced. All GPUs busy; scheduler and
   caffeinate alive; H100 queue three deep.
+- **2026-10-18 06:28** **H21b supported on seed 0:** x_goal75_s0 step 6000 **with oracle goals = 29 / 28 / 20 / 23 = 100,
+  without = 93**; with a 75% goal share, the goal image helps on both measured pairs (99 vs 93 at 3000, 100 vs 93 at
+  6000), the reverse of the 25% runs (six pairs, with-goal mean 86.2 vs 94.3). The seed-1 twin (1940) decides.
+  It is still an oracle (the simulator supplies a perfect goal), so it says a world model could help only if goals
+  are trained in most samples. **H23 weak:** x_control_long_s0 step 12000 = 95 (92, 90, 102, 103, 95: mean 96.4 vs the
+  6000-step controls' 97.4); the seed-1 twin is queued. **x_control_ema_s0 step 3000 = 95** (first-round controls at
+  3000: 82, 98). Steps: combo 960, lr5e6 5440, ema 4340, control_s2 3260, data_b2_s1 3200, goal75_s1 1940. dagger18
+  two_bins 240/300. Site synced (99 scores). All GPUs busy.
