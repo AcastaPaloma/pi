@@ -963,3 +963,9 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   data_v11 5840, data_v11_s1 3660, mem_s1 4340, ki_vlm01 5480. dagger17 handover 80/300 (success 53 of 66 kept).
   All seven GPUs busy; scheduler and caffeinate alive.
 - **2026-10-17 22:56** [scheduler] 192.222.55.167:2 was idle; launched **x_goal75_s0** (H21b: oracle goal images hurt goal_s0 (76 with vs 87 without at step 3000) because goals were present in only 25% of training samples, so the model never learned to rely on them. With goals in 75% of samples the with-goal score beats the without-goal score and the controls. If it does not, goal conditioning is closed here)
+- **2026-10-17 23:10** No new scores. x_data_v11 finished; the scheduler started **x_goal75_s0** (H21b) on 4x H100
+  GPU 2 at 22:56. Queue deepened for the next frees (ki_vlm01 ends in minutes and takes x_data_b2): **H18
+  x_twobins2x_r2** (two_bins sampled twice as often in a second low-LR round from the best checkpoint; never run
+  before) and **x_control_r2_s1** (the second-round reference needs two seeds, given the 16-point twin spread).
+  Steps: control_long 2900, control_r2 1000, data_v11_s1 4160, mem_s1 4600, ki_vlm01 5900, goal75 180. dagger17
+  handover 180/300 (success 116 of 152 kept). All seven GPUs busy; scheduler and caffeinate alive.
