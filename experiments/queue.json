@@ -519,7 +519,7 @@
     {
       "name": "x_control_r2_s0",
       "hypothesis": "H24: low-LR continuation compounds. The first round lifted pi05_dagger2 from 90 to a 97.4 mean (best 104); a second identical round started from that best checkpoint (x_control_s1 step 5000) ends higher again, or shows the plateau. Scored at 3000-6000",
-      "status": "running",
+      "status": "done",
       "train": "SEED=0 PI_TRIM_STILL_TAIL_S=1 LR=1e-5 RESUME=runs/x_control_s1/step_0005000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdagclean_v1 runs/{RUN} 6000",
       "eval": "GPU=0 VARIANTS='d0' bash scripts/box/c30_when_ready.sh runs/{RUN} 3000 4000 5000 6000",
       "requires_on_host": [
@@ -527,7 +527,8 @@
         "data/sim_mixdagclean_v1"
       ],
       "host": "192.222.52.191:1",
-      "started": "2026-10-17T22:24"
+      "started": "2026-10-17T22:24",
+      "result": "89 / 99 at 3000 / 4000 (5000, 6000 scoring)"
     },
     {
       "name": "x_goal75_s0",
@@ -640,6 +641,27 @@
         "kind": "replicate",
         "when": "Oct 18",
         "note": "A third run of the same recipe, so the comparison every idea is judged against rests on three runs instead of two."
+      }
+    },
+    {
+      "name": "x_data_b2_s1",
+      "hypothesis": "Seed-1 twin of x_data_b2 (its first checkpoint scored 96 against its reference's 89; a data version needs two seeds before it joins the mix)",
+      "status": "queued",
+      "requires_on_host": [
+        "runs/x_control_s1/step_0005000/model.pt",
+        "data/sim_mixdagclean_v1",
+        "data/sim_dagger_v14",
+        "data/sim_dagger_v15"
+      ],
+      "setup": "mkdir -p data/sim_mixdagclean_b2 && cd data/sim_mixdagclean_b2 && for d in ../sim_mixdagclean_v1/episode_*; do ln -sfn ../sim_mixdagclean_v1/$(basename $d) $(basename $d); done && for v in 14 15; do for d in ../sim_dagger_v$v/episode_*; do grep -qs '\"success\": true' $d/meta.json && ln -sfn $d episode_dag${v}_$(basename $d | cut -d_ -f2); done; done; true",
+      "train": "SEED=1 PI_TRIM_STILL_TAIL_S=1 LR=1e-5 RESUME=runs/x_control_s1/step_0005000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdagclean_b2 runs/{RUN} 6000",
+      "eval": "GPU=0 VARIANTS='d0' bash scripts/box/c30_when_ready.sh runs/{RUN} 3000 4000 5000 6000",
+      "site": {
+        "title": "Rescues from the best model, second run",
+        "short": "Rescues 2, seed 2",
+        "note": "The same experiment repeated with a different random start, to check the first run's lead is real.",
+        "parent": "rescues-2",
+        "kind": "replicate"
       }
     }
   ],
