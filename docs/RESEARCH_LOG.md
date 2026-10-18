@@ -1079,3 +1079,4 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   4760) decides whether a larger goal share makes it reliable. **x_data_b2 step 4000 = 97** (96, 97) vs its reference
   x_control_r2_s0 (89, 99, 95): level so far. **rtc_s1 step 5000 at delay 6 = 78** (97 at delay 0). Steps:
   control_long 8460, lr5e6 560, control_r2_s1 3520, data_b2 5320, goal75 4760, twobins2x 4160. Site synced.
+- **2026-10-18 03:13** [scheduler] 193.122.189.119 was idle; launched **robust_x_mem_s0_6000** (H26 coverage: randomized-visuals score of the add-on runs' final checkpoints, so every arm has a robustness number next to its default-look score)
