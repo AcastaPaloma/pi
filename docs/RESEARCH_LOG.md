@@ -1126,3 +1126,9 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   93: mean 97.0, level with the controls; its with-goal score at 6000 is next). The scheduler started
   **dagger18_from_b2** (batch 3) on the A10 at 04:49. Steps: control_long 11220, lr5e6 3440, ema 2320, control_s2
   1200, data_b2_s1 1040, goal75_s1 320. Site synced (91 scores). All GPUs busy; scheduler and caffeinate alive.
+- **2026-10-18 05:28** New: **goal_s1 step 6000 with oracle goals = 94, without = 97** (six pairs at the 25% share:
+  with-goal mean 86.2, without 94.3; H21 stays refuted at the paper's share). **x_twobins2x_r2 step 6000 = 30 / 27 /
+  20 / 24 = 101** (95, 98, 88, 101: mean 95.5; two_bins 24, 22, 15, 24, mean 21.3) vs round two (s0 89 / 99 / 95 / 97,
+  s1 95 / 92 / 101; two_bins means ~19.6): a small two_bins lift, no total gain; the s1 twin decides. Steps:
+  control_long 11720, lr5e6 3940, ema 2860, control_s2 1720, data_b2_s1 1540, goal75_s1 700. dagger18 handover
+  200/300 (kept 161, success 119). Site synced (93 scores). All GPUs busy; scheduler and caffeinate alive.
