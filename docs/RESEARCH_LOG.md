@@ -899,3 +899,4 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   the controls), CE 6.2. Steps: mem 5780, data_v11 1840, mem_s1 2040, rtc_s1 4540, goal_s1 3400. dagger14 two_bins
   200/300 (total kept 425, success 330). All seven GPUs busy; scheduler and caffeinate alive.
 - **2026-10-17 20:24** [scheduler] 192.222.55.167:1 was idle; launched **x_data_v11_s1** (Seed-1 twin of x_data_v11 (the control twins differ by 16 points at one checkpoint, so a data version needs two seeds))
+- **2026-10-17 20:28** [scheduler] 193.122.189.119 was idle; launched **dagger15_twobins_late_best** (Track B batch 2: second-arm hover in two_bins from the best policy, late takeovers 8-22 s (as v12, which kept 61% of episodes), seeds 1500000+)

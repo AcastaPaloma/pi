@@ -975,11 +975,13 @@
     {
       "name": "dagger15_twobins_late_best",
       "hypothesis": "Track B batch 2: second-arm hover in two_bins from the best policy, late takeovers 8-22 s (as v12, which kept 61% of episodes), seeds 1500000+",
-      "status": "queued",
+      "status": "running",
       "requires_on_host": [
         "runs/x_control_s1/step_0005000/model.pt"
       ],
-      "eval": "MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.dagger --checkpoint runs/x_control_s1/step_0005000 --tasks two_bins --episodes-per-task 300 --takeover-min 8 --takeover-max 22 --seed 1500000 --episode-seconds 40 --out data/sim_dagger_v15"
+      "eval": "MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.dagger --checkpoint runs/x_control_s1/step_0005000 --tasks two_bins --episodes-per-task 300 --takeover-min 8 --takeover-max 22 --seed 1500000 --episode-seconds 40 --out data/sim_dagger_v15",
+      "host": "193.122.189.119",
+      "started": "2026-10-17T20:28"
     }
   ]
 }
