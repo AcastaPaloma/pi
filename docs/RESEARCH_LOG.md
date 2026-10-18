@@ -970,3 +970,11 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   Steps: control_long 2900, control_r2 1000, data_v11_s1 4160, mem_s1 4600, ki_vlm01 5900, goal75 180. dagger17
   handover 180/300 (success 116 of 152 kept). All seven GPUs busy; scheduler and caffeinate alive.
 - **2026-10-17 23:15** [scheduler] 192.222.55.167:3 was idle; launched **x_data_b2** (Track B batch 2 (on-policy): successful takeovers from DAgger rounds 14 (handover + two_bins, takeover 2-16 s; 398 successful) and 15 (two_bins, 8-22 s; 116 successful), both rolled out from the best checkpoint x_control_s1 step 5000, added to sim_mixdagclean_v1 and resumed from that checkpoint. Clean A/B against x_control_r2_s0 (same resume and recipe, no new data))
+- **2026-10-17 23:30** New: **x_data_v11 step 5000 = 28 / 28 / 15 / 20 = 91** (94, 92, 91), **x_data_v11_s1 step
+  3000 = 91**: batch 1 (DAgger rounds 11-13 from pi05_dagger2) trails the controls at every matched step (controls
+  at 3000-5000: 82 / 103 / 96 and 98 / 101 / 104, mean 97.3; batch 1 mean 92.3). Leaning negative, as earlier
+  failure-heavy data did (recover2: 72); handover in particular does not improve (20, 18, 15) although batch 1 was
+  aimed at it. **goal_s1 step 4000 = 98** (89, 98); **mem_s1 step 4000 = 24 / 27 / 21 / 18 = 90** (98, 90).
+  ki_vlm01 finished; the scheduler started **x_data_b2** (on-policy batch 2) on 4x H100 GPU 3 at 23:14.
+  Steps: control_long 3400, control_r2 1520, data_v11_s1 4660, mem_s1 4880, goal75 560, data_b2 280. dagger17
+  280/300 (success 179 of 237 kept). All seven GPUs busy; scheduler and caffeinate alive.
