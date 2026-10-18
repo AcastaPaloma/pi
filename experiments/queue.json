@@ -761,7 +761,7 @@
     {
       "name": "x_control_long_s1",
       "hypothesis": "H23 replicate (seed 1): the 12000-step control climbed to 102-103 by steps 8000-10000 as its LR decayed; a second seed decides whether a longer schedule beats the 6000-step one (mean 97.4)",
-      "status": "queued",
+      "status": "running",
       "train": "SEED=1 PI_TRIM_STILL_TAIL_S=1 LR=1e-5 RESUME=runs/pi05_dagger2/step_0007000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdagclean_v1 runs/{RUN} 12000",
       "eval": "GPU=0 VARIANTS='d0' bash scripts/box/c30_when_ready.sh runs/{RUN} 4000 6000 8000 10000 12000",
       "requires_on_host": [
@@ -774,7 +774,9 @@
         "note": "The same longer training repeated with a different random start.",
         "parent": "longer",
         "kind": "replicate"
-      }
+      },
+      "host": "192.222.55.167:2",
+      "started": "2026-10-18T08:19"
     },
     {
       "name": "x_data_b3",
