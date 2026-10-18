@@ -892,3 +892,9 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   while feeding oracle goals at test time hurt at step 3000 (76); its with-goal score at 6000 is next. ki_vlm01
   flow 0.085 at step 1580 (still rising). Steps: mem 5500, data_v11 1320, mem_s1 1760, rtc_s1 4040, goal_s1 3000.
   dagger14 handover done (kept 225+, success 173+), now two_bins 80/300. All alive.
+- **2026-10-17 20:10** New: **rtc_s1 step 3000 = 26 / 27 / 15 / 18 = 86**; **mem_s0 step 5000 = 26 / 29 / 18 / 19 =
+  92** (mem: 94, 90, 92, mean 92, below the controls' 97.4 on all three); **ki_s0 steps 5000 / 6000 = 2 / 3** (KI
+  collapsed at every checkpoint: 2, 0, 2, 3). control_s0 step 6000 at delay 12 = 24 / 27 / 15 / 16 = 82 (the
+  control's delay curve: 95 / 99 / 82). ki_vlm01 flow 0.079 at step 2020 (0.085 at 1580: levelling off, still ~3x
+  the controls), CE 6.2. Steps: mem 5780, data_v11 1840, mem_s1 2040, rtc_s1 4540, goal_s1 3400. dagger14 two_bins
+  200/300 (total kept 425, success 330). All seven GPUs busy; scheduler and caffeinate alive.
