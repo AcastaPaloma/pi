@@ -1245,3 +1245,6 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   **x_goal75_s1 = 94 / 89 / 82 / 95** without goals; with goals at 3000 = 93; the with-goal 6000 score is the last
   number before the user email. The scheduler started **x_goal75_b2** (H31) on main GPU 1 at 10:49 after
   x_twobins2x_s1 finished. Steps: data_b3_s1 1100, round3 5080, round3_s1 1040, data_b3 3940, control_long_s1 4120.
+- **2026-10-18 11:18** x_combo_b2_tb2 step 6000 is on Hugging Face. Last number for the user email, x_goal75_s1 6000 with
+  oracle goals, is being scored. Steps: round3 5580, round3_s1 1560, data_b3 4440, data_b3_s1 1660, control_long_s1
+  4620, goal75_b2 440. A10: robust batch-2 seed 1 running. All GPUs busy.
