@@ -1120,3 +1120,9 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   107 on the batch-2 mix, also batch 3's reference; site field set). Steps: control_long 10760, lr5e6 2980,
   control_s2 720, data_b2_s1 540, ema 1760. A10: robust goal75 4000 running. Site synced.
 - **2026-10-18 04:49** [scheduler] 193.122.189.119 was idle; launched **dagger18_from_b2** (Track B batch 3 (on-policy): batch 2, rescued from the best checkpoint of its time, is the first data version to lead its reference; the next batch is rescued from the new best (x_data_b2 step 6000, 107/120) on handover and two_bins, takeover 2-16 s, seeds 1800000+. Data collection only; its A/B gets a site node when queued)
+- **2026-10-18 05:08** New: **x_control_long_s0 step 10000 = 28 / 28 / 23 / 24 = 103** (92, 90, 102, 103; climbing as
+  its LR decays); **x_control_r2_s1 step 5000 = 101** (95, 92, 101); **rtc_s1 step 6000 = 97** (86, 89, 97, 97: mean
+  92.25, seed 0 91.5: RTC both seeds below the controls); **x_goal75_s0 step 6000 without goals = 93** (93, 103, 99,
+  93: mean 97.0, level with the controls; its with-goal score at 6000 is next). The scheduler started
+  **dagger18_from_b2** (batch 3) on the A10 at 04:49. Steps: control_long 11220, lr5e6 3440, ema 2320, control_s2
+  1200, data_b2_s1 1040, goal75_s1 320. Site synced (91 scores). All GPUs busy; scheduler and caffeinate alive.
