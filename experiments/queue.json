@@ -1320,7 +1320,7 @@
     {
       "name": "robust_x_mem_s0_6000",
       "hypothesis": "H26 coverage: randomized-visuals score of the add-on runs' final checkpoints, so every arm has a robustness number next to its default-look score",
-      "status": "running",
+      "status": "done",
       "requires_on_host": [
         "runs/x_mem_s0/step_0006000/model.pt"
       ],
@@ -1349,7 +1349,8 @@
         "note": "The same model tested with random colours and lighting, to see whether its score holds up.",
         "parent": "robust",
         "kind": "eval"
-      }
+      },
+      "note": "04:10 first launch crashed at config load (A10 had code from before vlm_lr_scale/subgoal_prob); code synced, requeued"
     },
     {
       "name": "robust_x_goal75_s0_4000",

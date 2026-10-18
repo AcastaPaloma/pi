@@ -1094,3 +1094,10 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   26/30). x_data_b2 finished; the scheduler started **x_control_ema_s0** (H28) at 03:36. Queue topped up with
   **x_goal75_s1** (H21b replicate, site field set). Steps: control_long 9360, lr5e6 1440, control_r2_s1 4520,
   goal75 5480, twobins2x 5160, ema 220. Site synced (2 new clips). All GPUs busy; scheduler and caffeinate alive.
+- **2026-10-18 04:10** **A10 job failure caught:** robust_x_control_r2_s0_4000 crashed at config load (the A10 still had
+  code from before `vlm_lr_scale`/`subgoal_prob`, which newer checkpoints save); pi_model synced to the A10, config
+  load verified, job requeued. Code changes must now reach all three hosts. New scores: **x_control_r2_s0 step 6000
+  = 97** (89, 99, 95, 97: mean 95.0, the round-two reference); **x_twobins2x_r2 step 4000 = 98** (95, 98; two_bins
+  24, 22); **x_goal75_s0 step 5000 = 99** (93, 103, 99 without goals); **goal_s1 step 6000 = 97** (89, 98, 90, 97);
+  rtc_s1 step 5000 at delay 12 = 70. Steps: control_long 9880, lr5e6 1940, control_r2_s1 5020, goal75 5860,
+  twobins2x 5660, ema 720. Site synced (84 scores).
