@@ -1049,3 +1049,8 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   and 98 at 3000). Site sync skipped this check while the Results tree view is being built (to avoid two writers).
   Steps: control_long 6220, control_r2 4420, control_r2_s1 900, data_b2 3220, goal75 3040, twobins2x 1580.
 - **2026-10-18 01:31** [scheduler] 193.122.189.119 was idle; launched **robust_x_goal_s0_6000** (H26: the low-LR continuation's gain is mostly on the default look. Under visual randomization (the training distribution) the previous best scores 94 and the best continuation checkpoint 95, against 90 and 104 on the default look. Robust scores of more continuation checkpoints say whether the continuation improved the policy or only its default-look score)
+- **2026-10-18 01:48** New: **mem_s1 step 6000 = 28 / 29 / 16 / 19 = 92** (98, 90, 97, 92: mean 94.25; memory both
+  seeds 94.1, dropped as recorded on the site); **goal_s1 step 5000 = 90** (89, 98, 90); ki_vlm01 step 5000 = 2.
+  Steps: control_long 6600, control_r2 4820, control_r2_s1 1300, data_b2 3600, goal75 3360, twobins2x 2060. A10:
+  robust_x_goal_s0_6000 running. Site synced (22 runs, 63 scores). All GPUs busy; H100 queue three deep (lr5e6, ema,
+  control_s2); scheduler and caffeinate alive.
