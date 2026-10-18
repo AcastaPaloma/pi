@@ -1232,3 +1232,4 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   **x_goal75_s1 step 5000 = 82** without goals (94, 89, 82); both runs finished training, their 6000 scores (and the
   goal75_s1 with-goal 6000) are the last numbers before the user email. The scheduler started x_round3_b2mix_s1 at
   10:11. Steps: data_b3_s1 80, twobins2x_s1 5240, round3 4080, data_b3 2940, control_long_s1 3000.
+- **2026-10-18 10:28** [scheduler] 193.122.189.119 was idle; launched **robust_x_combo_b2_tb2_4000** (H26 coverage: randomized-visuals score of a strong new checkpoint)
