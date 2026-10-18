@@ -1112,3 +1112,4 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   (batch-2 data plus two_bins x2), **x_twobins2x_s1** (H18 replicate), both with site fields; A10: **dagger18_from_b2**
   (batch 3, rescued from the new best; data collection only, its A/B gets a site node when queued). Steps:
   control_long 10320, lr5e6 2460, control_r2_s1 5520, ema 1220. A10: robust goal75 4000 running. Site synced.
+- **2026-10-18 04:48** [scheduler] 192.222.55.167:0 was idle; launched **x_goal75_s1** (H21b replicate (seed 1): goal75_s0 scored 99 with oracle goals vs 93 without at step 3000, the reverse of the 25%-share runs; a second seed decides whether a larger goal share makes goal images reliably useful)
