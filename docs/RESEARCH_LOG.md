@@ -1263,3 +1263,22 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   upload had been blocked by a wait loop whose pgrep matched its own command line; killed and re-run). New:
   x_twobins2x_s1 = 88 / 87 / 97 / 97 (mean 92.2; H18 refuted on both seeds). Running: data_b3_s1 3800, goal75_b2 2020,
   control_long_s1 6700, round3_s1 3620, data_b4 1420, data_b2_s2 260; A10 robust round three.
+- **2026-10-18 12:55** **Round closed at the user's final confirmation.** Final verdicts written on the site for every
+  experiment; a last sync pulled all scores (136) and clips; the six runs still training (data_b3_s1, goal75_b2,
+  control_long_s1, round3_s1, data_b4, data_b2_s2) are marked "stopped at the shutdown" and x_round4_r3 "not run".
+  The HF token was deleted from all three boxes; the Mac scheduler, caffeinate and the 20-minute check are stopped.
+  The user terminates the three VMs (192.222.52.191, 192.222.55.167, 193.122.189.119) from the provider console.
+
+  **What the round found** (30 random layouts per task, 120 trials, strict success):
+  - None of the π0.7 add-ons beat plain training in this simulator: RTC (worse under delay), MEM history (mean 94),
+    knowledge insulation (collapsed, also with a 10x slower VLM), goal images at the paper's 25% share (hurt). Goal
+    images at a 75% share help with perfect simulator goals (98.3 vs 93.8 over two seeds), an upper bound on what a
+    world model could add.
+  - What worked: low-LR continuation (pi05_dagger2 90 → ~96-101), then DAgger rescues collected from the current best
+    model (batch 2: 107, 102 under visual randomization; seeds 100.5 / 97.5 vs 95.9), then another round from that model
+    (round three: 106 / 92 / 104 / 108). Best model: x_round3_b2mix step 6000, 108/120 (29 / 29 / 25 / 25).
+  - Rescues from an older model, two_bins x2, longer schedules, half LR, EMA and the combination did not help.
+  - The default-look scores flatter the models a little; under the visual randomization the training data used, the
+    gains hold but shrink (best 102).
+  Released: 24 checkpoints (public, KuanKuanKuan/so101-pi07-sim-models, round2/), DAgger rounds 11-19 (public data repo,
+  round2/), records/2026-10-17_pi07_addons/ on GitHub, live site https://acastapaloma.github.io/pi/results.html.
