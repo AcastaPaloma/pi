@@ -1001,3 +1001,4 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   control_long 4380, control_r2 2600, data_v11_s1 5680, mem_s1 5440, goal75 1360, data_b2 1280. The website
   auto-filming and sync is being built (scripts/sync_results_site.py appeared; first sync pending). All seven GPUs
   busy; scheduler and caffeinate alive.
+- **2026-10-18 00:24** [scheduler] 192.222.55.167:1 was idle; launched **x_twobins2x_r2** (H18 (never run): two_bins is the weakest task of the best checkpoint (21/30 test, 37/60 non-test; the second arm stalls). Sampling two_bins episodes twice as often (PI_TASK_WEIGHTS=two_bins=2) in a second low-LR round from the best checkpoint raises two_bins without costing the other tasks. Matched against x_control_r2_s0 (same resume and recipe, uniform tasks))
