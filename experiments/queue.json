@@ -852,7 +852,7 @@
     {
       "name": "x_goal75_b2",
       "hypothesis": "H31: the two most promising lines combine. Goal images in 75% of training samples (x_goal75_s0: 99/93 and 100/93 with vs without oracle goals) trained on the on-policy batch-2 mix from the new best checkpoint (x_data_b2 step 6000, 107; 102 under randomization). Scored with and without oracle goals",
-      "status": "queued",
+      "status": "running",
       "setup": "mkdir -p data/sim_mixdagclean_b2 && cd data/sim_mixdagclean_b2 && for d in ../sim_mixdagclean_v1/episode_*; do ln -sfn ../sim_mixdagclean_v1/$(basename $d) $(basename $d); done && for v in 14 15; do for d in ../sim_dagger_v$v/episode_*; do grep -qs '\"success\": true' $d/meta.json && ln -sfn $d episode_dag${v}_$(basename $d | cut -d_ -f2); done; done; true",
       "train": "SET='max_subgoals=1 subgoal_prob=0.75' SEED=0 PI_TRIM_STILL_TAIL_S=1 LR=1e-5 RESUME=runs/x_data_b2/step_0006000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdagclean_b2 runs/{RUN} 6000",
       "eval": "GPU=0 VARIANTS='d0 goal' bash scripts/box/c30_when_ready.sh runs/{RUN} 3000 6000 & GPU=0 VARIANTS='d0' bash scripts/box/c30_when_ready.sh runs/{RUN} 4000 5000",
@@ -868,7 +868,9 @@
         "note": "The two ideas that looked best, together: goal pictures in most training examples, trained on the new rescue data from the best model.",
         "parent": "rescues-2",
         "kind": "test"
-      }
+      },
+      "host": "192.222.52.191:1",
+      "started": "2026-10-18T10:49"
     },
     {
       "name": "x_data_b4",

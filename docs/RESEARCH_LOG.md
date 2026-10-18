@@ -1237,3 +1237,4 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   cut off by a timeout), started now. A10: robust_x_combo_b2_tb2_4000 running (checkpoints for both new robustness jobs
   arrived). Email still pending: x_combo_b2_tb2 6000 and x_goal75_s1 6000 (with and without goals) are being scored.
   Steps: data_b3_s1 600, twobins2x_s1 5760, round3 4600, round3_s1 580, data_b3 3460, control_long_s1 3580. All busy.
+- **2026-10-18 10:50** [scheduler] 192.222.52.191:1 was idle; launched **x_goal75_b2** (H31: the two most promising lines combine. Goal images in 75% of training samples (x_goal75_s0: 99/93 and 100/93 with vs without oracle goals) trained on the on-policy batch-2 mix from the new best checkpoint (x_data_b2 step 6000, 107; 102 under randomization). Scored with and without oracle goals)
