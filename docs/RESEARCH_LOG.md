@@ -1139,3 +1139,7 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   controls at 3000: 82, 98). dagger18 handover done (240 kept, 178 successful), now two_bins. Queue: **x_control_long_s1**
   (H23 replicate) and A10 **robust_x_data_b2_6000** (new best under randomization), both with site fields. Steps:
   lr5e6 4440, ema 3380, control_s2 2220, data_b2_s1 2100, goal75_s1 1100. Site synced (96 scores).
+- **2026-10-18 06:08** No new scores. Steps: combo 540, lr5e6 4960, ema 3860, control_s2 2740, data_b2_s1 2680,
+  goal75_s1 1520; control_long finished (12000 scoring). dagger18 two_bins 140/300 (total kept 341, success 260).
+  4x H100 GPU 3 at 75 GB (EMA training plus one scoring job; stable). Site synced. All GPUs busy; scheduler and
+  caffeinate alive; H100 queue three deep.
