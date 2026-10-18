@@ -781,7 +781,7 @@
     {
       "name": "x_data_b3",
       "hypothesis": "Track B batch 3 (on-policy, second iteration): successful takeovers from DAgger round 18 (345 successful, rescued from the new best x_data_b2 step 6000) added to the batch-2 mix, resumed from that checkpoint. Clean A/B against x_round3_b2mix (same resume and mix, no round-18 data). Tests whether the on-policy loop keeps paying",
-      "status": "queued",
+      "status": "running",
       "setup": "mkdir -p data/sim_mixdagclean_b2 && cd data/sim_mixdagclean_b2 && for d in ../sim_mixdagclean_v1/episode_*; do ln -sfn ../sim_mixdagclean_v1/$(basename $d) $(basename $d); done && for v in 14 15; do for d in ../sim_dagger_v$v/episode_*; do grep -qs '\"success\": true' $d/meta.json && ln -sfn $d episode_dag${v}_$(basename $d | cut -d_ -f2); done; done; cd .. && mkdir -p sim_mixdagclean_b3 && cd sim_mixdagclean_b3 && for d in ../sim_mixdagclean_b2/episode_*; do ln -sfn ../sim_mixdagclean_b2/$(basename $d) $(basename $d); done && for d in ../sim_dagger_v18/episode_*; do grep -qs '\"success\": true' $d/meta.json && ln -sfn $d episode_dag18_$(basename $d | cut -d_ -f2); done; true",
       "train": "SEED=0 PI_TRIM_STILL_TAIL_S=1 LR=1e-5 RESUME=runs/x_data_b2/step_0006000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdagclean_b3 runs/{RUN} 6000",
       "eval": "GPU=0 VARIANTS='d0' bash scripts/box/c30_when_ready.sh runs/{RUN} 3000 4000 5000 6000",
@@ -798,7 +798,9 @@
         "note": "A third batch of rescues, collected from the best model so far (107), added to the data. Compared with the same training without them.",
         "parent": "rescues-2",
         "kind": "test"
-      }
+      },
+      "host": "192.222.55.167:1",
+      "started": "2026-10-18T08:21"
     }
   ],
   "a10": [
