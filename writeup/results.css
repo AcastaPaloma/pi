@@ -33,7 +33,8 @@
 .node-head::before{content:'';position:absolute;left:-21px;top:10px;width:11px;height:11px;border-radius:50%;box-sizing:border-box;background:var(--accent)}
 .node[data-depth="1"]>.node-head::before{left:-16px}
 .node[data-kind=dead]>.node-head::before{background:var(--paper);border:1.5px solid #a9a9a2}
-.node[data-kind=running]>.node-head::before{background:var(--paper);border:1.5px solid var(--accent)}
+.node[data-kind=running]>.node-head::before,.node[data-kind=finished]>.node-head::before{background:var(--paper);border:1.5px solid var(--accent)}
+.node[data-kind=queued]>.node-head::before{background:var(--paper);border:1.5px dashed #7d8fc0}
 .node[aria-current=true]>.node-head::before{box-shadow:0 0 0 4px #1f3a8a1f}
 .node-when{grid-column:1/-1;font:11px/1.3 Arial,sans-serif;letter-spacing:.04em;text-transform:uppercase;color:#8b8b84}
 .node-name{font-size:17px;line-height:1.3}
@@ -43,8 +44,18 @@
 .node-score b{font-weight:400;color:var(--ink)}.node-num{min-width:54px;text-align:right}
 .bar{display:block;width:64px;height:3px;border-radius:2px;background:#e6e5e0;overflow:hidden}
 .bar i{display:block;height:100%;background:var(--accent)}
-.node[data-kind=dead] .bar i{background:#a9a9a2}.node[data-kind=running] .bar i{background:#7d8fc0}
+.node[data-kind=dead] .bar i{background:#a9a9a2}.node[data-kind=running] .bar i,.node[data-kind=finished] .bar i{background:#7d8fc0}
 .node-clips{display:inline-block;width:24px;font:11px/1 Arial,sans-serif;color:var(--accent);margin-left:2px}
+
+/* per-checkpoint scores of a node's runs */
+.run-table-wrap{overflow-x:auto;margin:2px 0 12px;scrollbar-width:thin}
+.run-table{border-collapse:collapse;font:12px/1.35 Arial,sans-serif;font-variant-numeric:tabular-nums;color:var(--ink)}
+.run-table caption{text-align:left;color:#8b8b84;font-size:11px;letter-spacing:.04em;text-transform:uppercase;padding:0 0 5px}
+.run-table th,.run-table td{padding:4px 10px 4px 0;text-align:right;white-space:nowrap;border-bottom:1px solid #ecebe6}
+.run-table th.step-head{color:#8b8b84;font-weight:400}
+.run-table th[scope=row]{text-align:left;font-weight:400;color:var(--secondary);padding-right:16px}
+.run-table td{min-width:34px}
+.results-updated{font:12px/1.5 Arial,sans-serif!important;color:#8b8b84;margin:14px 0 0!important}
 
 /* detail, opened under the selected node */
 .node-detail{padding:4px 0 18px}

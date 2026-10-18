@@ -43,6 +43,8 @@ def main():
     ap.add_argument("--device", default="cuda")
     ap.add_argument("--dtype", default="bf16", choices=("fp32", "bf16"))
     ap.add_argument("--tokenizer", type=Path, default=Path("weights/paligemma/tokenizer.model"))
+    ap.add_argument("--goal", choices=("none", "oracle"), default="none",
+                    help="oracle: hand goal-conditioned models a goal image (the teacher run 2 s ahead in a twin scene)")
     args = ap.parse_args()
 
     policy = Pi07Policy(args.checkpoint, device=args.device, tokenizer=args.tokenizer, denoise_steps=5, dtype=args.dtype)
@@ -55,6 +57,12 @@ def main():
     else:
         env = TaskEnv(args.task, control_mode="joint", object_color=color, second_color=second, object_shape="cube",
                       control_hz=policy.hz, episode_seconds=args.episode_seconds)
+    goal_env = None
+    if args.goal == "oracle":
+        if args.task == "pick_place":
+            raise SystemExit("--goal oracle needs a ladder task")
+        goal_env = TaskEnv(args.task, control_mode="joint", object_color=color, second_color=second, object_shape="cube",
+                           control_hz=policy.hz, episode_seconds=args.episode_seconds)
     env.model.vis.global_.offwidth = max(args.width, env.model.vis.global_.offwidth)
     env.model.vis.global_.offheight = max(args.height, env.model.vis.global_.offheight)
     renderer = mujoco.Renderer(env.model, height=args.height, width=args.width)
@@ -73,7 +81,8 @@ def main():
     started = time.monotonic()
     result = run_episode(env, policy, seed=args.seed, execute=25, delay=0, cfg_beta=None, subtask="oracle",
                          image_size=policy.cfg.vision.image_size, placement="wide", visual_randomization=False,
-                         generator=torch.Generator(device=policy.device).manual_seed(args.seed), frame_hook=film)
+                         generator=torch.Generator(device=policy.device).manual_seed(args.seed), frame_hook=film,
+                         goal_env=goal_env)
     frames += [frames[-1]] * int(args.hold_s * args.fps)
 
     args.out.parent.mkdir(parents=True, exist_ok=True)
@@ -89,7 +98,7 @@ def main():
     Image.fromarray(frames[min(len(frames) - 1, int(0.35 * len(frames)))]).save(args.out.with_suffix(".jpg"), quality=82)
     card = {"task": args.task, "instruction": result["task"], "seed": args.seed, "object": result["object"],
             "success": result["success"], "seconds": round(result["steps"] / policy.hz, 1),
-            "checkpoint": str(args.checkpoint), "video_seconds": round(len(frames) / args.fps, 1),
+            "checkpoint": str(args.checkpoint), "goal": args.goal == "oracle", "video_seconds": round(len(frames) / args.fps, 1),
             "wall_s": round(time.monotonic() - started, 1)}
     args.out.with_suffix(".json").write_text(json.dumps(card, indent=2) + "\n")
     print(json.dumps(card), flush=True)
