@@ -1239,3 +1239,9 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   Steps: data_b3_s1 600, twobins2x_s1 5760, round3 4600, round3_s1 580, data_b3 3460, control_long_s1 3580. All busy.
 - **2026-10-18 10:50** [scheduler] 192.222.52.191:1 was idle; launched **x_goal75_b2** (H31: the two most promising lines combine. Goal images in 75% of training samples (x_goal75_s0: 99/93 and 100/93 with vs without oracle goals) trained on the on-policy batch-2 mix from the new best checkpoint (x_data_b2 step 6000, 107; 102 under randomization). Scored with and without oracle goals)
 - **2026-10-18 10:54** [scheduler] 193.122.189.119 was idle; launched **robust_x_data_b2_s1_6000** (H26 coverage: randomized-visuals score of a strong new checkpoint)
+- **2026-10-18 10:58** **x_combo_b2_tb2 complete: 88 / 101 / 100 / 103, mean 98.0** vs batch 2 alone (96 / 97 / 102 / 107,
+  mean 100.5; seed 1 95 / 94 / 99 / .): adding two_bins x2 on top of batch 2 does not help (H29 refuted); its two_bins
+  scores (22, 22, 26, 26) are a little higher, its handover lower. Best checkpoint (6000, 103) uploading to HF.
+  **x_goal75_s1 = 94 / 89 / 82 / 95** without goals; with goals at 3000 = 93; the with-goal 6000 score is the last
+  number before the user email. The scheduler started **x_goal75_b2** (H31) on main GPU 1 at 10:49 after
+  x_twobins2x_s1 finished. Steps: data_b3_s1 1100, round3 5080, round3_s1 1040, data_b3 3940, control_long_s1 4120.
