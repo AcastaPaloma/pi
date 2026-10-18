@@ -1,12 +1,12 @@
-import { applyCopy, expandAll, focusPassage, previewPassage, refreshReadingMeasurements } from './app.js?v=20261017-r1';
+import { applyCopy, decoratePassage, expandAll, focusPassage, plainPassage, previewPassage, refreshReadingMeasurements } from './app.js?v=20261017-r2';
 import { serializeBody, validateCopy } from './rich-text.mjs';
-import { steps, details } from './content.js?v=20261017-r1';
+import { steps, details } from './content.js?v=20261017-r2';
 
 const initialPassage = location.hash.slice(1).split('/').pop();
 const ids = new Set([...steps, ...details].map(item => item.id));
 const draftKey = 'pi-text-editor-draft-v1';
 let saved, doc, sha, token, dirty = false, busy = false, activeBody, selection;
-let draftTimer, measureFrame;
+let draftTimer, measureFrame, plainBody = null;
 const notes = document.querySelector('.notes');
 document.body.classList.add('editing');
 // Every passage is editable, so every component note stays open in the editor.
@@ -70,9 +70,33 @@ toolbar.addEventListener('click', event => {
   if (button) command(button.dataset.command);
 });
 document.querySelector('#editor-font').addEventListener('change', event => command('fontName', event.target.value));
+// The passage being edited shows its plain source text; formatted math and
+// links return when focus moves elsewhere. Saved text is never decorated.
+function showFormatted() {
+  if (!plainBody) return;
+  const body = plainBody; plainBody = null;
+  decoratePassage(body); refreshReadingMeasurements();
+}
+function showPlain(body) {
+  if (plainBody === body) return;
+  showFormatted();
+  plainPassage(body, window.getSelection()); plainBody = body;
+  retainSelection(); refreshReadingMeasurements();
+}
 document.querySelector('#article').addEventListener('focusin', event => {
   const body = event.target.closest('.passage-body');
-  if (body) { activeBody = body; previewPassage(body.dataset.section); }
+  if (!body) return;
+  activeBody = body; previewPassage(body.dataset.section);
+  // Wait for the click to place the caret, then keep it at the same source position.
+  setTimeout(() => { if (body.contains(document.activeElement)) showPlain(body); });
+});
+document.querySelector('#article').addEventListener('focusout', event => {
+  const body = event.target.closest('.passage-body');
+  if (!body || body !== plainBody) return;
+  setTimeout(() => {
+    const focused = document.activeElement;
+    if (plainBody === body && !body.contains(focused) && !toolbar.contains(focused)) showFormatted();
+  });
 });
 document.querySelector('#article').addEventListener('input', event => {
   activeBody = event.target.closest('.passage-body'); changed();

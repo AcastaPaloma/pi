@@ -1,8 +1,9 @@
-import { artwork, macros, steps, details, annotations } from './content.js?v=20261017-r1';
+import { artwork, macros, steps, details, annotations, references } from './content.js?v=20261017-r2';
 import { clamp, fitBounds, zoomAt, constrainCamera } from './camera.mjs';
-import { buildReadingEntries, readingIndex } from './reading.mjs?v=20261017-r1';
+import { buildReadingEntries, readingIndex } from './reading.mjs?v=20261017-r2';
 
 import { validateCopy, renderNodes } from './rich-text.mjs';
+import { compileReferences, decorate, undecorate } from './math-text.mjs?v=20261017-r2';
 
 const $ = id => document.getElementById(id);
 const viewport = $('viewport'), world = $('world'), reader = $('reader');
@@ -12,6 +13,7 @@ const entries = buildReadingEntries(steps, details, annotations);
 const entryById = new Map(entries.map(item => [item.id, item]));
 const allBounds = [0, 0, artwork.width, artwork.height];
 const svgNS = 'http://www.w3.org/2000/svg';
+const crossReferences = compileReferences(references);
 let ready = false;
 let stepIndex = 0, pinned = null, preview = null, activeId = steps[0].id;
 let camera = { x: 0, y: 0, scale: 1 }, animation = 0, frame = 0;
@@ -168,6 +170,16 @@ function paragraph(block) {
   if (block.placeholder) return inline(make('p', undefined, 'placeholder-note'), block.placeholder);
   return make('p', String(block));
 }
+function routeHash(id) {
+  const entry = entryById.get(id), step = steps[entry.stepIndex];
+  return `#${step.id}${entry.detail ? `/${entry.detail}` : ''}`;
+}
+// Math and cross-references are display only; the saved text stays plain.
+export function decoratePassage(body) {
+  const entry = entryById.get(body.dataset.section);
+  decorate(body, { references: crossReferences, skip: new Set([entry.id, steps[entry.stepIndex].id]), href: routeHash });
+}
+export function plainPassage(body, selection) { undecorate(body, selection); }
 function previewRegion(id) { preview = id; renderSelection(); }
 function setExpanded(stepId, open) {
   if (open) expanded.add(stepId); else expanded.delete(stepId);
@@ -230,6 +242,7 @@ function passage(entry) {
   heading.id = `title-${entry.id}`; block.setAttribute('aria-labelledby', heading.id);
   const body = make('div', undefined, 'passage-body'); body.dataset.section = entry.id;
   body.append(...entry.paragraphs.map(paragraph));
+  decoratePassage(body);
   block.append(heading, body);
   return block;
 }
@@ -354,6 +367,19 @@ reader.addEventListener('scrollend', finishJump);
 reader.addEventListener('wheel', () => { cancelJump(); scheduleReading(); }, { passive: true });
 reader.addEventListener('touchstart', () => { cancelJump(); scheduleReading(); }, { passive: true });
 reader.addEventListener('pointerdown', event => { if (event.target.closest('[contenteditable="true"]')) return; cancelJump(); scheduleReading(); });
+// Cross-references move the reader and the camera like a contents link. While
+// a passage is being edited, a click places the caret instead.
+$('article').addEventListener('click', event => {
+  const link = event.target.closest('a.xref'); if (!link) return;
+  event.preventDefault();
+  if (link.closest('.passage-body').isContentEditable) return;
+  preview = null; jumpTo(link.dataset.target);
+});
+$('article').addEventListener('pointerover', event => {
+  const link = event.target.closest('a.xref');
+  if (link && !link.closest('.passage-body').isContentEditable) previewRegion(link.dataset.target);
+});
+$('article').addEventListener('pointerout', event => { if (event.target.closest('a.xref')) previewRegion(null); });
 window.addEventListener('hashchange', readRoute);
 window.addEventListener('popstate', readRoute);
 document.addEventListener('keydown', event => {
@@ -509,6 +535,7 @@ export function applyCopy(doc) {
     const body = document.querySelector('.passage-body[data-section="' + entry.id + '"]');
     if (Object.hasOwn(doc.sections, entry.id)) body.replaceChildren(renderNodes(doc.sections[entry.id], document));
     else body.replaceChildren(...entry.paragraphs.map(paragraph));
+    decoratePassage(body);
   }
   measureReading();
 }

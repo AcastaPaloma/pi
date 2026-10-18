@@ -1,6 +1,6 @@
 // Supplied SVGs, chapters, and named reading destinations. Bounds are
 // [x, y, width, height] on the 2048-wide logical canvas. Article prose lives in article.js.
-export { annotations } from './article.js?v=20261017-r1';
+export { annotations } from './article.js?v=20261017-r2';
 
 export const artwork = {
   "src": "./assets/full-backbone.svg",
@@ -62,6 +62,26 @@ export const artwork = {
     }
   ]
 };
+
+// Phrases in the prose that point at another passage. Each becomes a link the
+// first time it appears in a passage (never in its own). chapter: true phrases
+// link only in a sentence that says "chapter".
+export const references = [
+  { text: 'VLM loss', target: 'vlm-loss' },
+  { text: 'EAM loss', target: 'eam-loss' },
+  { text: 'flow loss', target: 'flow-loss' },
+  { text: 'knowledge insulation', target: 'vlm-loss' },
+  { text: 'AdaptiveRMSNorm', target: 'adaptive-rmsnorm', caseSensitive: true },
+  { text: 'attention mask', target: 'attention-mask' },
+  { text: 'transformer panel', target: 'transformer' },
+  { text: 'flow-matching panel', target: 'flow' },
+  { text: 'ingestion chapter', target: 'context' },
+  { text: 'Ingestion', target: 'context', chapter: true },
+  { text: 'Decision model', target: 'decision', chapter: true },
+  { text: 'Training losses', target: 'eam-loss', chapter: true },
+  { text: 'High-level policy', target: 'subgoal-policy', chapter: true },
+  { text: 'World model', target: 'world-model', chapter: true }
+];
 
 export const macros = [
   {

@@ -89,7 +89,7 @@ export function createEditorServer({ api = github, port = 4174 } = {}) {
       }
       if (req.method !== 'GET' && req.method !== 'HEAD') return json(res, 405, { error: 'Method not allowed.' });
       const name = path === '/' || path === '/editor' ? 'training.html' : decodeURIComponent(path.slice(1));
-      const allowed = new Set(['training.html', 'style.css', 'app.js', 'content.js', 'article.js', 'camera.mjs', 'reading.mjs', 'rich-text.mjs', 'text.json', 'editor.mjs', 'editor.css']);
+      const allowed = new Set(['training.html', 'style.css', 'app.js', 'content.js', 'article.js', 'camera.mjs', 'reading.mjs', 'rich-text.mjs', 'math-text.mjs', 'text.json', 'editor.mjs', 'editor.css']);
       if (!allowed.has(name) && !/^assets\/[a-z0-9-]+\.svg$/.test(name)) return json(res, 404, { error: 'Not found.' });
       let data = await readFile(resolve(root, name));
       if (name === 'training.html' && path !== '/') data = Buffer.from(data.toString().replace('</head>', '<link rel="stylesheet" href="./editor.css"><script type="module" src="./editor.mjs"></script></head>'));

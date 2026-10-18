@@ -49,14 +49,26 @@ export function renderNodes(nodes, document) {
   }
   fragment.append(...nodes.map(render)); return fragment;
 }
+// Display decorations (math, cross-references) can split one text run into
+// several; joining adjacent runs keeps the saved document unchanged.
+function joinText(nodes) {
+  const out = [];
+  for (const n of nodes) {
+    const last = out[out.length - 1];
+    if (Object.hasOwn(n, 'text') && last && Object.hasOwn(last, 'text')) last.text += n.text;
+    else out.push(Object.hasOwn(n, 'text') ? { text: n.text } : n);
+  }
+  return out;
+}
 export function serializeBody(root) {
   function walk(node) {
     if (node.nodeType === 3) return [{ text: node.textContent }];
     if (node.nodeType !== 1) return [];
     if (node.dataset.equation === 'flow-loss') return [{ equation: 'flow-loss' }];
+    if (node.dataset.source !== undefined) return [{ text: node.dataset.source }];
     const sourceTag = node.tagName.toLowerCase();
     if (['script', 'style', 'iframe', 'object', 'img', 'svg'].includes(sourceTag)) return [];
-    let children = [...node.childNodes].flatMap(walk);
+    let children = joinText([...node.childNodes].flatMap(walk));
     let tag = ({ b: 'strong', i: 'em', font: 'span' })[sourceTag] ?? sourceTag;
     if (!tags.has(tag)) return children;
     // Native editing commands use both semantic elements and styled spans.
@@ -69,5 +81,5 @@ export function serializeBody(root) {
     if (font) result.font = font;
     return [result];
   }
-  return [...root.childNodes].flatMap(walk);
+  return joinText([...root.childNodes].flatMap(walk));
 }
