@@ -506,7 +506,7 @@
     {
       "name": "x_control_long_s0",
       "hypothesis": "H23: the plain continuation is still climbing (controls 82/98 at step 3000, 103/101 at 4000 vs baseline 90), so the 6000-step budget may be too short: the same recipe over 12000 steps (LR decays over twice as long) ends higher. Also the right budget for the phase-2 combination run",
-      "status": "running",
+      "status": "done",
       "train": "SEED=0 PI_TRIM_STILL_TAIL_S=1 LR=1e-5 RESUME=runs/pi05_dagger2/step_0007000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdagclean_v1 runs/{RUN} 12000",
       "eval": "GPU=0 VARIANTS='d0' bash scripts/box/c30_when_ready.sh runs/{RUN} 4000 6000 8000 10000 12000",
       "requires_on_host": [
@@ -514,7 +514,8 @@
         "data/sim_mixdagclean_v1"
       ],
       "host": "192.222.52.191:0",
-      "started": "2026-10-17T21:09"
+      "started": "2026-10-17T21:09",
+      "result": "92 / 90 / 102 / 103 at steps 4000-10000 (12000 scoring)"
     },
     {
       "name": "x_control_r2_s0",
@@ -751,6 +752,24 @@
         "note": "Plain extra training starting from the best model so far (107), with no new data, to see whether each round keeps adding points.",
         "parent": "rescues-2",
         "kind": "test"
+      }
+    },
+    {
+      "name": "x_control_long_s1",
+      "hypothesis": "H23 replicate (seed 1): the 12000-step control climbed to 102-103 by steps 8000-10000 as its LR decayed; a second seed decides whether a longer schedule beats the 6000-step one (mean 97.4)",
+      "status": "queued",
+      "train": "SEED=1 PI_TRIM_STILL_TAIL_S=1 LR=1e-5 RESUME=runs/pi05_dagger2/step_0007000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdagclean_v1 runs/{RUN} 12000",
+      "eval": "GPU=0 VARIANTS='d0' bash scripts/box/c30_when_ready.sh runs/{RUN} 4000 6000 8000 10000 12000",
+      "requires_on_host": [
+        "runs/pi05_dagger2/step_0007000/model.pt",
+        "data/sim_mixdagclean_v1"
+      ],
+      "site": {
+        "title": "Twice as long, second run",
+        "short": "Twice long, seed 2",
+        "note": "The same longer training repeated with a different random start.",
+        "parent": "longer",
+        "kind": "replicate"
       }
     }
   ],
@@ -1448,6 +1467,22 @@
       "eval": "MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.dagger --checkpoint runs/x_data_b2/step_0006000 --tasks handover,two_bins --episodes-per-task 300 --takeover-min 2 --takeover-max 16 --seed 1800000 --out data/sim_dagger_v18",
       "host": "193.122.189.119",
       "started": "2026-10-18T04:49"
+    },
+    {
+      "name": "robust_x_data_b2_6000",
+      "hypothesis": "H26 coverage: randomized-visuals score of the new best checkpoint (x_data_b2 step 6000, 107 on the default look)",
+      "status": "queued",
+      "requires_on_host": [
+        "runs/x_data_b2/step_0006000/model.pt"
+      ],
+      "eval": "for T in pick_place_any bin handover two_bins; do MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.eval_sim --checkpoint runs/x_data_b2/step_0006000 --task $T --episodes 30 --episode-seconds 30 --execute 25 --delay 0 --device cuda --dtype bf16 --subtask oracle --seed 4000 --visual-randomization --tokenizer weights/paligemma/tokenizer.model --out outputs/robust_x_data_b2_6000_$T; done",
+      "site": {
+        "title": "Best-model rescues, new colours",
+        "short": "Rescues 2, colours",
+        "note": "The best model so far tested with random colours and lighting.",
+        "parent": "robust",
+        "kind": "eval"
+      }
     }
   ]
 }
