@@ -1119,3 +1119,4 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   within minutes of the slot freeing. Queue topped up with **H30 x_round3_b2mix** (a plain round from the new best
   107 on the batch-2 mix, also batch 3's reference; site field set). Steps: control_long 10760, lr5e6 2980,
   control_s2 720, data_b2_s1 540, ema 1760. A10: robust goal75 4000 running. Site synced.
+- **2026-10-18 04:49** [scheduler] 193.122.189.119 was idle; launched **dagger18_from_b2** (Track B batch 3 (on-policy): batch 2, rescued from the best checkpoint of its time, is the first data version to lead its reference; the next batch is rescued from the new best (x_data_b2 step 6000, 107/120) on handover and two_bins, takeover 2-16 s, seeds 1800000+. Data collection only; its A/B gets a site node when queued)

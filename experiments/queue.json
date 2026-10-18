@@ -1440,11 +1440,13 @@
     {
       "name": "dagger18_from_b2",
       "hypothesis": "Track B batch 3 (on-policy): batch 2, rescued from the best checkpoint of its time, is the first data version to lead its reference; the next batch is rescued from the new best (x_data_b2 step 6000, 107/120) on handover and two_bins, takeover 2-16 s, seeds 1800000+. Data collection only; its A/B gets a site node when queued",
-      "status": "queued",
+      "status": "running",
       "requires_on_host": [
         "runs/x_data_b2/step_0006000/model.pt"
       ],
-      "eval": "MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.dagger --checkpoint runs/x_data_b2/step_0006000 --tasks handover,two_bins --episodes-per-task 300 --takeover-min 2 --takeover-max 16 --seed 1800000 --out data/sim_dagger_v18"
+      "eval": "MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.dagger --checkpoint runs/x_data_b2/step_0006000 --tasks handover,two_bins --episodes-per-task 300 --takeover-min 2 --takeover-max 16 --seed 1800000 --out data/sim_dagger_v18",
+      "host": "193.122.189.119",
+      "started": "2026-10-18T04:49"
     }
   ]
 }
