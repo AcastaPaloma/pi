@@ -11,6 +11,12 @@ regenerates writeup/results-runs.js; the hand-written tree (writeup/results-cont
 score bars, per-checkpoint tables and running state always come from the boxes. It also writes
 writeup/results-loss.js, the training-loss history of every run (about 300 points each), which the page loads only
 when a reader opens the Loss view. Only the generated files and new clips are committed.
+
+Every hypothesis reaches the tree without a hand edit: a queue entry (experiments/queue.json) that carries
+"site": {"title", "note", "parent", "kind", optional "short", "when", "verdict", "result"} becomes a node branching
+from `parent` (kind "test"), joins `parent` as another seed (kind "replicate"), or feeds the lighting-and-colour
+node (kind "eval", the A10's robust_* jobs). Hand-written nodes in results-content.js win when they name the run.
+The checkpoint each run resumed from (runs/<run>/run.json, or RESUME= in a queued entry) gives the lineage tree.
 """
 import argparse
 import json
@@ -25,6 +31,10 @@ CLIPS = SITE / "assets" / "results"
 OUT = SITE / "results-runs.js"
 LOSS = SITE / "results-loss.js"
 HOSTS = ["192.222.52.191", "192.222.55.167"]
+A10 = "193.122.189.119"  # robustness scores only (outputs/robust_*)
+QUEUE = ROOT / "experiments" / "queue.json"
+CONTENT = SITE / "results-content.js"
+ROBUST_ALIAS = {"c1_5000": ("x_control_s1", 5000), "dagger2_7000": ("pi05_dagger2", 7000)}
 TASKS = ["pick_place_any", "bin", "handover", "two_bins"]
 NO_WATCH = {"x_control_s1"}  # filmed at step 5000 by hand (the best checkpoint); its clips are in results-content.js
 CLIP_RE = re.compile(r"^(pick_place|pick_place_any|bin|handover|two_bins)_(x_.+)_(\d+)_s(\d+)(_goal)?$")
@@ -45,17 +55,70 @@ def parse_name(name):
     return (m.group(1), int(m.group(2)), bool(m.group(3))) if m else (name, None, False)
 
 
+def queue_nodes(runs, resume, robust_raw):
+    """Tree additions from queue entries that carry "site", plus the lighting-and-colour rows."""
+    queue = json.loads(QUEUE.read_text())
+    named = set(re.findall(r"'(x_[a-z0-9_]+)'", CONTENT.read_text()))  # runs a hand-written node already shows
+    extra, replicates, pending = [], {}, []
+    for cls in ("h100", "a10"):
+        for e in queue[cls]:
+            site = e.get("site")
+            if not site or e.get("status") in ("cancelled", "failed"):
+                continue
+            if site["kind"] == "eval":
+                if e.get("status") in ("queued", "running"):
+                    m = re.match(r"^robust_(.+)_(\d+)$", e["name"])
+                    pending.append(ROBUST_ALIAS.get(e["name"][len("robust_"):], (m.group(1), int(m.group(2))) if m else (e["name"], None)))
+                continue
+            name = e["name"]
+            m = re.search(r"RESUME=runs/([^/\s]+)/step_0*(\d+)", e.get("train", ""))
+            if name not in resume and m:
+                resume[name] = [m.group(1), int(m.group(2))]
+            runs.setdefault(name, {"scores": [], "clips": [], "state": "queued", "step": 0, "of": None})
+            if name in named:
+                continue
+            if site["kind"] == "replicate":
+                replicates.setdefault(site["parent"], []).append(name)
+                continue
+            when = site.get("when") or (datetime.fromisoformat(e["started"][:10]).strftime("%b %-d") if e.get("started") else "Next")
+            extra.append({"id": name.replace("_", "-"), "runs": [name], "parent": site["parent"], "name": site["title"],
+                          "short": site.get("short", ""), "when": when, "changed": site["note"],
+                          "kind": site.get("verdict", "running"), "result": site.get("result", ""), "auto": True})
+    rows = []
+    for key, tasks in sorted(robust_raw.items()):
+        if any(t not in tasks for t in TASKS):
+            continue
+        m = re.match(r"^(.+)_(\d+)$", key)
+        run, step = ROBUST_ALIAS.get(key, (m.group(1), int(m.group(2))) if m else (key, None))
+        src = runs.get("base_dagger2" if run == "pi05_dagger2" else run, {})
+        plain = next((x["total"] for x in src.get("scores", []) if x["step"] == step and x["delay"] == 0 and not x["goal"]), None)
+        rows.append({"run": run, "step": step, "tasks": [tasks[t] for t in TASKS], "total": sum(tasks[t] for t in TASKS), "plain": plain})
+    rows.sort(key=lambda r: (r["run"] != "pi05_dagger2", r["run"], r["step"] or 0))
+    done = {(r["run"], r["step"]) for r in rows}  # the scheduler leaves finished A10 jobs marked running
+    return extra, replicates, {"rows": rows, "pending": [{"run": r, "step": s} for r, s in pending if (r, s) not in done]}
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--no-publish", action="store_true")
     args = ap.parse_args()
-    runs, notes, new_clips, started, loss = {}, [], 0, [], {}
-    for host in HOSTS:
+    runs, notes, new_clips, started, loss, resume, robust_raw = {}, [], 0, [], {}, {}, {}
+    for host in HOSTS + [A10]:
+        if host == A10:
+            subprocess.run(["rsync", "-a", str(ROOT / "scripts/box/results_status.py"), f"ubuntu@{host}:~/pi/scripts/box/"], check=True)
+            try:
+                robust_raw.update(json.loads(ssh(host, "cd ~/pi && python3 scripts/box/results_status.py"))["robust"])
+            except (RuntimeError, ValueError, KeyError) as exc:
+                notes.append(f"A10 unreadable: {exc}")
+            continue
         subprocess.run(["rsync", "-a", str(ROOT / "scripts/box/showcase_when_ready.sh"), str(ROOT / "scripts/box/results_status.py"),
                         f"ubuntu@{host}:~/pi/scripts/box/"], check=True)
         subprocess.run(["rsync", "-a", str(ROOT / "scripts/record_showcase.py"), f"ubuntu@{host}:~/pi/scripts/"], check=True)
         state = json.loads(ssh(host, "cd ~/pi && python3 scripts/box/results_status.py"))
+        for run, src in state.get("resume", {}).items():
+            if src:
+                resume.setdefault(run, [re.sub(r"_snap$", "", src[0]), src[1]])
         for run, curve in state.get("loss", {}).items():
             if run.startswith("fsdp") or len(curve["s"]) <= len(loss.get(run, {}).get("s", [])):
                 continue  # keep the longest copy when a run exists on both boxes
@@ -101,13 +164,18 @@ def main():
     for entry in runs.values():
         entry["scores"] = sorted(entry["scores"].values(), key=lambda s: (s["goal"], s["delay"], s["step"]))
         entry["clips"].sort(key=lambda c: (c["step"], c["goal"], c["seed"]))
+    extra, replicates, robust = queue_nodes(runs, resume, robust_raw)
     body = "{\n" + ",\n".join(f" {json.dumps(k)}: {json.dumps(v, sort_keys=True)}" for k, v in sorted(runs.items())) + "\n}"
-    header = "// Generated by scripts/sync_results_site.py from the training boxes; do not edit by hand.\n"
+    more = (f"export const lineage = {json.dumps(dict(sorted(resume.items())), sort_keys=True)};\n"
+            f"export const extraNodes = {json.dumps(extra, sort_keys=True)};\n"
+            f"export const replicates = {json.dumps(replicates, sort_keys=True)};\n"
+            f"export const robust = {json.dumps(robust, sort_keys=True)};\n")
+    header = "// Generated by scripts/sync_results_site.py from the training boxes and experiments/queue.json; do not edit by hand.\n"
     old = OUT.read_text() if OUT.exists() else ""
-    changed = f"export const runs = {body};" not in old
+    changed = f"export const runs = {body};\n{more}" not in old
     if changed:
         stamp = datetime.now().strftime("%-d %b %Y, %H:%M")
-        OUT.write_text(f"{header}export const updated = '{stamp}';\nexport const runs = {body};\n")
+        OUT.write_text(f"{header}export const updated = '{stamp}';\nexport const runs = {body};\n{more}")
     loss_body = "{\n" + ",\n".join(f" {json.dumps(k)}: {json.dumps(v, separators=(',', ':'))}" for k, v in sorted(loss.items())) + "\n}"
     loss_old = LOSS.read_text() if LOSS.exists() else ""
     if loss and f"export const loss = {loss_body};" not in loss_old:

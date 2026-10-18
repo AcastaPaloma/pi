@@ -95,3 +95,55 @@
 .loss-foot{font:11px/1.45 Arial,sans-serif;color:#8b8b84;margin-top:8px}
 .loss-empty{flex:1;display:grid;place-content:center;text-align:center;font:13px/1.5 Arial,sans-serif;color:var(--secondary);padding:24px}
 @media(max-width:760px){.stage-switch{right:10px;top:10px}.stage-switch button{padding:3px 8px;font-size:11.5px}.clip-card{max-width:calc(100% - 130px)}.loss-view{padding:12px 14px 12px}.loss-head{padding-right:104px;margin-bottom:6px}.loss-title{font-size:17px}.loss-foot{display:none}}
+
+/* List | Tree: how the reading column shows the experiments */
+.results-page .reading-nav{gap:14px}
+.layout-switch{display:flex;gap:2px;padding:3px;border:1px solid var(--rule);border-radius:5px;margin-left:auto}
+.layout-switch button{padding:4px 10px;border-radius:3px;font:12px/1.2 Arial,sans-serif;color:var(--secondary)}
+.layout-switch button:hover{color:var(--ink);background:#1a1a1a06}
+.layout-switch button[aria-pressed=true]{background:var(--accent);color:#fff}
+
+/* Tree view: the lineage of every experiment */
+.lineage{position:relative;margin:0 0 8px}
+.lineage-tools{display:flex;align-items:center;gap:6px;margin:0 0 6px;font:12px/1.4 Arial,sans-serif;color:var(--secondary)}
+.lineage-hint{margin-right:auto}
+.lineage-tools button{width:26px;height:24px;border:1px solid var(--rule);border-radius:4px;font:15px/1 Arial,sans-serif;color:var(--secondary)}
+.lineage-tools button:hover{color:var(--ink);border-color:var(--secondary)}
+.lineage-scroll{overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;padding:2px 0 6px;border-bottom:1px solid var(--rule)}
+.lineage-svg{display:block}
+.lineage-svg .edge{fill:none;stroke-width:1.4}
+.lineage-svg .edge-main,.lineage-svg .edge-running,.lineage-svg .edge-finished{stroke:#1f3a8a}
+.lineage-svg .edge-dead{stroke:#bdbdb6}
+.lineage-svg .edge-queued{stroke:#1f3a8a66;stroke-dasharray:3 3}
+.lineage-svg .edge-test{stroke-dasharray:1.5 3}
+.lineage-svg .mark{cursor:pointer;outline:none}
+.lineage-svg .mark-root{cursor:default}
+.lineage-svg .dot{stroke-width:1.6}
+.lineage-svg .mark-main .dot{fill:#1f3a8a;stroke:#1f3a8a}
+.lineage-svg .mark-dead .dot{fill:var(--paper);stroke:#9a9a93}
+.lineage-svg .mark-running .dot,.lineage-svg .mark-finished .dot{fill:var(--paper);stroke:#1f3a8a}
+.lineage-svg .mark-queued .dot{fill:var(--paper);stroke:#1f3a8a80;stroke-dasharray:2 2}
+.lineage-svg .mark-root .dot{fill:#1a1a1a}
+.lineage-svg .ring-base{fill:none;stroke:#1a1a1a10;stroke-width:2}
+.lineage-svg .ring{fill:none;stroke:#1f3a8a55;stroke-width:2;stroke-linecap:round}
+.lineage-svg .mark-dead .ring{stroke:#9a9a9366}
+.lineage-svg .end{stroke:#9a9a93;stroke-width:1.6}
+.lineage-svg .label{font:12px/1 Arial,sans-serif;fill:var(--ink)}
+.lineage-svg .mark-dead .label{fill:var(--secondary)}
+.lineage-svg .mark-queued .label{fill:#8b8b84}
+.lineage-svg .mark-root .label{font:italic 13px Georgia,'Times New Roman',serif}
+.lineage-svg .mark:hover .label,.lineage-svg .mark:focus-visible .label,.lineage-svg .mark.is-current .label{fill:var(--accent)}
+.lineage-svg .mark.is-current .dot{stroke-width:2.4}
+.lineage-svg .mark:focus-visible .dot{stroke:var(--accent);stroke-width:2.6}
+.lineage-svg .pulse{fill:none;stroke:#1f3a8a;stroke-width:1.2;opacity:0}
+@media(prefers-reduced-motion:no-preference){.lineage-svg .pulse{animation:node-pulse 2.4s ease-out infinite;transform-box:fill-box;transform-origin:center}}
+@keyframes node-pulse{0%{opacity:.55;transform:scale(1)}100%{opacity:0;transform:scale(2.4)}}
+.lineage-card{position:absolute;z-index:6;width:min(300px,calc(100% - 16px));background:var(--paper);border:1px solid var(--rule);border-radius:5px;box-shadow:0 10px 26px #1a1a1a14;padding:10px 12px;pointer-events:none}
+.lineage-card .card-when{display:block;font:10.5px/1.4 Arial,sans-serif;letter-spacing:.04em;text-transform:uppercase;color:var(--secondary)}
+.lineage-card .card-name{display:block;font:400 16px/1.3 Georgia,'Times New Roman',serif;color:var(--accent);margin:2px 0 4px}
+.lineage-card p{margin:0 0 4px;font:13px/1.45 Arial,sans-serif;color:var(--ink)}
+.lineage-card .card-score{font-variant-numeric:tabular-nums}
+.lineage-card .card-meta{color:var(--secondary);font-size:12px}
+.lineage-detail .node-detail{padding-top:12px}
+.robust-table td{min-width:64px}
+@media(max-width:760px){.layout-switch button{padding:3px 8px;font-size:11.5px}.results-page .step-counter{display:none}.lineage-hint{font-size:11px}}

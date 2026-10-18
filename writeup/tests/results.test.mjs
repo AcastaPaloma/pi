@@ -1,9 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { existsSync, statSync } from 'node:fs';
-import { nodes, tasks, lossPlan } from '../results-content.js';
+import { nodes, tasks, lossPlan, treeRoots } from '../results-content.js';
+import { lineageParents } from '../results-tree.js';
 import { loss } from '../results-loss.js';
-import { runs, updated } from '../results-runs.js';
+import * as gen from '../results-runs.js';
+const { runs, updated } = gen;
 
 const here = new URL('..', import.meta.url);
 
@@ -86,4 +88,53 @@ test('loss curves: the plan names real nodes and runs, and every curve is sound 
     assert.ok(curve.f.every(v => Number.isFinite(v) && v >= 0), `${run}: finite, non-negative losses`);
   }
   assert.ok(statSync(new URL('results-loss.js', here)).size < 1e6, 'results-loss.js stays under 1 MB');
+});
+
+test('queue-derived nodes and replicates attach to real nodes', () => {
+  const ids = new Set(nodes.map(n => n.id));
+  for (const n of gen.extraNodes || []) {
+    assert.match(n.id, /^[a-z0-9-]+$/, `${n.id}: ids are used in URLs`);
+    assert.ok(!ids.has(n.id), `${n.id}: collides with a hand-written node`);
+    assert.ok(n.name && n.changed && n.when, `${n.id}: needs a title, a note and a date`);
+    assert.ok(ids.has(n.parent), `${n.id}: parent ${n.parent} is not a node`);
+    for (const run of n.runs) assert.ok(runs[run], `${n.id}: run ${run} missing from the generated data`);
+  }
+  for (const [parent, list] of Object.entries(gen.replicates || {})) {
+    assert.ok(ids.has(parent), `replicates attach to an existing node, not ${parent}`);
+    for (const run of list) assert.match(run, /^x_[a-z0-9_]+$/);
+  }
+});
+
+test('lighting-and-colour rows name real models with sane totals', () => {
+  const robust = gen.robust || { rows: [], pending: [] };
+  const known = new Set(nodes.flatMap(n => [...(n.runs || []), ...((lossPlan[n.id] || {}).lines || []).map(l => l[0])]));
+  for (const id of Object.values(gen.replicates || {}).flat()) known.add(id);
+  for (const n of gen.extraNodes || []) n.runs.forEach(r => known.add(r));
+  assert.ok(nodes.some(n => n.robust), 'the tree has the lighting-and-colour node');
+  for (const r of robust.rows) {
+    assert.ok(known.has(r.run), `robust row ${r.run} is not shown by any node`);
+    assert.equal(r.tasks.length, 4);
+    assert.equal(r.total, r.tasks.reduce((a, b) => a + b, 0));
+    assert.ok(r.total <= 120 && r.tasks.every(t => t >= 0 && t <= 30));
+    if (r.plain !== null && r.plain !== undefined) assert.ok(r.plain >= 0 && r.plain <= 120);
+  }
+});
+
+test('every node hangs from a parent in the lineage tree', () => {
+  const extra = (gen.extraNodes || []).map(n => ({ ...n, depth: 1, clips: [] }));
+  const all = [...nodes, ...extra];
+  const parents = lineageParents(all, gen.lineage || {}, lossPlan, treeRoots);
+  const ids = new Set([...all.map(n => n.id), ...treeRoots.map(r => r.id)]);
+  for (const n of all) {
+    const p = parents.get(n.id);
+    assert.ok(p, `${n.id}: no lineage parent (add 'from' or a resume record)`);
+    assert.ok(ids.has(p.id) && p.id !== n.id, `${n.id}: parent ${p.id} does not resolve`);
+  }
+  const seen = new Set();  // no cycles: walking up from any node reaches a root
+  for (const n of all) {
+    let id = n.id, hops = 0;
+    while (parents.get(id) && hops++ < all.length) id = parents.get(id).id;
+    assert.ok(treeRoots.some(r => r.id === id), `${n.id}: walks up to ${id}, not a starting point`);
+    seen.add(id);
+  }
 });

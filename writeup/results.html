@@ -8,8 +8,8 @@
   <title>π0.7 results · Kuan Yi Wang</title>
   <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./style.css?v=20261017-r1">
-  <link rel="stylesheet" href="./results.css?v=20261018-x5">
-  <script type="module" src="./results.js?v=20261018-x5"></script>
+  <link rel="stylesheet" href="./results.css?v=20261018-t1">
+  <script type="module" src="./results.js?v=20261018-t1"></script>
 </head>
 <body class="results-page">
   <a class="skip-link" href="#reader">Skip to the experiment tree</a>
@@ -31,6 +31,7 @@
     <aside class="notes" aria-label="Results">
       <div class="reading-nav">
         <nav class="page-tabs" aria-label="Write-up sections"><a href="./">Inference</a><a href="training.html">Training</a><a href="results.html" aria-current="page">Results</a></nav>
+        <div class="layout-switch" role="group" aria-label="How the experiments are shown"><button type="button" id="layout-list" aria-pressed="true">List</button><button type="button" id="layout-tree" aria-pressed="false">Tree</button></div>
         <span class="step-counter" id="counter"></span>
       </div>
       <div class="reader" id="reader" tabindex="0" aria-label="Experiment tree">
@@ -43,11 +44,17 @@
           <section class="reading-block tree-block">
             <div class="tree-legend" aria-hidden="true"><span class="lg lg-main">kept</span><span class="lg lg-dead">dropped</span><span class="lg lg-running">running now</span></div>
             <ol class="tree" id="tree"></ol>
+            <div class="lineage" id="lineage" hidden>
+              <div class="lineage-tools"><span class="lineage-hint">Each branch starts from the checkpoint it was trained from.</span><button type="button" id="lineage-out" aria-label="Zoom out">−</button><button type="button" id="lineage-in" aria-label="Zoom in">+</button></div>
+              <div class="lineage-scroll" id="lineage-scroll"></div>
+              <div class="lineage-card" id="lineage-card" hidden></div>
+              <div class="lineage-detail" id="lineage-detail"></div>
+            </div>
             <p class="results-updated" id="updated"></p>
           </section>
           <section class="reading-block">
             <p class="results-note">Scores count a trial as a success only when the object was really picked up, not pushed into place. Two-arm models are tested on the same 30 random layouts for each of the four tasks (120 trials). Scores before October 17 were measured with an earlier renderer; the same model scores 86 there and 90 now.</p>
-            <p class="results-note">All scores use the simulator’s plain default look. The training data was recorded with random table and cube colours, lighting and small camera shifts; under that same randomization the best model scores 95 of 120 instead of 104, losing most on the two-arm tasks (handover 21 of 30 instead of 24, two cubes 18 instead of 21), so these numbers flatter it a little.</p>
+            <p class="results-note">The main scores use the simulator’s plain default look, while every training example had random table and cube colours, lighting and small camera shifts. “Does it still work with different lighting and colours?” in the tree scores the same models with that randomness switched on.</p>
           </section>
         </article>
       </div>

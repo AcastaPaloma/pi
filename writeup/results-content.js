@@ -18,9 +18,17 @@ export const tasks = {
 const clip = (stem, task, layout, success, seconds, rate, label) =>
   ({ task, layout, success, seconds, rate, label, video: `assets/results/${stem}.mp4`, poster: `assets/results/${stem}.jpg` });
 
+// Starting points of the lineage tree: models we started from but did not train ourselves.
+export const treeRoots = [
+  { id: 'root-gemma', name: 'Gemma 3', note: 'A model trained on images and text, never on robots.' },
+  { id: 'root-pi05', name: 'π0.5', note: 'A model pretrained on more than 10,000 hours of real robot data.' },
+];
+
+// Lineage (Tree view): each node hangs from the checkpoint its runs resumed from (results-runs.js `lineage`,
+// read from runs/<run>/run.json); `from` sets it by hand where no run records it; `short` is the tree label.
 export const nodes = [
   {
-    id: 'paper', kind: 'dead', depth: 0, when: 'Oct 14–15',
+    id: 'paper', short: 'π0.7 from the paper', from: 'root-gemma', kind: 'dead', depth: 0, when: 'Oct 14–15',
     name: 'π0.7 built from the paper',
     score: { value: 2, of: 20, label: 'best checkpoint, one arm' },
     changed: 'We built the full π0.7 model from the paper at its real size (about 5 billion parameters) and trained it on our scripted demonstrations, starting from Gemma 3, a model trained on images and text.',
@@ -29,7 +37,7 @@ export const nodes = [
     clips: [],
   },
   {
-    id: 'public', kind: 'dead', depth: 1, when: 'Oct 15',
+    id: 'public', short: 'Public model', from: 'root-pi05', kind: 'dead', depth: 1, when: 'Oct 15',
     name: 'A public robot model, as is',
     score: { value: 0, of: 10, label: 'first test' },
     changed: 'We tried a publicly released π0.5 model fine-tuned for SO-101 arms, without any training of our own.',
@@ -38,7 +46,7 @@ export const nodes = [
     clips: [],
   },
   {
-    id: 'pi05-single', kind: 'main', depth: 0, when: 'Oct 15',
+    id: 'pi05-single', short: 'π0.5, one arm', from: 'root-pi05', kind: 'main', depth: 0, when: 'Oct 15',
     name: 'Switch to π0.5’s pretrained brain, one arm',
     score: { value: 26, of: 30, label: 'one arm' },
     changed: 'We kept our data and the π0.7 way of prompting, but started from π0.5, a model pretrained on more than 10,000 hours of real robot data.',
@@ -47,7 +55,7 @@ export const nodes = [
     clips: [],
   },
   {
-    id: 'two-arms', kind: 'main', depth: 0, when: 'Oct 16',
+    id: 'two-arms', short: 'Two arms, 4 tasks', from: 'root-pi05', kind: 'main', depth: 0, when: 'Oct 16',
     name: 'Two arms, four tasks',
     score: { value: 83, of: 120 },
     changed: 'One model for both arms and four tasks of rising difficulty, trained for 20,000 steps on 4,800 demonstrations.',
@@ -56,7 +64,7 @@ export const nodes = [
     clips: [],
   },
   {
-    id: 'soup', kind: 'dead', depth: 1, when: 'Oct 16',
+    id: 'soup', short: 'Checkpoint average', from: 'two-arms', kind: 'dead', depth: 1, when: 'Oct 16',
     name: 'Average several checkpoints',
     score: { value: 74, of: 120 },
     changed: 'Checkpoints were good at different tasks, so we averaged six of them into one model.',
@@ -65,7 +73,7 @@ export const nodes = [
     clips: [],
   },
   {
-    id: 'recover', kind: 'dead', depth: 1, when: 'Oct 16',
+    id: 'recover', short: 'Staged mistakes', kind: 'dead', depth: 1, when: 'Oct 16',
     name: 'Practice recovering from staged mistakes',
     score: { value: 72, of: 120 },
     changed: 'We added demonstrations with deliberate fumbles (knocked cubes, missed grasps) followed by recoveries.',
@@ -74,7 +82,7 @@ export const nodes = [
     clips: [],
   },
   {
-    id: 'restart', kind: 'dead', depth: 1, when: 'Oct 16',
+    id: 'restart', short: 'Different start', kind: 'dead', depth: 1, when: 'Oct 16',
     name: 'A second run from a different start',
     score: { value: 52, of: 120 },
     changed: 'A separate two-arm run warm-started from the one-arm model, with the recovery data mixed in.',
@@ -83,7 +91,7 @@ export const nodes = [
     clips: [],
   },
   {
-    id: 'dagger', kind: 'main', depth: 0, when: 'Oct 16–17',
+    id: 'dagger', short: 'From its mistakes', kind: 'main', depth: 0, when: 'Oct 16–17',
     name: 'Learning from its own mistakes',
     score: { value: 86, of: 120 },
     changed: 'We let the model run, and when it got stuck the scripted teacher took over from exactly that moment. Those rescues became new training data (a method called DAgger), in two rounds.',
@@ -92,7 +100,7 @@ export const nodes = [
     clips: [],
   },
   {
-    id: 'gentle', kind: 'main', depth: 0, when: 'Oct 17',
+    id: 'gentle', short: 'Gentle training', kind: 'main', depth: 0, when: 'Oct 17',
     name: 'Longer, gentler training',
     runs: ['x_control_s0', 'x_control_s1'],
     changed: 'The same model and data, trained 6,000 more steps with smaller updates. Run twice with different random seeds, because two identical runs landed 16 points apart at the same checkpoint.',
@@ -101,7 +109,15 @@ export const nodes = [
     clips: [],
   },
   {
-    id: 'rtc', kind: 'dead', depth: 1, when: 'Oct 17',
+    id: 'robust', short: 'Lighting and colours', from: 'gentle', kind: 'running', depth: 1, when: 'Oct 17–18', robust: true,
+    name: 'Does it still work with different lighting and colours?',
+    changed: 'Every training example had random table and cube colours, lighting and small camera shifts, but the main scores use the simulator’s plain look. Here the same 30 layouts per task are scored again with that randomness switched on.',
+    result: 'So far the gain from gentle training carries over, though less cleanly than the plain look suggests: the table compares each model on both.',
+    next: 'More checkpoints are being scored on the small GPU as they finish.',
+    clips: [],
+  },
+  {
+    id: 'rtc', short: 'Acting while thinking', kind: 'dead', depth: 1, when: 'Oct 17',
     name: 'Acting while thinking',
     runs: ['x_rtc_s0', 'x_rtc_s1'],
     changed: 'A real robot keeps moving while the model computes its next move. This trains the model to continue smoothly from the actions it already committed to.',
@@ -110,7 +126,7 @@ export const nodes = [
     clips: [],
   },
   {
-    id: 'memory', kind: 'running', depth: 1, when: 'Oct 17',
+    id: 'memory', short: 'Memory', kind: 'running', depth: 1, when: 'Oct 17',
     name: 'Memory of the last few seconds',
     runs: ['x_mem_s0', 'x_mem_s1'],
     changed: 'Instead of only the current camera frame, the model also sees frames from the last five seconds, so it could remember where things were.',
@@ -119,7 +135,7 @@ export const nodes = [
     clips: [],
   },
   {
-    id: 'goals', kind: 'dead', depth: 1, when: 'Oct 17',
+    id: 'goals', short: 'Goal pictures', kind: 'dead', depth: 1, when: 'Oct 17',
     name: 'Pictures of the goal',
     runs: ['x_goal_s0', 'x_goal_s1'],
     changed: 'The model also learns from a picture of what the scene should look like two seconds ahead. At test time the simulator supplies a perfect picture.',
@@ -128,7 +144,7 @@ export const nodes = [
     clips: [],
   },
   {
-    id: 'goals-most', kind: 'running', depth: 1, when: 'Oct 17',
+    id: 'goals-most', short: 'Goal pictures, more', kind: 'running', depth: 1, when: 'Oct 17',
     name: 'Goal pictures in most training examples',
     runs: ['x_goal75_s0'],
     changed: 'The same idea, but with a goal picture in three of every four training examples instead of one in four, in case the model simply never learned to use them.',
@@ -137,7 +153,7 @@ export const nodes = [
     clips: [],
   },
   {
-    id: 'insulation', kind: 'dead', depth: 1, when: 'Oct 17',
+    id: 'insulation', short: 'Protected vision', kind: 'dead', depth: 1, when: 'Oct 17',
     name: 'Protecting the vision part',
     runs: ['x_ki_s0'],
     changed: 'π0.7 trains its vision-and-language part separately from the part that moves the arms. We tried that here.',
@@ -146,7 +162,7 @@ export const nodes = [
     clips: [],
   },
   {
-    id: 'insulation-slow', kind: 'dead', depth: 1, when: 'Oct 17',
+    id: 'insulation-slow', short: 'Protected, slowly', kind: 'dead', depth: 1, when: 'Oct 17',
     name: 'Protecting it, more slowly',
     runs: ['x_ki_vlm01_s0'],
     changed: 'The same, with the vision-and-language part learning ten times more slowly, so the part that moves the arms could keep up.',
@@ -155,7 +171,7 @@ export const nodes = [
     clips: [],
   },
   {
-    id: 'rescues-1', kind: 'running', depth: 1, when: 'Oct 17',
+    id: 'rescues-1', short: 'Rescues, previous model', kind: 'running', depth: 1, when: 'Oct 17',
     name: 'More rescues, from the previous model',
     runs: ['x_data_v11', 'x_data_v11_s1'],
     changed: 'About 980 new rescue episodes on the two hard tasks: the previous best model ran, and the scripted teacher took over whenever it got stuck. Added to the training data.',
@@ -164,7 +180,7 @@ export const nodes = [
     clips: [],
   },
   {
-    id: 'rescues-2', kind: 'running', depth: 1, when: 'Oct 17–18',
+    id: 'rescues-2', short: 'Rescues, best model', kind: 'running', depth: 1, when: 'Oct 17–18',
     name: 'More rescues, from the best model',
     runs: ['x_data_b2'],
     changed: 'About 510 rescue episodes collected from the current best model instead, added to the data, and trained further from that model.',
@@ -173,7 +189,7 @@ export const nodes = [
     clips: [],
   },
   {
-    id: 'longer', kind: 'running', depth: 1, when: 'Oct 17–18',
+    id: 'longer', short: 'Twice as long', kind: 'running', depth: 1, when: 'Oct 17–18',
     name: 'Twice as long',
     runs: ['x_control_long_s0'],
     changed: 'The plain recipe run for 12,000 steps instead of 6,000, since the plain runs were still improving when they stopped.',
@@ -182,7 +198,7 @@ export const nodes = [
     clips: [],
   },
   {
-    id: 'round-two', kind: 'running', depth: 1, when: 'Oct 17–18',
+    id: 'round-two', short: 'Round two', kind: 'running', depth: 1, when: 'Oct 17–18',
     name: 'A second round from the best checkpoint',
     runs: ['x_control_r2_s0', 'x_control_r2_s1'],
     changed: 'The same gentle training again, starting from the best checkpoint (104), to see whether the gain keeps adding up. Also the comparison for the two experiments that start from that checkpoint.',
@@ -191,7 +207,7 @@ export const nodes = [
     clips: [],
   },
   {
-    id: 'two-cubes-more', kind: 'running', depth: 1, when: 'Oct 18',
+    id: 'two-cubes-more', short: 'Two cubes, more often', kind: 'running', depth: 1, when: 'Oct 18',
     name: 'Practise the two-cube task more',
     runs: ['x_twobins2x_r2'],
     changed: 'The same second round, but showing the two-cube task twice as often, since it is now the weakest of the four.',
@@ -231,6 +247,7 @@ const ROUND_TWO = [['x_control_r2_s0', 'Control'], ['x_control_r2_s1', 'Control'
 export const lossPlan = {
   paper: { lines: [['full_v1', 'Paper size (5B)'], ['small_v1', 'Small (0.3B)']] },
   public: { note: 'This step had no training of our own, so there is no loss curve.' },
+  robust: { note: 'This is a test of finished models, not a training run, so there is no loss curve.' },
   'pi05-single': { lines: [['pi05_single', 'One arm']] },
   'two-arms': { lines: [['pi05_v1', 'Two arms, four tasks']] },
   soup: { note: 'Averaging checkpoints involves no training, so there is no loss curve.' },
