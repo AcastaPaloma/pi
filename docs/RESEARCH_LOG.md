@@ -1020,3 +1020,9 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   goal75 1780, data_b2 1780, twobins2x 80.
 - **2026-10-18 00:42** [scheduler] 193.122.189.119 was idle; launched **robust_x_control_s0_6000** (H26: the low-LR continuation's gain is mostly on the default look. Under visual randomization (the training distribution) the previous best scores 94 and the best continuation checkpoint 95, against 90 and 104 on the default look. Robust scores of more continuation checkpoints say whether the continuation improved the policy or only its default-look score)
 - **2026-10-18 00:49** [scheduler] 192.222.55.167:0 was idle; launched **x_control_r2_s1** (H24 replicate (seed 1): the second-round control is the reference for both x_data_b2 and x_twobins2x_r2, and the first-round twins differed by up to 16 points at one checkpoint, so the reference needs two seeds)
+- **2026-10-18 00:52** New: **goal_s1 step 4000 with oracle goals = 85, without = 98** (third with/without pair,
+  all negative: 76/87, 90/105, 75/89, 85/98); **x_data_v11_s1 step 5000 = 96** (91, 98, 96); **x_control_long_s0
+  step 4000 = 92** (12000-step run, LR still high at 4000, so not comparable to the 6000-step runs yet). mem_s1
+  finished; the scheduler started **x_control_r2_s1** at 00:49. A10: robust_x_control_s0_6000 running (pick 30/30
+  so far with randomization). Site sync: 7 new clips, pushed. Steps: control_long 5260, control_r2 3560, data_b2
+  2280, goal75 2200, twobins2x 580. All GPUs busy; scheduler and caffeinate alive.
