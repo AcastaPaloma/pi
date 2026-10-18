@@ -1222,7 +1222,7 @@
     {
       "name": "robust_x_data_v11_6000",
       "hypothesis": "H26: the low-LR continuation's gain is mostly on the default look. Under visual randomization (the training distribution) the previous best scores 94 and the best continuation checkpoint 95, against 90 and 104 on the default look. Robust scores of more continuation checkpoints say whether the continuation improved the policy or only its default-look score",
-      "status": "queued",
+      "status": "failed",
       "requires_on_host": [
         "runs/x_data_v11/step_0006000/model.pt"
       ],
@@ -1232,7 +1232,10 @@
         "parent": "robust",
         "kind": "eval",
         "note": "The same 30 test layouts per task, but with random table and cube colours and lighting, as in the training data."
-      }
+      },
+      "host": "193.122.189.119",
+      "started": "2026-10-18T01:58",
+      "error": "job tag SCHEDJOB_robust_x_data_v11_6000 not seen and GPU not busy on 193.122.189.119 within 15 minutes"
     },
     {
       "name": "robust_x_control_s0_4000",

@@ -1054,3 +1054,4 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   Steps: control_long 6600, control_r2 4820, control_r2_s1 1300, data_b2 3600, goal75 3360, twobins2x 2060. A10:
   robust_x_goal_s0_6000 running. Site synced (22 runs, 63 scores). All GPUs busy; H100 queue three deep (lr5e6, ema,
   control_s2); scheduler and caffeinate alive.
+- **2026-10-18 02:14** [scheduler] launch of robust_x_data_v11_6000 on 193.122.189.119 failed: job tag SCHEDJOB_robust_x_data_v11_6000 not seen and GPU not busy on 193.122.189.119 within 15 minutes
