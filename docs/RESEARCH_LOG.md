@@ -908,3 +908,10 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   takeovers at 3-14 s from the best checkpoint), and **x_data_b2** (blocked: on-policy batch v14 + v15 on top of
   batch 1, resumed from the best checkpoint, against x_control_r2_s0). ki_vlm01 flow 0.080 at 2520 (flat), CE 6.1;
   its step-3000 score comes next. Steps: data_v11 2340, mem_s1 2320, rtc_s1 5020, goal_s1 3780. All busy.
+- **2026-10-17 20:50** rtc_s0 step 6000 at delay 12 = 23 / 23 / 16 / 14 = **76**, completing the step-6000 delay
+  curves: **rtc 101 / 89 / 76 vs control 95 / 99 / 82** at delays 0 / 6 / 12. RTC is better at no delay by 6 (inside
+  the run-to-run spread) and worse under every delay, the opposite of H19. goal_s1 step 3000 = 26 / 27 / 18 / 18 =
+  89 (goal_s0 had 87 there). ki_vlm01 flow 0.068 at 2980 (drifting down slowly), CE 6.0, FAST accuracy 5%; its
+  step-3000 score is next. Steps: data_v11 2840, data_v11_s1 500, mem_s1 2600, rtc_s1 5520, goal_s1 4140.
+  dagger15 two_bins 80/300 (kept 44, success 31; 36 skipped: the policy finished or failed before the late
+  takeover). All seven GPUs busy; scheduler and caffeinate alive.
