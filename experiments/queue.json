@@ -718,7 +718,7 @@
     {
       "name": "x_twobins2x_s1",
       "hypothesis": "H18 replicate (seed 1): two_bins x2 lifted two_bins to 24 and 22 at steps 3000 and 4000 against 16 for its reference",
-      "status": "queued",
+      "status": "running",
       "train": "PI_TASK_WEIGHTS=two_bins=2 SEED=1 PI_TRIM_STILL_TAIL_S=1 LR=1e-5 RESUME=runs/x_control_s1/step_0005000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdagclean_v1 runs/{RUN} 6000",
       "eval": "GPU=0 VARIANTS='d0' bash scripts/box/c30_when_ready.sh runs/{RUN} 3000 4000 5000 6000",
       "requires_on_host": [
@@ -731,7 +731,9 @@
         "note": "The same experiment repeated with a different random start.",
         "parent": "two-cubes-more",
         "kind": "replicate"
-      }
+      },
+      "host": "192.222.52.191:1",
+      "started": "2026-10-18T06:50"
     },
     {
       "name": "x_round3_b2mix",

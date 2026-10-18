@@ -1158,3 +1158,4 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   new best's robustness, then **failmine_b2_6000** (failure types of the 107 checkpoint on non-test seeds, to aim round
   19; analysis only, not a tree node). New: x_control_lr5e6_s0 step 4000 = 91 (94, 91); rtc_s1 step 6000 at delay 12 =
   81. Steps: combo 1460, lr5e6 5960, ema 4840, control_s2 3740, data_b2_s1 3700, goal75_s1 2380. Site synced.
+- **2026-10-18 06:50** [scheduler] 192.222.52.191:1 was idle; launched **x_twobins2x_s1** (H18 replicate (seed 1): two_bins x2 lifted two_bins to 24 and 22 at steps 3000 and 4000 against 16 for its reference)
