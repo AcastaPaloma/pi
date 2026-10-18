@@ -1250,3 +1250,10 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   4620, goal75_b2 440. A10: robust batch-2 seed 1 running. All GPUs busy.
 - **2026-10-18 11:38** [scheduler] 192.222.55.167:3 was idle; launched **x_data_b4** (Track B batch 4: handover is the best model's weakest task (40/60 non-test); round 19 rescues handover only from that model (229 successful). Batch 3's mix plus round 19, from the same best checkpoint; compared with x_data_b3 (same, without round 19) on handover first)
 - **2026-10-18 12:24** [scheduler] 192.222.55.167:1 was idle; launched **x_data_b2_s2** (Third seed of the best recipe (batch 2: on-policy rescues from the best model), to firm up the round's main positive result before it is reported)
+- **2026-10-18 12:30** **H21b supported on two seeds:** x_goal75_s1 step 6000 with oracle goals = 27 / 28 / 23 / 23 =
+  **101 vs 95 without**; across both 75%-share seeds the with-goal mean is 98.3 vs 93.8 without (3 of 4 pairs positive),
+  the reverse of the 25% share (86.2 vs 94.3). Still an oracle upper bound. **H29 refuted:** combination 98.0 vs batch 2
+  alone 100.5. **x_round3_b2mix complete: 106 / 92 / 104 / 108, mean 102.5** (new best single checkpoint, 108; uploading).
+  x_data_b3: 102, 104 (finished; 5000/6000 scoring). **User email sent** with the results, every experiment's standing,
+  what is on Hugging Face (22 checkpoints, DAgger rounds 11-19) and the list of running/queued runs for terminations.
+  x_goal75_s1 6000 and x_combo 6000 are on HF. Queue: x_round4_r3, A10 robustness for round three and batch 3.
