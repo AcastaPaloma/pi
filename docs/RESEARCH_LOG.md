@@ -1224,3 +1224,11 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   6000); x_goal75_s1 at 5840 (with-goal 6000 pending), so the user email is still waiting. dagger19 380/400.
 - **2026-10-18 10:10** [scheduler] 192.222.52.191:0 was idle; launched **x_data_b3_s1** (Seed-1 twin of x_data_b3: data versions and their references need two seeds)
 - **2026-10-18 10:12** [scheduler] 192.222.55.167:0 was idle; launched **x_round3_b2mix_s1** (Seed-1 twin of x_round3_b2mix: data versions and their references need two seeds)
+- **2026-10-18 10:20** dagger19 done (400 episodes, 310 kept, 229 successful); v19 copying to both H100 hosts and
+  uploading to the public HF data repo. Queue refilled: **x_data_b4** (batch 3's mix plus round-19 handover rescues),
+  **x_data_b2_s2** (third seed of the winning batch-2 recipe), A10 robustness scores for x_combo_b2_tb2 4000 and
+  x_data_b2_s1 6000 (checkpoints copying), all with site fields. New: **x_combo_b2_tb2 = 88 / 101 / 100** at
+  3000-5000 (batch 2 alone: 96 / 97 / 102 / 107, so the two_bins x2 add-on does not help on top of batch 2);
+  **x_goal75_s1 step 5000 = 82** without goals (94, 89, 82); both runs finished training, their 6000 scores (and the
+  goal75_s1 with-goal 6000) are the last numbers before the user email. The scheduler started x_round3_b2mix_s1 at
+  10:11. Steps: data_b3_s1 80, twobins2x_s1 5240, round3 4080, data_b3 2940, control_long_s1 3000.

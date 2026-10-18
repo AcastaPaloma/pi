@@ -590,7 +590,7 @@
     {
       "name": "x_control_lr5e6_s0",
       "hypothesis": "H27: the continuation's learning rate matters (2.5e-5 dipped earlier, 1e-5 gained 7 points on the default look). Half of it (5e-6) from the same resume keeps the gain with less drift, which H26 suggests is the risk (default-look gains that do not carry to randomized visuals). Scored on the default look and, for the best checkpoint, with visual randomization",
-      "status": "running",
+      "status": "done",
       "train": "SEED=0 PI_TRIM_STILL_TAIL_S=1 LR=5e-6 RESUME=runs/pi05_dagger2/step_0007000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdagclean_v1 runs/{RUN} 6000",
       "eval": "GPU=0 VARIANTS='d0' bash scripts/box/c30_when_ready.sh runs/{RUN} 3000 4000 5000 6000",
       "requires_on_host": [
@@ -611,7 +611,7 @@
     {
       "name": "x_control_ema_s0",
       "hypothesis": "H28: checkpoints of one run swing by up to 21 points (control_s0: 82, 103, 96, 95), so any single checkpoint is a noisy pick. Keeping an exponential moving average of the weights during the low-LR continuation (--ema-decay 0.999, saved as the checkpoint) gives steadier checkpoints: smaller step-to-step swings and a mean at least as high as the plain control's 97.4 (an EMA run was planned on 2026-10-16 but never ran)",
-      "status": "running",
+      "status": "done",
       "train": "EMA=0.999 SEED=0 PI_TRIM_STILL_TAIL_S=1 LR=1e-5 RESUME=runs/pi05_dagger2/step_0007000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdagclean_v1 runs/{RUN} 6000",
       "eval": "GPU=0 VARIANTS='d0' bash scripts/box/c30_when_ready.sh runs/{RUN} 3000 4000 5000 6000",
       "requires_on_host": [
@@ -632,7 +632,7 @@
     {
       "name": "x_control_s2",
       "hypothesis": "Noise floor: a third seed of the first-round control. Every verdict this round leans on the control mean (97.4 from two seeds 6 points apart); a third seed tightens it, and it is the reference for H27 and H28",
-      "status": "running",
+      "status": "done",
       "train": "SEED=2 PI_TRIM_STILL_TAIL_S=1 LR=1e-5 RESUME=runs/pi05_dagger2/step_0007000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdagclean_v1 runs/{RUN} 6000",
       "eval": "GPU=0 VARIANTS='d0' bash scripts/box/c30_when_ready.sh runs/{RUN} 3000 4000 5000 6000",
       "requires_on_host": [
@@ -652,7 +652,7 @@
     {
       "name": "x_data_b2_s1",
       "hypothesis": "Seed-1 twin of x_data_b2 (its first checkpoint scored 96 against its reference's 89; a data version needs two seeds before it joins the mix)",
-      "status": "running",
+      "status": "done",
       "requires_on_host": [
         "runs/x_control_s1/step_0005000/model.pt",
         "data/sim_mixdagclean_v1",
@@ -675,7 +675,7 @@
     {
       "name": "x_goal75_s1",
       "hypothesis": "H21b replicate (seed 1): goal75_s0 scored 99 with oracle goals vs 93 without at step 3000, the reverse of the 25%-share runs; a second seed decides whether a larger goal share makes goal images reliably useful",
-      "status": "running",
+      "status": "done",
       "train": "SET='max_subgoals=1 subgoal_prob=0.75' SEED=1 PI_TRIM_STILL_TAIL_S=1 LR=1e-5 RESUME=runs/pi05_dagger2/step_0007000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdagclean_v1 runs/{RUN} 6000",
       "eval": "GPU=0 VARIANTS='d0 goal' bash scripts/box/c30_when_ready.sh runs/{RUN} 3000 6000 & GPU=0 VARIANTS='d0' bash scripts/box/c30_when_ready.sh runs/{RUN} 4000 5000",
       "requires_on_host": [
@@ -695,7 +695,7 @@
     {
       "name": "x_combo_b2_tb2",
       "hypothesis": "H29: the two positive signals add up. On-policy batch-2 data (x_data_b2: 96 / 97 / 102 / 107, mean 100.5 vs its reference's ~94.5) together with two_bins sampled twice as often (x_twobins2x_r2: two_bins 24 / 22 vs 16 at matched steps), from the same best checkpoint, beats each alone",
-      "status": "running",
+      "status": "done",
       "setup": "mkdir -p data/sim_mixdagclean_b2 && cd data/sim_mixdagclean_b2 && for d in ../sim_mixdagclean_v1/episode_*; do ln -sfn ../sim_mixdagclean_v1/$(basename $d) $(basename $d); done && for v in 14 15; do for d in ../sim_dagger_v$v/episode_*; do grep -qs '\"success\": true' $d/meta.json && ln -sfn $d episode_dag${v}_$(basename $d | cut -d_ -f2); done; done; true",
       "train": "PI_TASK_WEIGHTS=two_bins=2 SEED=0 PI_TRIM_STILL_TAIL_S=1 LR=1e-5 RESUME=runs/x_control_s1/step_0005000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdagclean_b2 runs/{RUN} 6000",
       "eval": "GPU=0 VARIANTS='d0' bash scripts/box/c30_when_ready.sh runs/{RUN} 3000 4000 5000 6000",
@@ -868,6 +868,50 @@
         "note": "The two ideas that looked best, together: goal pictures in most training examples, trained on the new rescue data from the best model.",
         "parent": "rescues-2",
         "kind": "test"
+      }
+    },
+    {
+      "name": "x_data_b4",
+      "hypothesis": "Track B batch 4: handover is the best model's weakest task (40/60 non-test); round 19 rescues handover only from that model (229 successful). Batch 3's mix plus round 19, from the same best checkpoint; compared with x_data_b3 (same, without round 19) on handover first",
+      "status": "queued",
+      "setup": "mkdir -p data/sim_mixdagclean_b2 && cd data/sim_mixdagclean_b2 && for d in ../sim_mixdagclean_v1/episode_*; do ln -sfn ../sim_mixdagclean_v1/$(basename $d) $(basename $d); done && for v in 14 15; do for d in ../sim_dagger_v$v/episode_*; do grep -qs '\"success\": true' $d/meta.json && ln -sfn $d episode_dag${v}_$(basename $d | cut -d_ -f2); done; done; cd .. && mkdir -p sim_mixdagclean_b3 && cd sim_mixdagclean_b3 && for d in ../sim_mixdagclean_b2/episode_*; do ln -sfn ../sim_mixdagclean_b2/$(basename $d) $(basename $d); done && for d in ../sim_dagger_v18/episode_*; do grep -qs '\"success\": true' $d/meta.json && ln -sfn $d episode_dag18_$(basename $d | cut -d_ -f2); done; cd .. && mkdir -p sim_mixdagclean_b4 && cd sim_mixdagclean_b4 && for d in ../sim_mixdagclean_b3/episode_*; do ln -sfn ../sim_mixdagclean_b3/$(basename $d) $(basename $d); done && for d in ../sim_dagger_v19/episode_*; do grep -qs '\"success\": true' $d/meta.json && ln -sfn $d episode_dag19_$(basename $d | cut -d_ -f2); done; true",
+      "train": "SEED=0 PI_TRIM_STILL_TAIL_S=1 LR=1e-5 RESUME=runs/x_data_b2/step_0006000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdagclean_b4 runs/{RUN} 6000",
+      "eval": "GPU=0 VARIANTS='d0' bash scripts/box/c30_when_ready.sh runs/{RUN} 3000 4000 5000 6000",
+      "requires_on_host": [
+        "runs/x_data_b2/step_0006000/model.pt",
+        "data/sim_mixdagclean_v1",
+        "data/sim_dagger_v14",
+        "data/sim_dagger_v15",
+        "data/sim_dagger_v18",
+        "data/sim_dagger_v19"
+      ],
+      "site": {
+        "title": "Handover rescues from the best model",
+        "short": "Handover rescues",
+        "note": "A fourth batch of rescues aimed at the hand-over task, the best model's weakest, added on top of the third batch.",
+        "parent": "rescues-2",
+        "kind": "test"
+      }
+    },
+    {
+      "name": "x_data_b2_s2",
+      "hypothesis": "Third seed of the best recipe (batch 2: on-policy rescues from the best model), to firm up the round's main positive result before it is reported",
+      "status": "queued",
+      "requires_on_host": [
+        "runs/x_control_s1/step_0005000/model.pt",
+        "data/sim_mixdagclean_v1",
+        "data/sim_dagger_v14",
+        "data/sim_dagger_v15"
+      ],
+      "setup": "mkdir -p data/sim_mixdagclean_b2 && cd data/sim_mixdagclean_b2 && for d in ../sim_mixdagclean_v1/episode_*; do ln -sfn ../sim_mixdagclean_v1/$(basename $d) $(basename $d); done && for v in 14 15; do for d in ../sim_dagger_v$v/episode_*; do grep -qs '\"success\": true' $d/meta.json && ln -sfn $d episode_dag${v}_$(basename $d | cut -d_ -f2); done; done; true",
+      "train": "SEED=2 PI_TRIM_STILL_TAIL_S=1 LR=1e-5 RESUME=runs/x_control_s1/step_0005000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdagclean_b2 runs/{RUN} 6000",
+      "eval": "GPU=0 VARIANTS='d0' bash scripts/box/c30_when_ready.sh runs/{RUN} 3000 4000 5000 6000",
+      "site": {
+        "title": "Rescues from the best model, third run",
+        "short": "Rescues 2, seed 3",
+        "note": "The winning recipe repeated with a third random start.",
+        "parent": "rescues-2",
+        "kind": "replicate"
       }
     }
   ],
@@ -1601,13 +1645,46 @@
     {
       "name": "dagger19_handover_b2",
       "hypothesis": "Track B batch 4 (data collection): failure mining of the new best (x_data_b2 step 6000) on non-test seeds gives handover 40/60 and two_bins 46/60, so handover is now the weakest task; on-policy takeovers on handover only from that checkpoint, takeover 4-16 s, seeds 1900000+",
-      "status": "running",
+      "status": "done",
       "requires_on_host": [
         "runs/x_data_b2/step_0006000/model.pt"
       ],
       "eval": "MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.dagger --checkpoint runs/x_data_b2/step_0006000 --tasks handover --episodes-per-task 400 --takeover-min 4 --takeover-max 16 --seed 1900000 --out data/sim_dagger_v19",
       "host": "193.122.189.119",
-      "started": "2026-10-18T08:43"
+      "started": "2026-10-18T08:43",
+      "result": "400 episodes: 310 kept, teacher success 229"
+    },
+    {
+      "name": "robust_x_combo_b2_tb2_4000",
+      "hypothesis": "H26 coverage: randomized-visuals score of a strong new checkpoint",
+      "status": "queued",
+      "requires_on_host": [
+        "runs/x_combo_b2_tb2/step_0004000/model.pt"
+      ],
+      "eval": "for T in pick_place_any bin handover two_bins; do MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.eval_sim --checkpoint runs/x_combo_b2_tb2/step_0004000 --task $T --episodes 30 --episode-seconds 30 --execute 25 --delay 0 --device cuda --dtype bf16 --subtask oracle --seed 4000 --visual-randomization --tokenizer weights/paligemma/tokenizer.model --out outputs/robust_x_combo_b2_tb2_4000_$T; done",
+      "site": {
+        "title": "Rescues + two-cube practice, new colours",
+        "short": "Combo, colours",
+        "note": "The same model tested with random colours and lighting.",
+        "parent": "robust",
+        "kind": "eval"
+      }
+    },
+    {
+      "name": "robust_x_data_b2_s1_6000",
+      "hypothesis": "H26 coverage: randomized-visuals score of a strong new checkpoint",
+      "status": "queued",
+      "requires_on_host": [
+        "runs/x_data_b2_s1/step_0006000/model.pt"
+      ],
+      "eval": "for T in pick_place_any bin handover two_bins; do MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.eval_sim --checkpoint runs/x_data_b2_s1/step_0006000 --task $T --episodes 30 --episode-seconds 30 --execute 25 --delay 0 --device cuda --dtype bf16 --subtask oracle --seed 4000 --visual-randomization --tokenizer weights/paligemma/tokenizer.model --out outputs/robust_x_data_b2_s1_6000_$T; done",
+      "site": {
+        "title": "Best-model rescues (second run), new colours",
+        "short": "Rescues 2b, colours",
+        "note": "The same model tested with random colours and lighting.",
+        "parent": "robust",
+        "kind": "eval"
+      }
     }
   ]
 }
