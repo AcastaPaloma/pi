@@ -1160,3 +1160,8 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   81. Steps: combo 1460, lr5e6 5960, ema 4840, control_s2 3740, data_b2_s1 3700, goal75_s1 2380. Site synced.
 - **2026-10-18 06:50** [scheduler] 192.222.52.191:1 was idle; launched **x_twobins2x_s1** (H18 replicate (seed 1): two_bins x2 lifted two_bins to 24 and 22 at steps 3000 and 4000 against 16 for its reference)
 - **2026-10-18 07:02** [scheduler] 193.122.189.119 was idle; launched **robust_x_data_b2_6000** (H26 coverage: randomized-visuals score of the new best checkpoint (x_data_b2 step 6000, 107 on the default look))
+- **2026-10-18 07:08** New: **x_data_b2_s1 step 3000 = 26 / 26 / 21 / 22 = 95** (seed 0 had 96 at 3000);
+  **x_control_ema_s0 step 4000 = 94** (95, 94); **x_control_s2 step 3000 = 89** (third control seed; the others had 82
+  and 98 at 3000). x_control_lr5e6_s0 finished (94, 91 so far); the scheduler started **x_twobins2x_s1** on main GPU 1 at
+  06:50. A10: robust round-two 4000 done, robust new-best running. Steps: combo 2000, data_b2_s1 4200, ema 5320,
+  control_s2 4240, goal75_s1 2800. Site synced (104 scores, 2 new clips). All GPUs busy; queue three deep.
