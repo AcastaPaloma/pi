@@ -126,12 +126,12 @@ export const nodes = [
     clips: [],
   },
   {
-    id: 'memory', short: 'Memory', kind: 'running', depth: 1, when: 'Oct 17',
+    id: 'memory', short: 'Memory', kind: 'dead', depth: 1, when: 'Oct 17',
     name: 'Memory of the last few seconds',
     runs: ['x_mem_s0', 'x_mem_s1'],
     changed: 'Instead of only the current camera frame, the model also sees frames from the last five seconds, so it could remember where things were.',
-    result: 'Its first run averaged 94, below the plain runs’ 97, and the two-cube task, where memory should help most, did not improve.',
-    next: 'Waiting for the second seed to finish.',
+    result: 'Both runs averaged about 94 (94 and 95 over their checkpoints), below the plain runs’ 97, and the two-cube task, where memory should help most, did not improve.',
+    next: 'Dropped: in these short tasks the current frame already holds what the model needs.',
     clips: [],
   },
   {
@@ -171,12 +171,12 @@ export const nodes = [
     clips: [],
   },
   {
-    id: 'rescues-1', short: 'Rescues, previous model', kind: 'running', depth: 1, when: 'Oct 17',
+    id: 'rescues-1', short: 'Rescues, previous model', kind: 'dead', depth: 1, when: 'Oct 17',
     name: 'More rescues, from the previous model',
     runs: ['x_data_v11', 'x_data_v11_s1'],
     changed: 'About 980 new rescue episodes on the two hard tasks: the previous best model ran, and the scripted teacher took over whenever it got stuck. Added to the training data.',
-    result: 'So far it scores below the plain runs on average at the same checkpoints.',
-    next: 'Kept only if it beats the plain runs on both seeds.',
+    result: 'Both runs averaged about 95 (95 and 96 over their checkpoints), below the plain runs’ 97, and handover, the task these rescues targeted, did not improve.',
+    next: 'Dropped: rescues collected from an older model teach situations the current model rarely reaches. The next batch comes from the best model instead.',
     clips: [],
   },
   {
