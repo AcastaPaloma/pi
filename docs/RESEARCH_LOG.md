@@ -962,3 +962,4 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   decide. **rtc_s1 step 4000 = 24 / 27 / 16 / 22 = 89** (86, 89). Steps: control_long 2420, control_r2 520,
   data_v11 5840, data_v11_s1 3660, mem_s1 4340, ki_vlm01 5480. dagger17 handover 80/300 (success 53 of 66 kept).
   All seven GPUs busy; scheduler and caffeinate alive.
+- **2026-10-17 22:56** [scheduler] 192.222.55.167:2 was idle; launched **x_goal75_s0** (H21b: oracle goal images hurt goal_s0 (76 with vs 87 without at step 3000) because goals were present in only 25% of training samples, so the model never learned to rely on them. With goals in 75% of samples the with-goal score beats the without-goal score and the controls. If it does not, goal conditioning is closed here)

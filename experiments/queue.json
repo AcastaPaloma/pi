@@ -527,13 +527,15 @@
     {
       "name": "x_goal75_s0",
       "hypothesis": "H21b: oracle goal images hurt goal_s0 (76 with vs 87 without at step 3000) because goals were present in only 25% of training samples, so the model never learned to rely on them. With goals in 75% of samples the with-goal score beats the without-goal score and the controls. If it does not, goal conditioning is closed here",
-      "status": "queued",
+      "status": "running",
       "train": "SET='max_subgoals=1 subgoal_prob=0.75' SEED=0 PI_TRIM_STILL_TAIL_S=1 LR=1e-5 RESUME=runs/pi05_dagger2/step_0007000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdagclean_v1 runs/{RUN} 6000",
       "eval": "GPU=0 VARIANTS='d0 goal' bash scripts/box/c30_when_ready.sh runs/{RUN} 3000 6000 & GPU=0 VARIANTS='d0' bash scripts/box/c30_when_ready.sh runs/{RUN} 4000 5000",
       "requires_on_host": [
         "runs/pi05_dagger2/step_0007000/model.pt",
         "data/sim_mixdagclean_v1"
-      ]
+      ],
+      "host": "192.222.55.167:2",
+      "started": "2026-10-17T22:56"
     },
     {
       "name": "x_data_b2",
