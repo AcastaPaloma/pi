@@ -1185,3 +1185,12 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   controls' 97.4: H27 refuted); **x_goal75_s1 step 3000 = 94** without goals (with-goal pending); **x_combo_b2_tb2
   step 3000 = 88**. x_data_b2_s1 and x_control_s2 finished. Site synced (113 scores, 6 new clips).
 - **2026-10-18 08:43** [scheduler] 193.122.189.119 was idle; launched **dagger19_handover_b2** (Track B batch 4 (data collection): failure mining of the new best (x_data_b2 step 6000) on non-test seeds gives handover 40/60 and two_bins 46/60, so handover is now the weakest task; on-policy takeovers on handover only from that checkpoint, takeover 4-16 s, seeds 1900000+)
+- **2026-10-18 09:05** **Preparing for termination (user request; nothing stopped).** Hugging Face: DAgger rounds
+  v11-v18 uploaded to the public data repo under `round2/` (20.9 GB, with a README of each round's source policy and
+  yield); full-precision checkpoints going to the private models repo under `round2/`, best first: x_data_b2 6000
+  (107 / 102 randomized), x_control_s1 5000 (104), x_goal75_s0 6000 (100 with goals) done, x_goal_s0 6000 uploading.
+  The models repo is then ~65 GB private, at the edge of the private quota (it stopped at ~69 GB before), so further
+  checkpoints (data_b2_s1, the running runs' finals) need the models repo public or a bigger plan. GitHub:
+  `records/2026-10-17_pi07_addons/` (628 files, 13 MB: every run's config, run.json and loss log, every 30-seed score,
+  robustness and failure-mining results, DAgger logs, scheduler log). The HF token is on the three boxes for the
+  uploads and is removed when they end. v19 (handover rescues from the best) uploads when it finishes.
