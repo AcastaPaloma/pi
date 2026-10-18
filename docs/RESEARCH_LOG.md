@@ -931,3 +931,11 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   at 420, ki_vlm01 3820 (flow 0.072; step-3000 score still running), data_v11 3860, data_v11_s1 1500. dagger15
   260/300 (kept 145, success 102); when it ends v14 + v15 go to both hosts and x_data_b2 is unblocked.
 - **2026-10-17 21:35** [scheduler] 193.122.189.119 was idle; launched **dagger16_twobins_mid_best** (Track B: two_bins is now the weakest task for the best checkpoint (37/60 non-test; 18 of 23 failures leave cube 2 undelivered); takeovers at 3-14 s cover the second arm's approach and grasp rather than only its late hover (v15 covers 8-22 s). Seeds 1600000+)
+- **2026-10-17 21:50** **x_data_v11 (batch 1: v11 + v12 + v13) step 3000 = 28 / 29 / 20 / 17 = 94** (controls at
+  3000: 82 and 98). dagger15 done (300 episodes, 165 kept, 116 successful); dagger16 started 21:35 (two_bins
+  60/300, success 40 of 49 kept). v14 (507 kept, 398 successful) and v15 (165, 116) copied to both H100 hosts;
+  **x_data_b2 unblocked** as a clean A/B: sim_mixdagclean_v1 + successful v14/v15 only, resumed from the best
+  checkpoint, against x_control_r2_s0 (same resume, no new data). A10 queue: **dagger17_handover_best** (handover
+  stall window 4-16 s, seeds 1700000+). mem_s0 and rtc_s1 marked done. ki_vlm01 flow 0.068 at 4240 (its step-3000
+  score has not landed yet: scoring shares the GPU with training). Steps: control_long 920, data_v11 4340,
+  data_v11_s1 2060, mem_s1 3480, goal_s1 5320. All seven GPUs busy; scheduler and caffeinate alive.
