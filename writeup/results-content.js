@@ -222,3 +222,22 @@ add('two-arms',
   clip('two_bins_v1_20000_s4003', 'two_bins', 4, true, 7.9, 12, 'Step 20,000'));
 add('paper',
   { ...clip('pick_place_full_v1_5000_s4000', 'pick_place', 1, false, 30.0, 0, 'Step 5,000'), of: 20 });
+
+// Loss view: the training runs drawn for each node. A node with `runs` draws them by default (one line per seed);
+// `lines` overrides that with [run, label] pairs, `ref` adds the matched control as a dashed reference, and `note`
+// replaces the chart when there was no training of our own. Curves come from results-loss.js (generated).
+const CONTROL = [['x_control_s0', 'Control'], ['x_control_s1', 'Control']];
+const ROUND_TWO = [['x_control_r2_s0', 'Control'], ['x_control_r2_s1', 'Control']];
+export const lossPlan = {
+  paper: { lines: [['full_v1', 'Paper size (5B)'], ['small_v1', 'Small (0.3B)']] },
+  public: { note: 'This step had no training of our own, so there is no loss curve.' },
+  'pi05-single': { lines: [['pi05_single', 'One arm']] },
+  'two-arms': { lines: [['pi05_v1', 'Two arms, four tasks']] },
+  soup: { note: 'Averaging checkpoints involves no training, so there is no loss curve.' },
+  recover: { lines: [['pi05_v1_rec2', 'With staged mistakes']] },
+  restart: { lines: [['pi05_2arm_v2', 'Warm-started run']] },
+  dagger: { lines: [['pi05_dagger1', 'Round 1'], ['pi05_dagger2', 'Round 2']] },
+  rtc: { ref: CONTROL }, memory: { ref: CONTROL }, goals: { ref: CONTROL }, 'goals-most': { ref: CONTROL },
+  insulation: { ref: CONTROL }, 'insulation-slow': { ref: CONTROL }, 'rescues-1': { ref: CONTROL }, longer: { ref: CONTROL },
+  'rescues-2': { ref: ROUND_TWO }, 'two-cubes-more': { ref: ROUND_TWO },
+};

@@ -8,18 +8,20 @@
   <title>π0.7 results · Kuan Yi Wang</title>
   <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./style.css?v=20261017-r1">
-  <link rel="stylesheet" href="./results.css?v=20261018-x4">
-  <script type="module" src="./results.js?v=20261018-x4"></script>
+  <link rel="stylesheet" href="./results.css?v=20261018-x5">
+  <script type="module" src="./results.js?v=20261018-x5"></script>
 </head>
 <body class="results-page">
   <a class="skip-link" href="#reader">Skip to the experiment tree</a>
   <main class="workspace">
-    <section class="results-stage" aria-label="Rollout video">
+    <section class="results-stage" aria-label="Rollout video or training loss">
       <video id="video" playsinline muted autoplay loop controls preload="metadata"></video>
       <div class="stage-empty" id="stage-empty" hidden>
         <p class="stage-empty-title" id="empty-title"></p>
         <p class="stage-empty-note">No video for this step. Experiments marked ▶ have videos.</p>
       </div>
+      <div class="loss-view" id="loss-view" hidden></div>
+      <div class="stage-switch" role="group" aria-label="What the stage shows"><button type="button" id="view-video" aria-pressed="true">Video</button><button type="button" id="view-loss" aria-pressed="false">Loss</button></div>
       <div class="clip-card" id="clip-card" aria-live="polite" hidden>
         <span class="clip-label" id="clip-label"></span>
         <span class="clip-title" id="clip-title"></span>

@@ -70,3 +70,28 @@
 
 @media(prefers-reduced-motion:no-preference){.node-detail{animation:detail-in .18s ease-out}@keyframes detail-in{from{opacity:0;transform:translateY(-3px)}}}
 @media(max-width:760px){.results-page .workspace{grid-template-columns:minmax(0,1fr)}.clip-goal{display:none}.clip-card{left:10px;top:10px;padding:7px 10px}.clip-title{font-size:17px}.node-name{font-size:16px}.bar{width:44px}.node[data-depth="1"]{padding-left:44px}.node[data-depth="1"]>.node-head::after{left:-29px;width:15px}.node[data-depth="1"]>.node-head::before{left:-14px}.node-detail p{font-size:15px}.tree-legend{gap:12px}}
+
+/* Video | Loss switch (top right of the stage) and the loss chart */
+.stage-switch{position:absolute;z-index:3;right:16px;top:14px;display:flex;gap:2px;padding:3px;background:#fbfbfaeb;border:1px solid #d8d8d4cc;border-radius:5px;box-shadow:0 6px 18px #1a1a1a14}
+.stage-switch button{padding:4px 10px;border-radius:3px;font:12px/1.2 Arial,sans-serif;color:var(--secondary)}
+.stage-switch button:hover{color:var(--ink);background:#1a1a1a08}
+.stage-switch button[aria-pressed=true]{background:var(--accent);color:#fff}
+.results-stage.show-loss{background:var(--paper)}
+.loss-view{position:absolute;inset:0;display:flex;flex-direction:column;background:var(--paper);padding:16px 24px 18px;border-right:1px solid var(--rule)}
+.loss-head{display:flex;flex-direction:column;gap:3px;padding-right:120px;margin-bottom:10px}
+.loss-label{font:11px/1.35 Arial,sans-serif;color:var(--secondary)}
+.loss-title{font:italic 21px/1.2 Georgia,'Times New Roman',serif;color:var(--accent)}
+.loss-legend{display:flex;flex-wrap:wrap;gap:4px 16px;font:12px/1.4 Arial,sans-serif;color:var(--ink);margin-top:4px}
+.loss-legend span{display:inline-flex;align-items:center;gap:6px}
+.loss-legend svg{width:18px;height:6px;overflow:visible}
+.loss-metric{display:flex;gap:2px;margin-top:8px;align-self:flex-start;padding:2px;border:1px solid var(--rule);border-radius:4px}
+.loss-metric button{padding:3px 9px;border-radius:3px;font:11.5px/1.2 Arial,sans-serif;color:var(--secondary)}
+.loss-metric button[aria-pressed=true]{background:#1f3a8a12;color:var(--accent)}
+.loss-plot{position:relative;flex:1;min-height:0}
+.loss-plot svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible;touch-action:none}
+.loss-plot text{font:11px Arial,sans-serif;fill:#8b8b84}
+.loss-tip{position:absolute;pointer-events:none;background:var(--paper);border:1px solid var(--rule);border-radius:4px;padding:6px 9px;font:11.5px/1.45 Arial,sans-serif;color:var(--ink);box-shadow:0 6px 18px #1a1a1a12;white-space:nowrap}
+.loss-tip b{font-weight:600}.loss-tip i{display:inline-block;width:10px;height:2px;margin-right:6px;vertical-align:3px}
+.loss-foot{font:11px/1.45 Arial,sans-serif;color:#8b8b84;margin-top:8px}
+.loss-empty{flex:1;display:grid;place-content:center;text-align:center;font:13px/1.5 Arial,sans-serif;color:var(--secondary);padding:24px}
+@media(max-width:760px){.stage-switch{right:10px;top:10px}.stage-switch button{padding:3px 8px;font-size:11.5px}.clip-card{max-width:calc(100% - 130px)}.loss-view{padding:12px 14px 12px}.loss-head{padding-right:104px;margin-bottom:6px}.loss-title{font-size:17px}.loss-foot{display:none}}

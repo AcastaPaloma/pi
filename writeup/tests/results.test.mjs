@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { existsSync, statSync } from 'node:fs';
-import { nodes, tasks } from '../results-content.js';
+import { nodes, tasks, lossPlan } from '../results-content.js';
+import { loss } from '../results-loss.js';
 import { runs, updated } from '../results-runs.js';
 
 const here = new URL('..', import.meta.url);
@@ -62,4 +63,27 @@ test('the generated run data is well formed and its clips exist', () => {
       }
     }
   }
+});
+
+test('loss curves: the plan names real nodes and runs, and every curve is sound and small', () => {
+  const ids = new Set(nodes.map(n => n.id));
+  for (const [id, plan] of Object.entries(lossPlan)) {
+    assert.ok(ids.has(id), `lossPlan names unknown node ${id}`);
+    for (const [run, label] of [...(plan.lines || []), ...(plan.ref || [])]) {
+      assert.ok(typeof label === 'string' && label, `${id}: ${run} needs a label`);
+      assert.ok(loss[run] || (runs[run] && runs[run].state !== 'done'), `${id}: no loss curve for finished run ${run}`);
+    }
+  }
+  for (const node of nodes) {
+    const plan = lossPlan[node.id] || {};
+    assert.ok(plan.note || plan.lines || node.runs, `${node.id}: the Loss view needs curves or a note`);
+  }
+  for (const [run, curve] of Object.entries(loss)) {
+    assert.ok(curve.s.length >= 3 && curve.s.length <= 400, `${run}: ${curve.s.length} points`);
+    assert.equal(curve.f.length, curve.s.length, `${run}: flow loss length`);
+    if (curve.c) assert.equal(curve.c.length, curve.s.length, `${run}: FAST loss length`);
+    for (let i = 1; i < curve.s.length; i++) assert.ok(curve.s[i] > curve.s[i - 1], `${run}: steps must increase`);
+    assert.ok(curve.f.every(v => Number.isFinite(v) && v >= 0), `${run}: finite, non-negative losses`);
+  }
+  assert.ok(statSync(new URL('results-loss.js', here)).size < 1e6, 'results-loss.js stays under 1 MB');
 });
