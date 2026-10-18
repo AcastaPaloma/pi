@@ -1404,7 +1404,7 @@
     {
       "name": "robust_x_control_r2_s0_4000",
       "hypothesis": "H26 coverage: randomized-visuals score of the strongest new checkpoints (round two 99, goal75 103 on the default look)",
-      "status": "failed",
+      "status": "queued",
       "requires_on_host": [
         "runs/x_control_r2_s0/step_0004000/model.pt"
       ],
@@ -1416,13 +1416,12 @@
         "parent": "robust",
         "kind": "eval"
       },
-      "note": "04:10 first launch crashed at config load (A10 had code from before vlm_lr_scale/subgoal_prob); code synced, requeued",
-      "error": "job tag SCHEDJOB_robust_x_control_r2_s0_4000 not seen and GPU not busy on 193.122.189.119 within 15 minutes"
+      "note": "04:10 first launch crashed at config load (A10 had code from before vlm_lr_scale/subgoal_prob); code synced, requeued"
     },
     {
       "name": "robust_x_goal75_s0_4000",
       "hypothesis": "H26 coverage: randomized-visuals score of the strongest new checkpoints (round two 99, goal75 103 on the default look)",
-      "status": "running",
+      "status": "done",
       "requires_on_host": [
         "runs/x_goal75_s0/step_0004000/model.pt"
       ],
