@@ -546,7 +546,7 @@
     {
       "name": "x_data_b2",
       "hypothesis": "Track B batch 2 (on-policy): successful takeovers from DAgger rounds 14 (handover + two_bins, takeover 2-16 s; 398 successful) and 15 (two_bins, 8-22 s; 116 successful), both rolled out from the best checkpoint x_control_s1 step 5000, added to sim_mixdagclean_v1 and resumed from that checkpoint. Clean A/B against x_control_r2_s0 (same resume and recipe, no new data)",
-      "status": "running",
+      "status": "done",
       "requires_on_host": [
         "runs/x_control_s1/step_0005000/model.pt",
         "data/sim_mixdagclean_v1",
@@ -557,7 +557,8 @@
       "train": "SEED=0 PI_TRIM_STILL_TAIL_S=1 LR=1e-5 RESUME=runs/x_control_s1/step_0005000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdagclean_b2 runs/{RUN} 6000",
       "eval": "GPU=0 VARIANTS='d0' bash scripts/box/c30_when_ready.sh runs/{RUN} 3000 4000 5000 6000",
       "host": "192.222.55.167:3",
-      "started": "2026-10-17T23:14"
+      "started": "2026-10-17T23:14",
+      "result": "96 / 97 / 102 at 3000-5000 (6000 scoring); reference x_control_r2_s0 89 / 99 / 95"
     },
     {
       "name": "x_twobins2x_r2",
@@ -663,6 +664,24 @@
         "short": "Rescues 2, seed 2",
         "note": "The same experiment repeated with a different random start, to check the first run's lead is real.",
         "parent": "rescues-2",
+        "kind": "replicate"
+      }
+    },
+    {
+      "name": "x_goal75_s1",
+      "hypothesis": "H21b replicate (seed 1): goal75_s0 scored 99 with oracle goals vs 93 without at step 3000, the reverse of the 25%-share runs; a second seed decides whether a larger goal share makes goal images reliably useful",
+      "status": "queued",
+      "train": "SET='max_subgoals=1 subgoal_prob=0.75' SEED=1 PI_TRIM_STILL_TAIL_S=1 LR=1e-5 RESUME=runs/pi05_dagger2/step_0007000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdagclean_v1 runs/{RUN} 6000",
+      "eval": "GPU=0 VARIANTS='d0 goal' bash scripts/box/c30_when_ready.sh runs/{RUN} 3000 6000 & GPU=0 VARIANTS='d0' bash scripts/box/c30_when_ready.sh runs/{RUN} 4000 5000",
+      "requires_on_host": [
+        "runs/pi05_dagger2/step_0007000/model.pt",
+        "data/sim_mixdagclean_v1"
+      ],
+      "site": {
+        "title": "Goal pictures in most examples, second run",
+        "short": "Goals+, seed 2",
+        "note": "The same experiment repeated with a different random start, to check that goal pictures really help once the model sees them often.",
+        "parent": "goals-most",
         "kind": "replicate"
       }
     }

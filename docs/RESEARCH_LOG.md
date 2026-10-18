@@ -1088,3 +1088,9 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   x_goal75_s0 4000 (checkpoints copied); finished robust jobs marked done. Steps: control_long 8900, lr5e6 1000,
   control_r2_s1 4020, data_b2 5820, goal75 5120, twobins2x 4660. Site synced (76 scores). All GPUs busy.
 - **2026-10-18 03:36** [scheduler] 192.222.55.167:3 was idle; launched **x_control_ema_s0** (H28: checkpoints of one run swing by up to 21 points (control_s0: 82, 103, 96, 95), so any single checkpoint is a noisy pick. Keeping an exponential moving average of the weights during the low-LR continuation (--ema-decay 0.999, saved as the checkpoint) gives steadier checkpoints: smaller step-to-step swings and a mean at least as high as the plain control's 97.4 (an EMA run was planned on 2026-10-16 but never ran))
+- **2026-10-18 03:49** New: **x_data_b2 step 5000 = 29 / 28 / 23 / 22 = 102** (96, 97, 102: mean 98.3) vs its reference
+  round two (x_control_r2_s0 89, 99, 95; x_control_r2_s1 95 at 3000: mean 94.5), so on-policy batch 2 leads by ~4
+  so far, unlike batch 1; its seed-1 twin is queued. **x_control_long_s0 step 8000 = 102** (92, 90, 102; two_bins
+  26/30). x_data_b2 finished; the scheduler started **x_control_ema_s0** (H28) at 03:36. Queue topped up with
+  **x_goal75_s1** (H21b replicate, site field set). Steps: control_long 9360, lr5e6 1440, control_r2_s1 4520,
+  goal75 5480, twobins2x 5160, ema 220. Site synced (2 new clips). All GPUs busy; scheduler and caffeinate alive.
