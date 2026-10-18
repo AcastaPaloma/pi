@@ -1002,3 +1002,19 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   auto-filming and sync is being built (scripts/sync_results_site.py appeared; first sync pending). All seven GPUs
   busy; scheduler and caffeinate alive.
 - **2026-10-18 00:24** [scheduler] 192.222.55.167:1 was idle; launched **x_twobins2x_r2** (H18 (never run): two_bins is the weakest task of the best checkpoint (21/30 test, 37/60 non-test; the second arm stalls). Sampling two_bins episodes twice as often (PI_TASK_WEIGHTS=two_bins=2) in a second low-LR round from the best checkpoint raises two_bins without costing the other tasks. Matched against x_control_r2_s0 (same resume and recipe, uniform tasks))
+- **2026-10-18 00:35** **H26 (new, important): the continuation's gain may be mostly on the default look.** Strict,
+  30 seeds per task, with visual randomization (the distribution the training data was recorded under):
+
+  | model | default look | visual randomization |
+  | --- | --- | --- |
+  | pi05_dagger2 step 7000 (previous best) | 29 / 27 / 16 / 18 = 90 | 25 / 26 / 22 / 21 = **94** |
+  | x_control_s1 step 5000 (best continuation) | 29 / 30 / 24 / 21 = 104 | 28 / 28 / 21 / 18 = **95** |
+
+  Under randomization the two are tied (the evaluation SE is about ±4.5), so most of the continuation's 14-point
+  gain shows only on the default look. One pair is not a verdict: the A10 now scores five more checkpoints with
+  randomization (control_s0 4000/6000, control_s1 6000, goal_s0 6000, data_v11 6000; checkpoints being copied).
+  If it holds, the default look has been the wrong yardstick for the whole round and randomized scores take over.
+  The A10 sat idle 00:21-00:35 (robust_dagger2 finished, queue empty: my miss). Queued **H27 x_control_lr5e6_s0**
+  (continuation at half the LR). New: mem_s1 step 5000 = 97 (98, 90, 97); the scheduler started **x_twobins2x_r2**
+  (H18) at 00:24. Site sync ran: 9 new clips, pushed. Steps: control_long 4820, control_r2 3100, mem_s1 5720,
+  goal75 1780, data_b2 1780, twobins2x 80.

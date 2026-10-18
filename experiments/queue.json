@@ -577,6 +577,17 @@
         "runs/x_control_s1/step_0005000/model.pt",
         "data/sim_mixdagclean_v1"
       ]
+    },
+    {
+      "name": "x_control_lr5e6_s0",
+      "hypothesis": "H27: the continuation's learning rate matters (2.5e-5 dipped earlier, 1e-5 gained 7 points on the default look). Half of it (5e-6) from the same resume keeps the gain with less drift, which H26 suggests is the risk (default-look gains that do not carry to randomized visuals). Scored on the default look and, for the best checkpoint, with visual randomization",
+      "status": "queued",
+      "train": "SEED=0 PI_TRIM_STILL_TAIL_S=1 LR=5e-6 RESUME=runs/pi05_dagger2/step_0007000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdagclean_v1 runs/{RUN} 6000",
+      "eval": "GPU=0 VARIANTS='d0' bash scripts/box/c30_when_ready.sh runs/{RUN} 3000 4000 5000 6000",
+      "requires_on_host": [
+        "runs/pi05_dagger2/step_0007000/model.pt",
+        "data/sim_mixdagclean_v1"
+      ]
     }
   ],
   "a10": [
@@ -1073,24 +1084,71 @@
     {
       "name": "robust_c1_5000",
       "hypothesis": "H25 (corrected 23:50): every training set was recorded WITH visual randomization (table and object colour, light, camera jitter; meta.json visual_randomization), while all 30-seed scores use the plain default look. So this measures the best checkpoint under its own training distribution of visuals, not unseen ones; a large drop means the policy is fragile on the harder draws (dim light, low contrast) it was trained on",
-      "status": "running",
+      "status": "done",
       "requires_on_host": [
         "runs/x_control_s1/step_0005000/model.pt"
       ],
       "eval": "for T in pick_place_any bin handover two_bins; do MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.eval_sim --checkpoint runs/x_control_s1/step_0005000 --task $T --episodes 30 --episode-seconds 30 --execute 25 --delay 0 --device cuda --dtype bf16 --subtask oracle --seed 4000 --visual-randomization --tokenizer weights/paligemma/tokenizer.model --out outputs/robust_c1_5000_$T; done",
       "host": "193.122.189.119",
-      "started": "2026-10-17T23:30"
+      "started": "2026-10-17T23:30",
+      "result": "with visual randomization 28 / 28 / 21 / 18 = 95 (default look 104)"
     },
     {
       "name": "robust_dagger2_7000",
       "hypothesis": "H25 comparison: the previous best (pi05_dagger2 step 7000, 90/120 default look) under the same visual randomization, to see whether the low-LR continuation also made the policy more robust to lighting and colour or only better on the default look",
-      "status": "running",
+      "status": "done",
       "requires_on_host": [
         "runs/pi05_dagger2/step_0007000/model.pt"
       ],
       "eval": "for T in pick_place_any bin handover two_bins; do MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.eval_sim --checkpoint runs/pi05_dagger2/step_0007000 --task $T --episodes 30 --episode-seconds 30 --execute 25 --delay 0 --device cuda --dtype bf16 --subtask oracle --seed 4000 --visual-randomization --tokenizer weights/paligemma/tokenizer.model --out outputs/robust_dagger2_7000_$T; done",
       "host": "193.122.189.119",
-      "started": "2026-10-17T23:55"
+      "started": "2026-10-17T23:55",
+      "result": "with visual randomization 25 / 26 / 22 / 21 = 94 (default look 90)"
+    },
+    {
+      "name": "robust_x_control_s0_6000",
+      "hypothesis": "H26: the low-LR continuation's gain is mostly on the default look. Under visual randomization (the training distribution) the previous best scores 94 and the best continuation checkpoint 95, against 90 and 104 on the default look. Robust scores of more continuation checkpoints say whether the continuation improved the policy or only its default-look score",
+      "status": "queued",
+      "requires_on_host": [
+        "runs/x_control_s0/step_0006000/model.pt"
+      ],
+      "eval": "for T in pick_place_any bin handover two_bins; do MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.eval_sim --checkpoint runs/x_control_s0/step_0006000 --task $T --episodes 30 --episode-seconds 30 --execute 25 --delay 0 --device cuda --dtype bf16 --subtask oracle --seed 4000 --visual-randomization --tokenizer weights/paligemma/tokenizer.model --out outputs/robust_x_control_s0_6000_$T; done"
+    },
+    {
+      "name": "robust_x_control_s1_6000",
+      "hypothesis": "H26: the low-LR continuation's gain is mostly on the default look. Under visual randomization (the training distribution) the previous best scores 94 and the best continuation checkpoint 95, against 90 and 104 on the default look. Robust scores of more continuation checkpoints say whether the continuation improved the policy or only its default-look score",
+      "status": "queued",
+      "requires_on_host": [
+        "runs/x_control_s1/step_0006000/model.pt"
+      ],
+      "eval": "for T in pick_place_any bin handover two_bins; do MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.eval_sim --checkpoint runs/x_control_s1/step_0006000 --task $T --episodes 30 --episode-seconds 30 --execute 25 --delay 0 --device cuda --dtype bf16 --subtask oracle --seed 4000 --visual-randomization --tokenizer weights/paligemma/tokenizer.model --out outputs/robust_x_control_s1_6000_$T; done"
+    },
+    {
+      "name": "robust_x_goal_s0_6000",
+      "hypothesis": "H26: the low-LR continuation's gain is mostly on the default look. Under visual randomization (the training distribution) the previous best scores 94 and the best continuation checkpoint 95, against 90 and 104 on the default look. Robust scores of more continuation checkpoints say whether the continuation improved the policy or only its default-look score",
+      "status": "queued",
+      "requires_on_host": [
+        "runs/x_goal_s0/step_0006000/model.pt"
+      ],
+      "eval": "for T in pick_place_any bin handover two_bins; do MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.eval_sim --checkpoint runs/x_goal_s0/step_0006000 --task $T --episodes 30 --episode-seconds 30 --execute 25 --delay 0 --device cuda --dtype bf16 --subtask oracle --seed 4000 --visual-randomization --tokenizer weights/paligemma/tokenizer.model --out outputs/robust_x_goal_s0_6000_$T; done"
+    },
+    {
+      "name": "robust_x_data_v11_6000",
+      "hypothesis": "H26: the low-LR continuation's gain is mostly on the default look. Under visual randomization (the training distribution) the previous best scores 94 and the best continuation checkpoint 95, against 90 and 104 on the default look. Robust scores of more continuation checkpoints say whether the continuation improved the policy or only its default-look score",
+      "status": "queued",
+      "requires_on_host": [
+        "runs/x_data_v11/step_0006000/model.pt"
+      ],
+      "eval": "for T in pick_place_any bin handover two_bins; do MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.eval_sim --checkpoint runs/x_data_v11/step_0006000 --task $T --episodes 30 --episode-seconds 30 --execute 25 --delay 0 --device cuda --dtype bf16 --subtask oracle --seed 4000 --visual-randomization --tokenizer weights/paligemma/tokenizer.model --out outputs/robust_x_data_v11_6000_$T; done"
+    },
+    {
+      "name": "robust_x_control_s0_4000",
+      "hypothesis": "H26: the low-LR continuation's gain is mostly on the default look. Under visual randomization (the training distribution) the previous best scores 94 and the best continuation checkpoint 95, against 90 and 104 on the default look. Robust scores of more continuation checkpoints say whether the continuation improved the policy or only its default-look score",
+      "status": "queued",
+      "requires_on_host": [
+        "runs/x_control_s0/step_0004000/model.pt"
+      ],
+      "eval": "for T in pick_place_any bin handover two_bins; do MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.eval_sim --checkpoint runs/x_control_s0/step_0004000 --task $T --episodes 30 --episode-seconds 30 --execute 25 --delay 0 --device cuda --dtype bf16 --subtask oracle --seed 4000 --visual-randomization --tokenizer weights/paligemma/tokenizer.model --out outputs/robust_x_control_s0_4000_$T; done"
     }
   ]
 }
