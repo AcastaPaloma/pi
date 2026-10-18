@@ -1597,11 +1597,13 @@
     {
       "name": "dagger19_handover_b2",
       "hypothesis": "Track B batch 4 (data collection): failure mining of the new best (x_data_b2 step 6000) on non-test seeds gives handover 40/60 and two_bins 46/60, so handover is now the weakest task; on-policy takeovers on handover only from that checkpoint, takeover 4-16 s, seeds 1900000+",
-      "status": "queued",
+      "status": "running",
       "requires_on_host": [
         "runs/x_data_b2/step_0006000/model.pt"
       ],
-      "eval": "MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.dagger --checkpoint runs/x_data_b2/step_0006000 --tasks handover --episodes-per-task 400 --takeover-min 4 --takeover-max 16 --seed 1900000 --out data/sim_dagger_v19"
+      "eval": "MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.dagger --checkpoint runs/x_data_b2/step_0006000 --tasks handover --episodes-per-task 400 --takeover-min 4 --takeover-max 16 --seed 1900000 --out data/sim_dagger_v19",
+      "host": "193.122.189.119",
+      "started": "2026-10-18T08:43"
     }
   ]
 }

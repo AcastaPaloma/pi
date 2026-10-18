@@ -1184,3 +1184,4 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   6000 = 95** (95, 94, ., 95); **x_control_lr5e6_s0 step 6000 = 95** (94, 91, 96, 95: mean 94.0, below the 1e-5
   controls' 97.4: H27 refuted); **x_goal75_s1 step 3000 = 94** without goals (with-goal pending); **x_combo_b2_tb2
   step 3000 = 88**. x_data_b2_s1 and x_control_s2 finished. Site synced (113 scores, 6 new clips).
+- **2026-10-18 08:43** [scheduler] 193.122.189.119 was idle; launched **dagger19_handover_b2** (Track B batch 4 (data collection): failure mining of the new best (x_data_b2 step 6000) on non-test seeds gives handover 40/60 and two_bins 46/60, so handover is now the weakest task; on-policy takeovers on handover only from that checkpoint, takeover 4-16 s, seeds 1900000+)
