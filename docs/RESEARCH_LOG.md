@@ -898,3 +898,4 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   control's delay curve: 95 / 99 / 82). ki_vlm01 flow 0.079 at step 2020 (0.085 at 1580: levelling off, still ~3x
   the controls), CE 6.2. Steps: mem 5780, data_v11 1840, mem_s1 2040, rtc_s1 4540, goal_s1 3400. dagger14 two_bins
   200/300 (total kept 425, success 330). All seven GPUs busy; scheduler and caffeinate alive.
+- **2026-10-17 20:24** [scheduler] 192.222.55.167:1 was idle; launched **x_data_v11_s1** (Seed-1 twin of x_data_v11 (the control twins differ by 16 points at one checkpoint, so a data version needs two seeds))
