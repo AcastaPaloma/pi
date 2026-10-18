@@ -1,0 +1,132 @@
+WARNING:lerobot.configs.policies:Device 'mps' is not available. Switching to 'cuda'.
+episode 0: red cube       success=True steps=174 failure=None calls=7 closest=0.004m lifted=True final_to_goal=0.023m policy=2s observe=0s
+episode 1: green cube     success=True steps=574 failure=None calls=23 closest=0.008m lifted=True final_to_goal=0.010m policy=7s observe=1s
+episode 2: blue cube      success=True steps=399 failure=None calls=16 closest=0.006m lifted=True final_to_goal=0.018m policy=5s observe=0s
+episode 3: yellow cube    success=True steps=474 failure=None calls=19 closest=0.005m lifted=True final_to_goal=0.011m policy=6s observe=1s
+episode 4: red cube       success=True steps=599 failure=None calls=24 closest=0.004m lifted=True final_to_goal=0.017m policy=7s observe=0s
+episode 5: green cube     success=True steps=650 failure=None calls=26 closest=0.003m lifted=True final_to_goal=0.012m policy=8s observe=0s
+episode 6: blue cube      success=False steps=1500 failure=None calls=60 closest=0.007m lifted=True final_to_goal=0.060m policy=18s observe=1s
+episode 7: yellow cube    success=True steps=199 failure=None calls=8 closest=0.006m lifted=True final_to_goal=0.013m policy=2s observe=0s
+episode 8: red cube       success=True steps=206 failure=None calls=9 closest=0.010m lifted=True final_to_goal=0.016m policy=3s observe=0s
+episode 9: green cube     success=True steps=1099 failure=None calls=44 closest=0.005m lifted=True final_to_goal=0.007m policy=13s observe=1s
+episode 10: blue cube      success=True steps=223 failure=None calls=9 closest=0.004m lifted=True final_to_goal=0.014m policy=3s observe=0s
+episode 11: yellow cube    success=True steps=658 failure=None calls=27 closest=0.004m lifted=True final_to_goal=0.002m policy=8s observe=0s
+episode 12: red cube       success=True steps=624 failure=None calls=25 closest=0.011m lifted=True final_to_goal=0.011m policy=8s observe=0s
+episode 13: green cube     success=True steps=509 failure=None calls=21 closest=0.008m lifted=True final_to_goal=0.011m policy=6s observe=0s
+episode 14: blue cube      success=True steps=249 failure=None calls=10 closest=0.008m lifted=True final_to_goal=0.008m policy=3s observe=0s
+episode 15: yellow cube    success=True steps=224 failure=None calls=9 closest=0.007m lifted=True final_to_goal=0.006m policy=3s observe=0s
+episode 16: red cube       success=True steps=299 failure=None calls=12 closest=0.007m lifted=True final_to_goal=0.011m policy=4s observe=0s
+episode 17: green cube     success=True steps=399 failure=None calls=16 closest=0.005m lifted=True final_to_goal=0.013m policy=5s observe=0s
+episode 18: blue cube      success=True steps=299 failure=None calls=12 closest=0.005m lifted=True final_to_goal=0.007m policy=4s observe=0s
+episode 19: yellow cube    success=True steps=174 failure=None calls=7 closest=0.003m lifted=True final_to_goal=0.009m policy=2s observe=0s
+episode 20: red cube       success=True steps=676 failure=None calls=28 closest=0.010m lifted=True final_to_goal=0.026m policy=8s observe=0s
+episode 21: green cube     success=True steps=524 failure=None calls=21 closest=0.007m lifted=True final_to_goal=0.019m policy=6s observe=0s
+episode 22: blue cube      success=True steps=199 failure=None calls=8 closest=0.005m lifted=True final_to_goal=0.004m policy=2s observe=0s
+episode 23: yellow cube    success=True steps=249 failure=None calls=10 closest=0.005m lifted=True final_to_goal=0.005m policy=3s observe=0s
+episode 24: red cube       success=True steps=246 failure=None calls=10 closest=0.006m lifted=True final_to_goal=0.001m policy=3s observe=0s
+episode 25: green cube     success=True steps=326 failure=None calls=14 closest=0.008m lifted=True final_to_goal=0.014m policy=4s observe=0s
+episode 26: blue cube      success=True steps=649 failure=None calls=26 closest=0.005m lifted=True final_to_goal=0.006m policy=8s observe=0s
+episode 27: yellow cube    success=True steps=517 failure=None calls=21 closest=0.003m lifted=True final_to_goal=0.009m policy=6s observe=0s
+episode 28: red cube       success=True steps=399 failure=None calls=16 closest=0.008m lifted=True final_to_goal=0.033m policy=5s observe=0s
+episode 29: green cube     success=True steps=173 failure=None calls=7 closest=0.006m lifted=True final_to_goal=0.012m policy=2s observe=0s
+success rate 96.67%, lift rate 100.00%, over 30 episodes
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+WARNING:huggingface_hub.utils._http:Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+WARNING:lerobot.configs.policies:Device 'mps' is not available. Switching to 'cuda'.
+episode 0: red cube       success=True steps=151 failure=None calls=7 closest=0.004m lifted=True final_to_goal=2.935m policy=2s observe=0s
+episode 1: green cube     success=True steps=577 failure=None calls=24 closest=0.012m lifted=True final_to_goal=2.711m policy=7s observe=1s
+episode 2: blue cube      success=True steps=248 failure=None calls=10 closest=0.004m lifted=True final_to_goal=2.698m policy=3s observe=0s
+episode 3: yellow cube    success=True steps=224 failure=None calls=9 closest=0.007m lifted=True final_to_goal=3.011m policy=3s observe=0s
+episode 4: red cube       success=True steps=399 failure=None calls=16 closest=0.007m lifted=True final_to_goal=2.725m policy=5s observe=0s
+episode 5: green cube     success=True steps=374 failure=None calls=15 closest=0.007m lifted=True final_to_goal=2.985m policy=4s observe=0s
+episode 6: blue cube      success=True steps=274 failure=None calls=11 closest=0.009m lifted=True final_to_goal=2.638m policy=3s observe=0s
+episode 7: yellow cube    success=True steps=224 failure=None calls=9 closest=0.006m lifted=True final_to_goal=2.959m policy=3s observe=0s
+episode 8: red cube       success=True steps=624 failure=None calls=25 closest=0.007m lifted=True final_to_goal=2.614m policy=8s observe=0s
+episode 9: green cube     success=True steps=699 failure=None calls=28 closest=0.006m lifted=True final_to_goal=2.731m policy=8s observe=0s
+episode 10: blue cube      success=True steps=149 failure=None calls=6 closest=0.008m lifted=True final_to_goal=3.016m policy=2s observe=0s
+episode 11: yellow cube    success=True steps=174 failure=None calls=7 closest=0.011m lifted=True final_to_goal=3.011m policy=2s observe=0s
+episode 12: red cube       success=True steps=174 failure=None calls=7 closest=0.010m lifted=True final_to_goal=2.642m policy=2s observe=0s
+episode 13: green cube     success=False steps=1500 failure=None calls=60 closest=0.007m lifted=True final_to_goal=2.524m policy=18s observe=1s
+episode 14: blue cube      success=True steps=249 failure=None calls=10 closest=0.007m lifted=True final_to_goal=3.029m policy=3s observe=0s
+episode 15: yellow cube    success=True steps=149 failure=None calls=6 closest=0.005m lifted=True final_to_goal=3.048m policy=2s observe=0s
+episode 16: red cube       success=True steps=399 failure=None calls=16 closest=0.004m lifted=True final_to_goal=2.928m policy=5s observe=0s
+episode 17: green cube     success=True steps=174 failure=None calls=7 closest=0.009m lifted=True final_to_goal=2.777m policy=2s observe=0s
+episode 18: blue cube      success=True steps=149 failure=None calls=6 closest=0.008m lifted=True final_to_goal=2.997m policy=2s observe=0s
+episode 19: yellow cube    success=True steps=525 failure=None calls=21 closest=0.009m lifted=True final_to_goal=2.970m policy=6s observe=0s
+episode 20: red cube       success=True steps=274 failure=None calls=11 closest=0.009m lifted=True final_to_goal=2.740m policy=3s observe=0s
+episode 21: green cube     success=False steps=1500 failure=None calls=60 closest=0.012m lifted=False final_to_goal=2.683m policy=18s observe=1s
+episode 22: blue cube      success=True steps=224 failure=None calls=9 closest=0.010m lifted=True final_to_goal=2.942m policy=3s observe=0s
+episode 23: yellow cube    success=True steps=1124 failure=None calls=45 closest=0.005m lifted=True final_to_goal=3.015m policy=14s observe=1s
+episode 24: red cube       success=True steps=174 failure=None calls=7 closest=0.006m lifted=True final_to_goal=2.721m policy=2s observe=0s
+episode 25: green cube     success=True steps=199 failure=None calls=8 closest=0.006m lifted=True final_to_goal=2.747m policy=2s observe=0s
+episode 26: blue cube      success=True steps=449 failure=None calls=18 closest=0.006m lifted=True final_to_goal=3.010m policy=6s observe=0s
+episode 27: yellow cube    success=True steps=624 failure=None calls=25 closest=0.009m lifted=True final_to_goal=2.723m policy=8s observe=0s
+episode 28: red cube       success=True steps=149 failure=None calls=6 closest=0.007m lifted=True final_to_goal=2.756m policy=2s observe=0s
+episode 29: green cube     success=True steps=203 failure=None calls=9 closest=0.009m lifted=True final_to_goal=2.911m policy=3s observe=0s
+success rate 93.33%, lift rate 96.67%, over 30 episodes
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+WARNING:huggingface_hub.utils._http:Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+WARNING:lerobot.configs.policies:Device 'mps' is not available. Switching to 'cuda'.
+episode 0: red cube       success=False steps=1500 failure=None calls=60 closest=0.003m lifted=True final_to_goal=2.826m policy=18s observe=1s
+episode 1: green cube     success=True steps=775 failure=None calls=31 closest=0.003m lifted=True final_to_goal=2.979m policy=9s observe=1s
+episode 2: blue cube      success=True steps=799 failure=None calls=32 closest=0.006m lifted=True final_to_goal=2.971m policy=10s observe=1s
+episode 3: yellow cube    success=True steps=710 failure=None calls=29 closest=0.008m lifted=True final_to_goal=2.760m policy=9s observe=1s
+episode 4: red cube       success=True steps=801 failure=None calls=33 closest=0.004m lifted=True final_to_goal=2.962m policy=10s observe=0s
+episode 5: green cube     success=False steps=1500 failure=None calls=60 closest=0.002m lifted=True final_to_goal=2.821m policy=18s observe=1s
+episode 6: blue cube      success=False steps=1500 failure=None calls=60 closest=0.005m lifted=True final_to_goal=2.852m policy=18s observe=1s
+episode 7: yellow cube    success=True steps=424 failure=None calls=17 closest=0.003m lifted=True final_to_goal=2.633m policy=5s observe=0s
+episode 8: red cube       success=True steps=774 failure=None calls=31 closest=0.005m lifted=True final_to_goal=2.970m policy=10s observe=0s
+episode 9: green cube     success=True steps=374 failure=None calls=15 closest=0.005m lifted=True final_to_goal=2.940m policy=5s observe=0s
+episode 10: blue cube      success=True steps=874 failure=None calls=35 closest=0.007m lifted=True final_to_goal=2.656m policy=11s observe=0s
+episode 11: yellow cube    success=True steps=574 failure=None calls=23 closest=0.003m lifted=True final_to_goal=2.725m policy=7s observe=0s
+episode 12: red cube       success=True steps=525 failure=None calls=21 closest=0.009m lifted=True final_to_goal=2.894m policy=6s observe=0s
+episode 13: green cube     success=True steps=420 failure=None calls=17 closest=0.005m lifted=True final_to_goal=2.939m policy=5s observe=0s
+episode 14: blue cube      success=True steps=474 failure=None calls=19 closest=0.005m lifted=True final_to_goal=2.757m policy=6s observe=0s
+episode 15: yellow cube    success=False steps=1500 failure=None calls=60 closest=0.004m lifted=True final_to_goal=2.824m policy=18s observe=1s
+episode 16: red cube       success=True steps=424 failure=None calls=17 closest=0.003m lifted=True final_to_goal=2.631m policy=5s observe=0s
+episode 17: green cube     success=True steps=924 failure=None calls=37 closest=0.005m lifted=True final_to_goal=3.036m policy=11s observe=0s
+episode 18: blue cube      success=True steps=624 failure=None calls=25 closest=0.005m lifted=True final_to_goal=2.688m policy=8s observe=0s
+episode 19: yellow cube    success=True steps=552 failure=None calls=23 closest=0.005m lifted=True final_to_goal=2.696m policy=7s observe=0s
+episode 20: red cube       success=False steps=1500 failure=None calls=60 closest=0.005m lifted=True final_to_goal=2.911m policy=19s observe=1s
+episode 21: green cube     success=True steps=699 failure=None calls=28 closest=0.006m lifted=True final_to_goal=2.957m policy=9s observe=0s
+episode 22: blue cube      success=False steps=1500 failure=None calls=60 closest=0.008m lifted=True final_to_goal=2.823m policy=18s observe=1s
+episode 23: yellow cube    success=True steps=449 failure=None calls=18 closest=0.006m lifted=True final_to_goal=2.751m policy=6s observe=0s
+episode 24: red cube       success=True steps=474 failure=None calls=19 closest=0.009m lifted=True final_to_goal=2.953m policy=6s observe=0s
+episode 25: green cube     success=True steps=449 failure=None calls=18 closest=0.003m lifted=True final_to_goal=2.977m policy=6s observe=0s
+episode 26: blue cube      success=False steps=1500 failure=None calls=60 closest=0.005m lifted=True final_to_goal=2.830m policy=18s observe=1s
+episode 27: yellow cube    success=True steps=447 failure=None calls=18 closest=0.004m lifted=True final_to_goal=2.970m policy=6s observe=0s
+episode 28: red cube       success=True steps=624 failure=None calls=25 closest=0.005m lifted=True final_to_goal=3.008m policy=8s observe=0s
+episode 29: green cube     success=True steps=424 failure=None calls=17 closest=0.006m lifted=True final_to_goal=2.706m policy=5s observe=0s
+success rate 76.67%, lift rate 100.00%, over 30 episodes
+WARNING:lerobot.configs.policies:Device 'mps' is not available. Switching to 'cuda'.
+episode 0: red cube       success=True steps=299 failure=None calls=12 closest=0.005m lifted=True final_to_goal=2.835m policy=4s observe=0s
+episode 1: green cube     success=False steps=1500 failure=None calls=60 closest=0.009m lifted=False final_to_goal=3.011m policy=18s observe=1s
+episode 2: blue cube      success=False steps=1500 failure=None calls=60 closest=0.003m lifted=True final_to_goal=2.817m policy=18s observe=1s
+episode 3: yellow cube    success=True steps=1149 failure=None calls=46 closest=0.008m lifted=True final_to_goal=2.798m policy=14s observe=1s
+episode 4: red cube       success=True steps=374 failure=None calls=15 closest=0.006m lifted=True final_to_goal=2.830m policy=5s observe=0s
+episode 5: green cube     success=True steps=453 failure=None calls=19 closest=0.007m lifted=True final_to_goal=2.818m policy=6s observe=0s
+episode 6: blue cube      success=True steps=399 failure=None calls=16 closest=0.005m lifted=True final_to_goal=2.814m policy=5s observe=0s
+episode 7: yellow cube    success=False steps=1500 failure=None calls=60 closest=0.004m lifted=False final_to_goal=3.063m policy=19s observe=1s
+episode 8: red cube       success=True steps=1125 failure=None calls=45 closest=0.004m lifted=True final_to_goal=2.820m policy=14s observe=1s
+episode 9: green cube     success=True steps=474 failure=None calls=19 closest=0.006m lifted=True final_to_goal=2.843m policy=6s observe=0s
+episode 10: blue cube      success=False steps=1500 failure=None calls=60 closest=0.006m lifted=True final_to_goal=2.831m policy=18s observe=1s
+episode 11: yellow cube    success=True steps=349 failure=None calls=14 closest=0.005m lifted=True final_to_goal=2.826m policy=4s observe=0s
+episode 12: red cube       success=True steps=524 failure=None calls=21 closest=0.007m lifted=True final_to_goal=2.842m policy=6s observe=0s
+episode 13: green cube     success=True steps=604 failure=None calls=25 closest=0.006m lifted=True final_to_goal=2.815m policy=8s observe=0s
+episode 14: blue cube      success=True steps=912 failure=None calls=37 closest=0.007m lifted=True final_to_goal=2.816m policy=11s observe=0s
+episode 15: yellow cube    success=False steps=1500 failure=None calls=60 closest=0.006m lifted=True final_to_goal=2.837m policy=19s observe=1s
+episode 16: red cube       success=True steps=739 failure=None calls=30 closest=0.007m lifted=True final_to_goal=2.840m policy=9s observe=0s
+episode 17: green cube     success=False steps=1500 failure=None calls=60 closest=0.010m lifted=True final_to_goal=2.862m policy=19s observe=1s
+episode 18: blue cube      success=True steps=574 failure=None calls=23 closest=0.007m lifted=True final_to_goal=2.830m policy=7s observe=0s
+episode 19: yellow cube    success=True steps=424 failure=None calls=17 closest=0.004m lifted=True final_to_goal=2.826m policy=5s observe=0s
+episode 20: red cube       success=False steps=1500 failure=None calls=60 closest=0.008m lifted=False final_to_goal=2.986m policy=19s observe=1s
+episode 21: green cube     success=True steps=1449 failure=None calls=58 closest=0.003m lifted=True final_to_goal=2.818m policy=18s observe=1s
+episode 22: blue cube      success=True steps=1452 failure=None calls=59 closest=0.008m lifted=True final_to_goal=2.818m policy=18s observe=1s
+episode 23: yellow cube    success=True steps=599 failure=None calls=24 closest=0.006m lifted=True final_to_goal=2.837m policy=8s observe=0s
+episode 24: red cube       success=True steps=499 failure=None calls=20 closest=0.007m lifted=True final_to_goal=2.839m policy=6s observe=0s
+episode 25: green cube     success=False steps=1500 failure=None calls=60 closest=0.009m lifted=True final_to_goal=2.970m policy=19s observe=1s
+episode 26: blue cube      success=False steps=1500 failure=None calls=60 closest=0.004m lifted=True final_to_goal=2.830m policy=19s observe=1s
+episode 27: yellow cube    success=True steps=524 failure=None calls=21 closest=0.007m lifted=True final_to_goal=2.826m policy=6s observe=0s
+episode 28: red cube       success=True steps=1041 failure=None calls=42 closest=0.006m lifted=True final_to_goal=2.806m policy=13s observe=1s
+episode 29: green cube     success=True steps=1074 failure=None calls=43 closest=0.008m lifted=True final_to_goal=2.825m policy=13s observe=1s
+success rate 70.00%, lift rate 90.00%, over 30 episodes

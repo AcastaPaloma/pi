@@ -1,0 +1,19 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+WARNING:huggingface_hub.utils._http:Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+WARNING:lerobot.configs.policies:Device 'mps' is not available. Switching to 'cuda'.
+handover 20/300 {'kept': 16, 'skipped': 4, 'success': 13}
+handover 40/300 {'kept': 32, 'skipped': 8, 'success': 25}
+handover 60/300 {'kept': 50, 'skipped': 10, 'success': 40}
+handover 80/300 {'kept': 66, 'skipped': 14, 'success': 53}
+handover 100/300 {'kept': 86, 'skipped': 14, 'success': 66}
+handover 120/300 {'kept': 104, 'skipped': 16, 'success': 81}
+handover 140/300 {'kept': 119, 'skipped': 21, 'success': 93}
+handover 160/300 {'kept': 135, 'skipped': 25, 'success': 101}
+handover 180/300 {'kept': 152, 'skipped': 28, 'success': 116}
+handover 200/300 {'kept': 168, 'skipped': 32, 'success': 129}
+handover 220/300 {'kept': 187, 'skipped': 33, 'success': 140}
+handover 240/300 {'kept': 205, 'skipped': 35, 'success': 153}
+handover 260/300 {'kept': 221, 'skipped': 39, 'success': 167}
+handover 280/300 {'kept': 237, 'skipped': 43, 'success': 179}
+handover 300/300 {'kept': 255, 'skipped': 45, 'success': 196}
+done {'kept': 255, 'skipped': 45, 'success': 196}

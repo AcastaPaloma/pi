@@ -1,0 +1,55 @@
+{
+  "args": {
+    "data": "data/sim_mixdagclean_b2",
+    "meta": "data/sim_mix_v1/pi07_meta",
+    "config": "pi05",
+    "objective": "action",
+    "gemma": null,
+    "tokenizer": "weights/paligemma/tokenizer.model",
+    "resume": "runs/x_control_s1/step_0005000",
+    "no_state_history": false,
+    "ema_decay": 0.0,
+    "no_knowledge_insulation": false,
+    "state_dropout": null,
+    "reset_action_io": false,
+    "out": "runs/x_data_b2",
+    "steps": 6000,
+    "batch_size": 32,
+    "grad_accum": 1,
+    "lr": 1e-05,
+    "warmup": 1000,
+    "weight_decay": 0.01,
+    "grad_clip": 1.0,
+    "device": "cuda:0",
+    "bf16": true,
+    "num_workers": 16,
+    "log_every": 20,
+    "save_every": 1000,
+    "image_size": null,
+    "seed": 0,
+    "max_steps_per_epoch": null,
+    "gradient_checkpointing": true,
+    "fsdp": false,
+    "set": []
+  },
+  "parameters": {
+    "vision": 412442352,
+    "backbone": 2508531712,
+    "expert": 693422112,
+    "total": 4143404816
+  },
+  "device": "cuda:0",
+  "tokenizer": "gemma-sentencepiece",
+  "gemma": null,
+  "dataset": {
+    "episodes": 14679,
+    "samples": 1563509,
+    "cameras": [
+      "overhead",
+      "left_wrist",
+      "right_wrist"
+    ],
+    "control_hz": 50
+  },
+  "world_size": 1
+}

@@ -1,0 +1,60 @@
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/home/ubuntu/pi/pi_model/eval_sim.py", line 325, in <module>
+    main()
+  File "/home/ubuntu/pi/pi_model/eval_sim.py", line 270, in main
+    policy = Pi07Policy(args.checkpoint, device=args.device, tokenizer=args.tokenizer, denoise_steps=args.denoise_steps,
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/pi/pi_model/policy.py", line 57, in __init__
+    self.cfg = Pi07Config.from_json((checkpoint / "config.json").read_text())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/pi/pi_model/config.py", line 173, in from_json
+    return Pi07Config(vision=VisionConfig(**raw.pop("vision")), text=TextConfig(**raw.pop("text")),
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: Pi07Config.__init__() got an unexpected keyword argument 'vlm_lr_scale'
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/home/ubuntu/pi/pi_model/eval_sim.py", line 325, in <module>
+    main()
+  File "/home/ubuntu/pi/pi_model/eval_sim.py", line 270, in main
+    policy = Pi07Policy(args.checkpoint, device=args.device, tokenizer=args.tokenizer, denoise_steps=args.denoise_steps,
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/pi/pi_model/policy.py", line 57, in __init__
+    self.cfg = Pi07Config.from_json((checkpoint / "config.json").read_text())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/pi/pi_model/config.py", line 173, in from_json
+    return Pi07Config(vision=VisionConfig(**raw.pop("vision")), text=TextConfig(**raw.pop("text")),
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: Pi07Config.__init__() got an unexpected keyword argument 'vlm_lr_scale'
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/home/ubuntu/pi/pi_model/eval_sim.py", line 325, in <module>
+    main()
+  File "/home/ubuntu/pi/pi_model/eval_sim.py", line 270, in main
+    policy = Pi07Policy(args.checkpoint, device=args.device, tokenizer=args.tokenizer, denoise_steps=args.denoise_steps,
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/pi/pi_model/policy.py", line 57, in __init__
+    self.cfg = Pi07Config.from_json((checkpoint / "config.json").read_text())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/pi/pi_model/config.py", line 173, in from_json
+    return Pi07Config(vision=VisionConfig(**raw.pop("vision")), text=TextConfig(**raw.pop("text")),
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: Pi07Config.__init__() got an unexpected keyword argument 'vlm_lr_scale'
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/home/ubuntu/pi/pi_model/eval_sim.py", line 325, in <module>
+    main()
+  File "/home/ubuntu/pi/pi_model/eval_sim.py", line 270, in main
+    policy = Pi07Policy(args.checkpoint, device=args.device, tokenizer=args.tokenizer, denoise_steps=args.denoise_steps,
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/pi/pi_model/policy.py", line 57, in __init__
+    self.cfg = Pi07Config.from_json((checkpoint / "config.json").read_text())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/pi/pi_model/config.py", line 173, in from_json
+    return Pi07Config(vision=VisionConfig(**raw.pop("vision")), text=TextConfig(**raw.pop("text")),
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: Pi07Config.__init__() got an unexpected keyword argument 'vlm_lr_scale'

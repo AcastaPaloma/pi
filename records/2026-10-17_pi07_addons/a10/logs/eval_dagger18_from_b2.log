@@ -1,0 +1,34 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+WARNING:huggingface_hub.utils._http:Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+WARNING:lerobot.configs.policies:Device 'mps' is not available. Switching to 'cuda'.
+handover 20/300 {'kept': 19, 'skipped': 1, 'success': 14}
+handover 40/300 {'kept': 34, 'skipped': 6, 'success': 24}
+handover 60/300 {'kept': 50, 'skipped': 10, 'success': 35}
+handover 80/300 {'kept': 63, 'skipped': 17, 'success': 44}
+handover 100/300 {'kept': 81, 'skipped': 19, 'success': 59}
+handover 120/300 {'kept': 94, 'skipped': 26, 'success': 66}
+handover 140/300 {'kept': 110, 'skipped': 30, 'success': 80}
+handover 160/300 {'kept': 127, 'skipped': 33, 'success': 92}
+handover 180/300 {'kept': 144, 'skipped': 36, 'success': 107}
+handover 200/300 {'kept': 161, 'skipped': 39, 'success': 119}
+handover 220/300 {'kept': 177, 'skipped': 43, 'success': 131}
+handover 240/300 {'kept': 192, 'skipped': 48, 'success': 142}
+handover 260/300 {'kept': 205, 'skipped': 55, 'success': 153}
+handover 280/300 {'kept': 222, 'skipped': 58, 'success': 166}
+handover 300/300 {'kept': 240, 'skipped': 60, 'success': 178}
+two_bins 20/300 {'kept': 252, 'skipped': 68, 'success': 187}
+two_bins 40/300 {'kept': 266, 'skipped': 74, 'success': 198}
+two_bins 60/300 {'kept': 283, 'skipped': 77, 'success': 210}
+two_bins 80/300 {'kept': 298, 'skipped': 82, 'success': 224}
+two_bins 100/300 {'kept': 312, 'skipped': 88, 'success': 236}
+two_bins 120/300 {'kept': 327, 'skipped': 93, 'success': 248}
+two_bins 140/300 {'kept': 341, 'skipped': 99, 'success': 260}
+two_bins 160/300 {'kept': 354, 'skipped': 106, 'success': 269}
+two_bins 180/300 {'kept': 370, 'skipped': 110, 'success': 282}
+two_bins 200/300 {'kept': 382, 'skipped': 118, 'success': 290}
+two_bins 220/300 {'kept': 397, 'skipped': 123, 'success': 302}
+two_bins 240/300 {'kept': 410, 'skipped': 130, 'success': 310}
+two_bins 260/300 {'kept': 425, 'skipped': 135, 'success': 320}
+two_bins 280/300 {'kept': 442, 'skipped': 138, 'success': 333}
+two_bins 300/300 {'kept': 459, 'skipped': 141, 'success': 345}
+done {'kept': 459, 'skipped': 141, 'success': 345}

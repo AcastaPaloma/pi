@@ -1,0 +1,44 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+WARNING:huggingface_hub.utils._http:Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+WARNING:lerobot.configs.policies:Device 'mps' is not available. Switching to 'cuda'.
+handover 20/400 {'kept': 19, 'skipped': 1, 'success': 15}
+handover 40/400 {'kept': 39, 'skipped': 1, 'success': 35}
+handover 60/400 {'kept': 57, 'skipped': 3, 'success': 52}
+handover 80/400 {'kept': 76, 'skipped': 4, 'success': 65}
+handover 100/400 {'kept': 93, 'skipped': 7, 'success': 79}
+handover 120/400 {'kept': 112, 'skipped': 8, 'success': 96}
+handover 140/400 {'kept': 130, 'skipped': 10, 'success': 110}
+handover 160/400 {'kept': 148, 'skipped': 12, 'success': 123}
+handover 180/400 {'kept': 165, 'skipped': 15, 'success': 136}
+handover 200/400 {'kept': 183, 'skipped': 17, 'success': 150}
+handover 220/400 {'kept': 202, 'skipped': 18, 'success': 165}
+handover 240/400 {'kept': 219, 'skipped': 21, 'success': 179}
+handover 260/400 {'kept': 236, 'skipped': 24, 'success': 193}
+handover 280/400 {'kept': 255, 'skipped': 25, 'success': 209}
+handover 300/400 {'kept': 273, 'skipped': 27, 'success': 225}
+handover 320/400 {'kept': 289, 'skipped': 31, 'success': 239}
+handover 340/400 {'kept': 309, 'skipped': 31, 'success': 258}
+handover 360/400 {'kept': 328, 'skipped': 32, 'success': 274}
+handover 380/400 {'kept': 345, 'skipped': 35, 'success': 286}
+handover 400/400 {'kept': 363, 'skipped': 37, 'success': 303}
+two_bins 20/400 {'kept': 382, 'skipped': 38, 'success': 316}
+two_bins 40/400 {'kept': 398, 'skipped': 42, 'success': 325}
+two_bins 60/400 {'kept': 414, 'skipped': 46, 'success': 339}
+two_bins 80/400 {'kept': 429, 'skipped': 51, 'success': 352}
+two_bins 100/400 {'kept': 447, 'skipped': 53, 'success': 362}
+two_bins 120/400 {'kept': 464, 'skipped': 56, 'success': 378}
+two_bins 140/400 {'kept': 480, 'skipped': 60, 'success': 389}
+two_bins 160/400 {'kept': 493, 'skipped': 67, 'success': 398}
+two_bins 180/400 {'kept': 513, 'skipped': 67, 'success': 409}
+two_bins 200/400 {'kept': 531, 'skipped': 69, 'success': 421}
+two_bins 220/400 {'kept': 547, 'skipped': 73, 'success': 436}
+two_bins 240/400 {'kept': 564, 'skipped': 76, 'success': 449}
+two_bins 260/400 {'kept': 582, 'skipped': 78, 'success': 464}
+two_bins 280/400 {'kept': 597, 'skipped': 83, 'success': 479}
+two_bins 300/400 {'kept': 616, 'skipped': 84, 'success': 491}
+two_bins 320/400 {'kept': 634, 'skipped': 86, 'success': 508}
+two_bins 340/400 {'kept': 652, 'skipped': 88, 'success': 519}
+two_bins 360/400 {'kept': 669, 'skipped': 91, 'success': 529}
+two_bins 380/400 {'kept': 687, 'skipped': 93, 'success': 544}
+two_bins 400/400 {'kept': 702, 'skipped': 98, 'success': 554}
+done {'kept': 702, 'skipped': 98, 'success': 554}

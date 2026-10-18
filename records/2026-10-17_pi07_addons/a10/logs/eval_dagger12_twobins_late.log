@@ -1,0 +1,24 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+WARNING:huggingface_hub.utils._http:Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+WARNING:lerobot.configs.policies:Device 'mps' is not available. Switching to 'cuda'.
+two_bins 20/400 {'kept': 15, 'skipped': 5, 'success': 12}
+two_bins 40/400 {'kept': 26, 'skipped': 14, 'success': 18}
+two_bins 60/400 {'kept': 40, 'skipped': 20, 'success': 29}
+two_bins 80/400 {'kept': 51, 'skipped': 29, 'success': 38}
+two_bins 100/400 {'kept': 63, 'skipped': 37, 'success': 44}
+two_bins 120/400 {'kept': 72, 'skipped': 48, 'success': 50}
+two_bins 140/400 {'kept': 86, 'skipped': 54, 'success': 59}
+two_bins 160/400 {'kept': 97, 'skipped': 63, 'success': 68}
+two_bins 180/400 {'kept': 109, 'skipped': 71, 'success': 76}
+two_bins 200/400 {'kept': 120, 'skipped': 80, 'success': 85}
+two_bins 220/400 {'kept': 135, 'skipped': 85, 'success': 95}
+two_bins 240/400 {'kept': 146, 'skipped': 94, 'success': 104}
+two_bins 260/400 {'kept': 155, 'skipped': 105, 'success': 111}
+two_bins 280/400 {'kept': 167, 'skipped': 113, 'success': 119}
+two_bins 300/400 {'kept': 179, 'skipped': 121, 'success': 129}
+two_bins 320/400 {'kept': 193, 'skipped': 127, 'success': 142}
+two_bins 340/400 {'kept': 199, 'skipped': 141, 'success': 148}
+two_bins 360/400 {'kept': 214, 'skipped': 146, 'success': 158}
+two_bins 380/400 {'kept': 231, 'skipped': 149, 'success': 167}
+two_bins 400/400 {'kept': 245, 'skipped': 155, 'success': 173}
+done {'kept': 245, 'skipped': 155, 'success': 173}
