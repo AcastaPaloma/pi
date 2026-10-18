@@ -1194,3 +1194,8 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   `records/2026-10-17_pi07_addons/` (628 files, 13 MB: every run's config, run.json and loss log, every 30-seed score,
   robustness and failure-mining results, DAgger logs, scheduler log). The HF token is on the three boxes for the
   uploads and is removed when they end. v19 (handover rescues from the best) uploads when it finishes.
+- **2026-10-18 08:56** All four priority checkpoints are on Hugging Face (x_goal_s0 6000 finished; models repo ~65.5 GB
+  private, at the quota edge; more need the repo public). Email condition not yet met: x_combo_b2_tb2 at 4820 (88 at
+  3000), x_goal75_s1 at 4760 (94 at 3000 without goals; with-goal 3000 pending). Steps: twobins2x_s1 3220, round3
+  1940, data_b3 740, control_long_s1 840. A10: dagger19 handover 40/400 (success 22 of 33 kept). Site synced (114
+  scores). All GPUs busy; scheduler and caffeinate alive.
