@@ -950,3 +950,10 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   180/300 (success 119 of 145 kept). Queue: control_r2, goal75, data_b2 for the next three free GPUs.
 - **2026-10-17 22:25** [scheduler] 192.222.52.191:1 was idle; launched **x_control_r2_s0** (H24: low-LR continuation compounds. The first round lifted pi05_dagger2 from 90 to a 97.4 mean (best 104); a second identical round started from that best checkpoint (x_control_s1 step 5000) ends higher again, or shows the plateau. Scored at 3000-6000)
 - **2026-10-17 22:30** [scheduler] 193.122.189.119 was idle; launched **dagger17_handover_best** (Track B: handover still fails by stalling while holding the cube (14 of 16 failures of the best checkpoint on non-test seeds); more on-policy takeovers in the stall window (4-16 s) from the best checkpoint, seeds 1700000+)
+- **2026-10-17 22:32** **goal_s1 step 3000 with oracle goals = 26 / 22 / 13 / 14 = 75, without = 89**: the second
+  seed repeats goal_s0 (76 vs 87), so H21 is refuted on both seeds at the paper's 25% goal share (H21b, 75% share,
+  queued). **ki_vlm01 step 3000 = 0/120** (H22b closed). dagger16 done (300 episodes, 236 kept, 193 successful);
+  the scheduler started dagger17_handover_best at 22:30 and x_control_r2_s0 (H24) on main GPU 1 at 22:24. A10
+  queue: **H25 robust_c1_5000** (the best checkpoint under visual randomization on the 30 test seeds per task:
+  how brittle is it before hardware?). Steps: control_long 1920, control_r2 40, data_v11 5340, data_v11_s1 3160,
+  mem_s1 4060, ki_vlm01 5080. All seven GPUs busy; scheduler and caffeinate alive.

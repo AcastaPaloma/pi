@@ -1020,13 +1020,14 @@
     {
       "name": "dagger16_twobins_mid_best",
       "hypothesis": "Track B: two_bins is now the weakest task for the best checkpoint (37/60 non-test; 18 of 23 failures leave cube 2 undelivered); takeovers at 3-14 s cover the second arm's approach and grasp rather than only its late hover (v15 covers 8-22 s). Seeds 1600000+",
-      "status": "running",
+      "status": "done",
       "requires_on_host": [
         "runs/x_control_s1/step_0005000/model.pt"
       ],
       "eval": "MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.dagger --checkpoint runs/x_control_s1/step_0005000 --tasks two_bins --episodes-per-task 300 --takeover-min 3 --takeover-max 14 --seed 1600000 --episode-seconds 40 --out data/sim_dagger_v16",
       "host": "193.122.189.119",
-      "started": "2026-10-17T21:35"
+      "started": "2026-10-17T21:35",
+      "result": "300 episodes: 236 kept, teacher success 193"
     },
     {
       "name": "dagger17_handover_best",
@@ -1038,6 +1039,15 @@
       "eval": "MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.dagger --checkpoint runs/x_control_s1/step_0005000 --tasks handover --episodes-per-task 300 --takeover-min 4 --takeover-max 16 --seed 1700000 --out data/sim_dagger_v17",
       "host": "193.122.189.119",
       "started": "2026-10-17T22:30"
+    },
+    {
+      "name": "robust_c1_5000",
+      "hypothesis": "H25: the best policy (x_control_s1 step 5000, 104/120) is brittle to visual change: with randomized lighting, colours and textures (eval_sim --visual-randomization) on the same 30 seeds per task it drops far below 104. A large drop means visually randomized data must come before hardware; a small one means the sim-to-real gap is mostly elsewhere",
+      "status": "queued",
+      "requires_on_host": [
+        "runs/x_control_s1/step_0005000/model.pt"
+      ],
+      "eval": "for T in pick_place_any bin handover two_bins; do MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.eval_sim --checkpoint runs/x_control_s1/step_0005000 --task $T --episodes 30 --episode-seconds 30 --execute 25 --delay 0 --device cuda --dtype bf16 --subtask oracle --seed 4000 --visual-randomization --tokenizer weights/paligemma/tokenizer.model --out outputs/robust_c1_5000_$T; done"
     }
   ]
 }
