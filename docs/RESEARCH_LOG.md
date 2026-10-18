@@ -1027,3 +1027,11 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   so far with randomization). Site sync: 7 new clips, pushed. Steps: control_long 5260, control_r2 3560, data_b2
   2280, goal75 2200, twobins2x 580. All GPUs busy; scheduler and caffeinate alive.
 - **2026-10-18 01:06** [scheduler] 193.122.189.119 was idle; launched **robust_x_control_s1_6000** (H26: the low-LR continuation's gain is mostly on the default look. Under visual randomization (the training distribution) the previous best scores 94 and the best continuation checkpoint 95, against 90 and 104 on the default look. Robust scores of more continuation checkpoints say whether the continuation improved the policy or only its default-look score)
+- **2026-10-18 01:12** **H26 weakened by the first new point:** x_control_s0 step 6000 **with visual randomization =
+  29 / 28 / 23 / 19 = 99** (default look 95). Randomized scores so far: pi05_dagger2 7000 = 94, x_control_s1 5000 =
+  95, x_control_s0 6000 = 99, so the continuation does carry over to the training distribution of visuals (mean 97
+  vs 94), just less cleanly than the default look suggested. Three more randomized scores are queued on the A10.
+  The H100 queue had thinned to one entry (below the several-deep rule); added **H28 x_control_ema_s0** (EMA of the
+  weights during the continuation, to tame the 21-point checkpoint-to-checkpoint swings) and **x_control_s2** (a
+  third control seed, since every verdict leans on a two-seed control mean). Finished runs marked done in the
+  queue (goal_s1, mem_s1, ki_vlm01_s0, data_v11_s1). All GPUs busy.
