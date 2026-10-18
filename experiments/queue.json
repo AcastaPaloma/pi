@@ -541,7 +541,7 @@
     {
       "name": "x_data_b2",
       "hypothesis": "Track B batch 2 (on-policy): successful takeovers from DAgger rounds 14 (handover + two_bins, takeover 2-16 s; 398 successful) and 15 (two_bins, 8-22 s; 116 successful), both rolled out from the best checkpoint x_control_s1 step 5000, added to sim_mixdagclean_v1 and resumed from that checkpoint. Clean A/B against x_control_r2_s0 (same resume and recipe, no new data)",
-      "status": "queued",
+      "status": "running",
       "requires_on_host": [
         "runs/x_control_s1/step_0005000/model.pt",
         "data/sim_mixdagclean_v1",
@@ -550,7 +550,9 @@
       ],
       "setup": "mkdir -p data/sim_mixdagclean_b2 && cd data/sim_mixdagclean_b2 && for d in ../sim_mixdagclean_v1/episode_*; do ln -sfn ../sim_mixdagclean_v1/$(basename $d) $(basename $d); done && for v in 14 15; do for d in ../sim_dagger_v$v/episode_*; do grep -qs '\"success\": true' $d/meta.json && ln -sfn $d episode_dag${v}_$(basename $d | cut -d_ -f2); done; done; true",
       "train": "SEED=0 PI_TRIM_STILL_TAIL_S=1 LR=1e-5 RESUME=runs/x_control_s1/step_0005000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdagclean_b2 runs/{RUN} 6000",
-      "eval": "GPU=0 VARIANTS='d0' bash scripts/box/c30_when_ready.sh runs/{RUN} 3000 4000 5000 6000"
+      "eval": "GPU=0 VARIANTS='d0' bash scripts/box/c30_when_ready.sh runs/{RUN} 3000 4000 5000 6000",
+      "host": "192.222.55.167:3",
+      "started": "2026-10-17T23:14"
     },
     {
       "name": "x_twobins2x_r2",
