@@ -989,3 +989,15 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   robustness too. dagger17 done (300 episodes, 255 kept, 196 successful). Steps: control_long 3900, control_r2
   2040, data_v11_s1 5160, mem_s1 5160, goal75 940, data_b2 760. All seven GPUs busy; scheduler and caffeinate alive.
 - **2026-10-17 23:55** [scheduler] 193.122.189.119 was idle; launched **robust_dagger2_7000** (H25 comparison: the previous best (pi05_dagger2 step 7000, 90/120 default look) under the same visual randomization, to see whether the low-LR continuation also made the policy more robust to lighting and colour or only better on the default look)
+- **2026-10-18 00:12** **Correction to the 23:50 entry:** the "70%" read from the log there was handover, not
+  pick_place_any. Complete H25 result for the best checkpoint (x_control_s1 step 5000), strict, 30 seeds, **with
+  visual randomization: 28 / 28 / 21 / 18 = 95** vs 29 / 30 / 24 / 21 = 104 on the default look. A 9-point drop,
+  concentrated in the two-arm tasks; pick and bin barely move. So the policy is moderately, not badly, sensitive to
+  the lighting and colour range it was trained on. robust_dagger2_7000 (comparison) is running.
+  New: **x_data_v11 step 6000 = 27 / 29 / 22 / 24 = 102** (94, 92, 91, 102: mean 94.75) and **x_data_v11_s1 step
+  4000 = 30 / 29 / 19 / 20 = 98** (91, 98). Batch 1 is still below the controls' means (97.4) but closer than it
+  looked at 23:30; the s1 twin's last two checkpoints decide. **rtc_s1 step 4000: 89 at delay 0, 68 at delay 6**
+  (two_bins 7/30 under delay), matching RTC's poor delay behaviour on seed 0. ki_vlm01 step 4000: 1/120. Steps:
+  control_long 4380, control_r2 2600, data_v11_s1 5680, mem_s1 5440, goal75 1360, data_b2 1280. The website
+  auto-filming and sync is being built (scripts/sync_results_site.py appeared; first sync pending). All seven GPUs
+  busy; scheduler and caffeinate alive.
