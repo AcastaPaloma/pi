@@ -1059,17 +1059,18 @@
     {
       "name": "dagger17_handover_best",
       "hypothesis": "Track B: handover still fails by stalling while holding the cube (14 of 16 failures of the best checkpoint on non-test seeds); more on-policy takeovers in the stall window (4-16 s) from the best checkpoint, seeds 1700000+",
-      "status": "running",
+      "status": "done",
       "requires_on_host": [
         "runs/x_control_s1/step_0005000/model.pt"
       ],
       "eval": "MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.dagger --checkpoint runs/x_control_s1/step_0005000 --tasks handover --episodes-per-task 300 --takeover-min 4 --takeover-max 16 --seed 1700000 --out data/sim_dagger_v17",
       "host": "193.122.189.119",
-      "started": "2026-10-17T22:30"
+      "started": "2026-10-17T22:30",
+      "result": "300 episodes: 255 kept, teacher success 196"
     },
     {
       "name": "robust_c1_5000",
-      "hypothesis": "H25: the best policy (x_control_s1 step 5000, 104/120) is brittle to visual change: with randomized lighting, colours and textures (eval_sim --visual-randomization) on the same 30 seeds per task it drops far below 104. A large drop means visually randomized data must come before hardware; a small one means the sim-to-real gap is mostly elsewhere",
+      "hypothesis": "H25 (corrected 23:50): every training set was recorded WITH visual randomization (table and object colour, light, camera jitter; meta.json visual_randomization), while all 30-seed scores use the plain default look. So this measures the best checkpoint under its own training distribution of visuals, not unseen ones; a large drop means the policy is fragile on the harder draws (dim light, low contrast) it was trained on",
       "status": "running",
       "requires_on_host": [
         "runs/x_control_s1/step_0005000/model.pt"
@@ -1077,6 +1078,15 @@
       "eval": "for T in pick_place_any bin handover two_bins; do MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.eval_sim --checkpoint runs/x_control_s1/step_0005000 --task $T --episodes 30 --episode-seconds 30 --execute 25 --delay 0 --device cuda --dtype bf16 --subtask oracle --seed 4000 --visual-randomization --tokenizer weights/paligemma/tokenizer.model --out outputs/robust_c1_5000_$T; done",
       "host": "193.122.189.119",
       "started": "2026-10-17T23:30"
+    },
+    {
+      "name": "robust_dagger2_7000",
+      "hypothesis": "H25 comparison: the previous best (pi05_dagger2 step 7000, 90/120 default look) under the same visual randomization, to see whether the low-LR continuation also made the policy more robust to lighting and colour or only better on the default look",
+      "status": "queued",
+      "requires_on_host": [
+        "runs/pi05_dagger2/step_0007000/model.pt"
+      ],
+      "eval": "for T in pick_place_any bin handover two_bins; do MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.eval_sim --checkpoint runs/pi05_dagger2/step_0007000 --task $T --episodes 30 --episode-seconds 30 --execute 25 --delay 0 --device cuda --dtype bf16 --subtask oracle --seed 4000 --visual-randomization --tokenizer weights/paligemma/tokenizer.model --out outputs/robust_dagger2_7000_$T; done"
     }
   ]
 }

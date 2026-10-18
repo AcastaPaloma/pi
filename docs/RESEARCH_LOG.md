@@ -979,3 +979,12 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   Steps: control_long 3400, control_r2 1520, data_v11_s1 4660, mem_s1 4880, goal75 560, data_b2 280. dagger17
   280/300 (success 179 of 237 kept). All seven GPUs busy; scheduler and caffeinate alive.
 - **2026-10-17 23:31** [scheduler] 193.122.189.119 was idle; launched **robust_c1_5000** (H25: the best policy (x_control_s1 step 5000, 104/120) is brittle to visual change: with randomized lighting, colours and textures (eval_sim --visual-randomization) on the same 30 seeds per task it drops far below 104. A large drop means visually randomized data must come before hardware; a small one means the sim-to-real gap is mostly elsewhere)
+- **2026-10-17 23:50** **Correction to H25:** every training set was recorded **with** visual randomization (table
+  and object colour, light position and strength, camera jitter; checked in meta.json of sim_ladder_v1,
+  sim_recover2_v1, sim_twobins_mixed_v1, DAgger v7 and v9), while every 30-seed score so far uses the plain default
+  look (eval_sim without --visual-randomization). So robust_c1_5000 measures the best checkpoint under its own
+  training distribution of visuals. First task: **pick_place_any 21/30 with randomization vs 29/30 without**, so
+  the policy is fragile on the harder draws it was trained on, and the default-look scores flatter it. Queued
+  **robust_dagger2_7000** (the previous best under the same randomization) to see whether the continuation helped
+  robustness too. dagger17 done (300 episodes, 255 kept, 196 successful). Steps: control_long 3900, control_r2
+  2040, data_v11_s1 5160, mem_s1 5160, goal75 940, data_b2 760. All seven GPUs busy; scheduler and caffeinate alive.
