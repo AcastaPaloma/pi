@@ -298,6 +298,93 @@
           }
         ]
       }
+    ],
+    "observation": [
+      {
+        "tag": "p",
+        "children": [
+          {
+            "text": "This follows a standard VLM image encoder, extended to video. Each camera contributes 6 frames: the current frame and 5 past frames, 1 second apart. Every frame is cut into patches, and each patch is given a positional embedding that records where it was in the image."
+          }
+        ]
+      },
+      {
+        "tag": "p",
+        "children": [
+          {
+            "text": "The patches then pass through 27 transformer layers. Every layer applies spatial attention, in which each patch reads the other patches of the same frame. Every fourth layer also applies temporal attention, in which each patch reads the same patch position in earlier frames. The shape is still [B, V, 6, 1024, 1152], but the current frame's patches now also carry information from the past frames. Cameras do not exchange information here; that happens later, inside Gemma."
+          }
+        ]
+      },
+      {
+        "tag": "p",
+        "children": [
+          {
+            "text": "After the last temporal layer, the 5 past frames have nothing left to contribute, so they are dropped: [B, V, (1), 1024, 1152]. Pooling and a linear projection then reduce each camera to 256 tokens of width 2560. The final tensor is [B, 256V, 2560]."
+          }
+        ]
+      },
+      {
+        "tag": "p",
+        "children": [
+          {
+            "text": "This history encoder comes from MEM (Torne et al., 2026)."
+          },
+          {
+            "tag": "strong",
+            "children": [
+              {
+                "text": " It adds no new learned weights to the image encoder"
+              }
+            ]
+          },
+          {
+            "text": ", so it can start from the pretrained encoder that ships with Gemma 3."
+          }
+        ]
+      }
+    ],
+    "subgoal-policy": [
+      {
+        "tag": "p",
+        "children": [
+          {
+            "text": "This chapter is the high-level policy, the model that decides what to do next. It writes the next subtask as text, such as “Turn on the faucet”, and that text becomes the Subtask line of π0.7's prompt. The world model then draws images for that subtask."
+          }
+        ]
+      },
+      {
+        "tag": "p",
+        "children": [
+          {
+            "text": "The paper says only that it is based on the same architecture as π0.7. The drawing uses the text half of that architecture: images and text go in, and next-token cross-entropy trains it to write the subtask. No action expert or FAST target appears."
+          }
+        ]
+      },
+      {
+        "tag": "p",
+        "children": [
+          {
+            "text": "The paper's high-level policy is π0.7 fine-tuned on coaching data. A person first talks the robot through a new task step by step (“grasp the handle of the air fryer with the left hand”, …), and the policy is then trained to issue those same instructions on its own. For the five unseen tasks tested, the resulting autonomous runs roughly match the coached runs, without any new teleoperated action data."
+          }
+        ]
+      },
+      {
+        "tag": "p",
+        "children": [
+          {
+            "text": "Subtask text is generated in its own thread at runtime; π0.7 always uses the latest subtask available."
+          }
+        ]
+      },
+      {
+        "tag": "p",
+        "children": [
+          {
+            "text": "The drawing reuses the low-level pieces, so you can skim: the observation is encoded as in Ingestion, and the loss works as in the VLM loss."
+          }
+        ]
+      }
     ]
   }
 }
