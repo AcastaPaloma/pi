@@ -225,7 +225,7 @@ class Pi07Dataset(Dataset):
         episode = self.store.episodes[e]
         rng = self._rng(index)
         cfg = self.cfg
-        plan = sample_dropout(rng) if self.train else no_dropout()
+        plan = sample_dropout(rng, p_subgoals=cfg.subgoal_prob) if self.train else no_dropout()
         if cfg.max_subgoals == 0 and plan.subgoals:  # no subgoal images: never drop the subtask for one
             plan = replace(plan, subgoals=False, subtask=True)
         K, H = cfg.max_history, cfg.action_horizon

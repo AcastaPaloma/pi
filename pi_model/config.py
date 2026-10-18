@@ -122,6 +122,8 @@ class Pi07Config:
     # only gets FAST cross-entropy gradients, and Adam's update size ignores a loss weight, so this is the knob that
     # slows how fast the VLM's features move under the expert that reads them.
     vlm_lr_scale: float = 1.0
+    # Fraction of training samples that carry goal images (the paper's subgoal dropout keeps them in 25%).
+    subgoal_prob: float = 0.25
     # "pi07": our Gemma 3 4B implementation. "pi05": π0.5's pretrained PaliGemma + action expert
     # (pi_model/pi05_backbone.py), with π0.7's data, prompts and evaluation.
     backbone: str = "pi07"

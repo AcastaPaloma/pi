@@ -900,3 +900,11 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   200/300 (total kept 425, success 330). All seven GPUs busy; scheduler and caffeinate alive.
 - **2026-10-17 20:24** [scheduler] 192.222.55.167:1 was idle; launched **x_data_v11_s1** (Seed-1 twin of x_data_v11 (the control twins differ by 16 points at one checkpoint, so a data version needs two seeds))
 - **2026-10-17 20:28** [scheduler] 193.122.189.119 was idle; launched **dagger15_twobins_late_best** (Track B batch 2: second-arm hover in two_bins from the best policy, late takeovers 8-22 s (as v12, which kept 61% of episodes), seeds 1500000+)
+- **2026-10-17 20:30** mem_s0 finished (scored 94 / 90 / 92 at 3000-5000; 6000 scoring); the scheduler started
+  **x_data_v11_s1** on 4x H100 GPU 1 at 20:24. dagger14 done (600 episodes, 507 kept, 398 successful); the
+  scheduler started **dagger15_twobins_late_best** at 20:28. Queues refilled: **H21b x_goal75_s0** (goal images in
+  75% of training samples instead of the paper's 25%, scored with and without oracle goals; new `subgoal_prob`
+  config field, default 0.25 so earlier runs are unchanged), **dagger16_twobins_mid_best** (A10: two_bins
+  takeovers at 3-14 s from the best checkpoint), and **x_data_b2** (blocked: on-policy batch v14 + v15 on top of
+  batch 1, resumed from the best checkpoint, against x_control_r2_s0). ki_vlm01 flow 0.080 at 2520 (flat), CE 6.1;
+  its step-3000 score comes next. Steps: data_v11 2340, mem_s1 2320, rtc_s1 5020, goal_s1 3780. All busy.
