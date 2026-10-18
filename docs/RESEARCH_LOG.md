@@ -1073,3 +1073,9 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   on main GPU 1 at 02:40 and the sync started its filming watcher. Queue topped up to three with **x_data_b2_s1**
   (seed-1 twin of batch 2, whose step 3000 scored 96 vs its reference's 89). A10: robust_x_rtc_s0_6000 running.
   Steps: control_long 8020, control_r2_s1 3020, data_b2 4900, goal75 4420, twobins2x 3680. Site synced (1 new clip).
+- **2026-10-18 03:08** New: **goal_s1 step 5000 with oracle goals = 25 / 28 / 20 / 24 = 97, without = 90**, the
+  first with-goal win in five pairs (76/87, 90/105, 75/89, 85/98, 97/90; with-goal mean 84.6 vs without 93.8). One
+  pair does not reverse H21, but it shows the goal effect is noisy rather than uniformly harmful; H21b (goal75,
+  4760) decides whether a larger goal share makes it reliable. **x_data_b2 step 4000 = 97** (96, 97) vs its reference
+  x_control_r2_s0 (89, 99, 95): level so far. **rtc_s1 step 5000 at delay 6 = 78** (97 at delay 0). Steps:
+  control_long 8460, lr5e6 560, control_r2_s1 3520, data_b2 5320, goal75 4760, twobins2x 4160. Site synced.
