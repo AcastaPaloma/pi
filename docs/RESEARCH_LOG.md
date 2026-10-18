@@ -957,3 +957,8 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   queue: **H25 robust_c1_5000** (the best checkpoint under visual randomization on the 30 test seeds per task:
   how brittle is it before hardware?). Steps: control_long 1920, control_r2 40, data_v11 5340, data_v11_s1 3160,
   mem_s1 4060, ki_vlm01 5080. All seven GPUs busy; scheduler and caffeinate alive.
+- **2026-10-17 22:50** **x_data_v11 step 4000 = 27 / 28 / 18 / 19 = 92** (94, 92 so far; the controls had 103 / 101
+  at 4000), so batch 1 (DAgger from pi05_dagger2) is not ahead yet; its seed-1 twin (3660) and steps 5000/6000
+  decide. **rtc_s1 step 4000 = 24 / 27 / 16 / 22 = 89** (86, 89). Steps: control_long 2420, control_r2 520,
+  data_v11 5840, data_v11_s1 3660, mem_s1 4340, ki_vlm01 5480. dagger17 handover 80/300 (success 53 of 66 kept).
+  All seven GPUs busy; scheduler and caffeinate alive.
