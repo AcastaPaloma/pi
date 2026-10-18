@@ -1248,3 +1248,4 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
 - **2026-10-18 11:18** x_combo_b2_tb2 step 6000 is on Hugging Face. Last number for the user email, x_goal75_s1 6000 with
   oracle goals, is being scored. Steps: round3 5580, round3_s1 1560, data_b3 4440, data_b3_s1 1660, control_long_s1
   4620, goal75_b2 440. A10: robust batch-2 seed 1 running. All GPUs busy.
+- **2026-10-18 11:38** [scheduler] 192.222.55.167:3 was idle; launched **x_data_b4** (Track B batch 4: handover is the best model's weakest task (40/60 non-test); round 19 rescues handover only from that model (229 successful). Batch 3's mix plus round 19, from the same best checkpoint; compared with x_data_b3 (same, without round 19) on handover first)
