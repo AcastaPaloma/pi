@@ -1035,3 +1035,7 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   weights during the continuation, to tame the 21-point checkpoint-to-checkpoint swings) and **x_control_s2** (a
   third control seed, since every verdict leans on a two-seed control mean). Finished runs marked done in the
   queue (goal_s1, mem_s1, ki_vlm01_s0, data_v11_s1). All GPUs busy.
+- **2026-10-18 01:14** rtc_s1 step 4000 at delay 12 = 24 / 22 / 11 / 10 = 67 (delays 0 / 6 / 12: 89 / 68 / 67): RTC's
+  second seed degrades under delay as the first did. Steps: control_long 5740, control_r2 3980, control_r2_s1 420,
+  data_b2 2760, goal75 2620, twobins2x 1060. A10: robust_x_control_s1_6000 running. Site sync: 2 new clips, 35 loss
+  curves, pushed. All GPUs busy; scheduler and caffeinate alive; H100 queue three deep (lr5e6, ema, control_s2).
