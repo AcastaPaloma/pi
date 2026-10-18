@@ -1012,11 +1012,13 @@
     {
       "name": "dagger16_twobins_mid_best",
       "hypothesis": "Track B: two_bins is now the weakest task for the best checkpoint (37/60 non-test; 18 of 23 failures leave cube 2 undelivered); takeovers at 3-14 s cover the second arm's approach and grasp rather than only its late hover (v15 covers 8-22 s). Seeds 1600000+",
-      "status": "queued",
+      "status": "running",
       "requires_on_host": [
         "runs/x_control_s1/step_0005000/model.pt"
       ],
-      "eval": "MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.dagger --checkpoint runs/x_control_s1/step_0005000 --tasks two_bins --episodes-per-task 300 --takeover-min 3 --takeover-max 14 --seed 1600000 --episode-seconds 40 --out data/sim_dagger_v16"
+      "eval": "MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.dagger --checkpoint runs/x_control_s1/step_0005000 --tasks two_bins --episodes-per-task 300 --takeover-min 3 --takeover-max 14 --seed 1600000 --episode-seconds 40 --out data/sim_dagger_v16",
+      "host": "193.122.189.119",
+      "started": "2026-10-17T21:35"
     }
   ]
 }

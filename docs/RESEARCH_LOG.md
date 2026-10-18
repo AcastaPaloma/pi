@@ -930,3 +930,4 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   Only the s1 replicates (mem_s1 3220, goal_s1 4920; rtc_s1 done, scoring) can still move this. x_control_long_s0
   at 420, ki_vlm01 3820 (flow 0.072; step-3000 score still running), data_v11 3860, data_v11_s1 1500. dagger15
   260/300 (kept 145, success 102); when it ends v14 + v15 go to both hosts and x_data_b2 is unblocked.
+- **2026-10-17 21:35** [scheduler] 193.122.189.119 was idle; launched **dagger16_twobins_mid_best** (Track B: two_bins is now the weakest task for the best checkpoint (37/60 non-test; 18 of 23 failures leave cube 2 undelivered); takeovers at 3-14 s cover the second arm's approach and grasp rather than only its late hover (v15 covers 8-22 s). Seeds 1600000+)
