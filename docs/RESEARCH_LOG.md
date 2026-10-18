@@ -1199,3 +1199,9 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   3000), x_goal75_s1 at 4760 (94 at 3000 without goals; with-goal 3000 pending). Steps: twobins2x_s1 3220, round3
   1940, data_b3 740, control_long_s1 840. A10: dagger19 handover 40/400 (success 22 of 33 kept). Site synced (114
   scores). All GPUs busy; scheduler and caffeinate alive.
+- **2026-10-18 09:16** New: **x_data_b2_s1 = 95 / 94 / 99** at 3000-5000 (6000 pending; seed 0 averaged 100.5, the
+  round-two reference both seeds 95.9: batch 2 leads by ~2-4 so far); **x_control_ema_s0 = 95 / 94 / 92 / 95, mean 94.0**
+  (H28: weight averaging does not beat the plain controls, and its checkpoint swings are no smaller); **x_control_s2 =
+  89 / 90 / 91** at 3000-5000 (the third control seed runs lower; the first-round control mean over three seeds is
+  ~95, which every earlier comparison should be read against); **x_goal75_s1 step 4000 = 89** without goals. Email
+  still pending: combo at 5300, goal75_s1 at 5080. A10: dagger19 handover 160/400. Site synced (115 scores).
