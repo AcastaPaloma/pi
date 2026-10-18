@@ -1039,3 +1039,12 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   second seed degrades under delay as the first did. Steps: control_long 5740, control_r2 3980, control_r2_s1 420,
   data_b2 2760, goal75 2620, twobins2x 1060. A10: robust_x_control_s1_6000 running. Site sync: 2 new clips, 35 loss
   curves, pushed. All GPUs busy; scheduler and caffeinate alive; H100 queue three deep (lr5e6, ema, control_s2).
+- **2026-10-18 01:33** **H26 mostly refuted:** x_control_s1 step 6000 with visual randomization = 29 / 29 / 20 / 20 =
+  **98** (default look 100). Randomized scores: pi05_dagger2 7000 = 94; continuation checkpoints 95, 99, 98 (mean
+  97.3). The continuation's gain holds under the training distribution of visuals, smaller than on the default look
+  (+3 vs +7 over the baseline) but real; the 00:35 worry came from one unlucky checkpoint. **Batch 1 data closes:**
+  x_data_v11_s1 step 6000 = 98 (91, 98, 96, 98); batch 1 means 94.75 and 95.75 (both seeds 95.25) vs the controls'
+  97.4, so DAgger rounds 11-13 from pi05_dagger2 do not earn a place in the mix. Batch 2 (on-policy, from the best
+  checkpoint) is at 3220. **x_control_r2_s0 step 3000 = 28 / 27 / 18 / 16 = 89** (the first round's controls had 82
+  and 98 at 3000). Site sync skipped this check while the Results tree view is being built (to avoid two writers).
+  Steps: control_long 6220, control_r2 4420, control_r2_s1 900, data_b2 3220, goal75 3040, twobins2x 1580.
