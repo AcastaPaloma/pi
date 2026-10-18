@@ -924,3 +924,9 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   at 21:09, a minute after the GPU dropped to scoring only. ki_vlm01 flow 0.070 at 3400 (step-3000 score running).
   Steps: data_v11 3360, data_v11_s1 960, mem_s1 2920, goal_s1 4540. dagger15 180/300 (kept 98, success 70).
 - **2026-10-17 21:09** [scheduler] 192.222.52.191:0 was idle; launched **x_control_long_s0** (H23: the plain continuation is still climbing (controls 82/98 at step 3000, 103/101 at 4000 vs baseline 90), so the 6000-step budget may be too short: the same recipe over 12000 steps (LR decays over twice as long) ends higher. Also the right budget for the phase-2 combination run)
+- **2026-10-17 21:30** **mem_s0 step 6000 = 28 / 30 / 20 / 22 = 100** (94, 90, 92, 100: mean 94.0, controls 97.4;
+  two_bins 19-22 vs the controls' 19-26, so no sign yet that history helps the second arm). Seed-0 tallies at delay
+  0, mean over steps 3000-6000: controls 97.4 (two seeds), goal without goals 97.5, mem 94.0, rtc 91.5, KI 1.8.
+  Only the s1 replicates (mem_s1 3220, goal_s1 4920; rtc_s1 done, scoring) can still move this. x_control_long_s0
+  at 420, ki_vlm01 3820 (flow 0.072; step-3000 score still running), data_v11 3860, data_v11_s1 1500. dagger15
+  260/300 (kept 145, success 102); when it ends v14 + v15 go to both hosts and x_data_b2 is unblocked.
