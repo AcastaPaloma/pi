@@ -1060,3 +1060,4 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   extended with randomized scores for rtc_s0 and mem_s0 at step 6000 (checkpoints copied, site fields set).
   Steps: control_long 7060, control_r2 5280, control_r2_s1 1880, data_b2 4020, goal75 3720, twobins2x 2640. Site
   synced. All GPUs busy; scheduler and caffeinate alive.
+- **2026-10-18 02:20** [scheduler] 193.122.189.119 was idle; launched **robust_x_control_s0_4000** (H26: the low-LR continuation's gain is mostly on the default look. Under visual randomization (the training distribution) the previous best scores 94 and the best continuation checkpoint 95, against 90 and 104 on the default look. Robust scores of more continuation checkpoints say whether the continuation improved the policy or only its default-look score)
