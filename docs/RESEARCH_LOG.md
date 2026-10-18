@@ -1048,3 +1048,4 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   checkpoint) is at 3220. **x_control_r2_s0 step 3000 = 28 / 27 / 18 / 16 = 89** (the first round's controls had 82
   and 98 at 3000). Site sync skipped this check while the Results tree view is being built (to avoid two writers).
   Steps: control_long 6220, control_r2 4420, control_r2_s1 900, data_b2 3220, goal75 3040, twobins2x 1580.
+- **2026-10-18 01:31** [scheduler] 193.122.189.119 was idle; launched **robust_x_goal_s0_6000** (H26: the low-LR continuation's gain is mostly on the default look. Under visual randomization (the training distribution) the previous best scores 94 and the best continuation checkpoint 95, against 90 and 104 on the default look. Robust scores of more continuation checkpoints say whether the continuation improved the policy or only its default-look score)
