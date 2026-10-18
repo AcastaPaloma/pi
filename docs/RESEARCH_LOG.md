@@ -1101,3 +1101,4 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   24, 22); **x_goal75_s0 step 5000 = 99** (93, 103, 99 without goals); **goal_s1 step 6000 = 97** (89, 98, 90, 97);
   rtc_s1 step 5000 at delay 12 = 70. Steps: control_long 9880, lr5e6 1940, control_r2_s1 5020, goal75 5860,
   twobins2x 5660, ema 720. Site synced (84 scores).
+- **2026-10-18 04:13** [scheduler] launch of robust_x_control_r2_s0_4000 on 193.122.189.119 failed: job tag SCHEDJOB_robust_x_control_r2_s0_4000 not seen and GPU not busy on 193.122.189.119 within 15 minutes
