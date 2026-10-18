@@ -1498,7 +1498,7 @@
     {
       "name": "robust_x_data_b2_6000",
       "hypothesis": "H26 coverage: randomized-visuals score of the new best checkpoint (x_data_b2 step 6000, 107 on the default look)",
-      "status": "queued",
+      "status": "running",
       "requires_on_host": [
         "runs/x_data_b2/step_0006000/model.pt"
       ],
@@ -1509,7 +1509,9 @@
         "note": "The best model so far tested with random colours and lighting.",
         "parent": "robust",
         "kind": "eval"
-      }
+      },
+      "host": "193.122.189.119",
+      "started": "2026-10-18T07:01"
     },
     {
       "name": "failmine_b2_6000",

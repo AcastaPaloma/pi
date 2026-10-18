@@ -1159,3 +1159,4 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   19; analysis only, not a tree node). New: x_control_lr5e6_s0 step 4000 = 91 (94, 91); rtc_s1 step 6000 at delay 12 =
   81. Steps: combo 1460, lr5e6 5960, ema 4840, control_s2 3740, data_b2_s1 3700, goal75_s1 2380. Site synced.
 - **2026-10-18 06:50** [scheduler] 192.222.52.191:1 was idle; launched **x_twobins2x_s1** (H18 replicate (seed 1): two_bins x2 lifted two_bins to 24 and 22 at steps 3000 and 4000 against 16 for its reference)
+- **2026-10-18 07:02** [scheduler] 193.122.189.119 was idle; launched **robust_x_data_b2_6000** (H26 coverage: randomized-visuals score of the new best checkpoint (x_data_b2 step 6000, 107 on the default look))
