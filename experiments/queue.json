@@ -1070,11 +1070,13 @@
     {
       "name": "robust_c1_5000",
       "hypothesis": "H25: the best policy (x_control_s1 step 5000, 104/120) is brittle to visual change: with randomized lighting, colours and textures (eval_sim --visual-randomization) on the same 30 seeds per task it drops far below 104. A large drop means visually randomized data must come before hardware; a small one means the sim-to-real gap is mostly elsewhere",
-      "status": "queued",
+      "status": "running",
       "requires_on_host": [
         "runs/x_control_s1/step_0005000/model.pt"
       ],
-      "eval": "for T in pick_place_any bin handover two_bins; do MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.eval_sim --checkpoint runs/x_control_s1/step_0005000 --task $T --episodes 30 --episode-seconds 30 --execute 25 --delay 0 --device cuda --dtype bf16 --subtask oracle --seed 4000 --visual-randomization --tokenizer weights/paligemma/tokenizer.model --out outputs/robust_c1_5000_$T; done"
+      "eval": "for T in pick_place_any bin handover two_bins; do MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.eval_sim --checkpoint runs/x_control_s1/step_0005000 --task $T --episodes 30 --episode-seconds 30 --execute 25 --delay 0 --device cuda --dtype bf16 --subtask oracle --seed 4000 --visual-randomization --tokenizer weights/paligemma/tokenizer.model --out outputs/robust_c1_5000_$T; done",
+      "host": "193.122.189.119",
+      "started": "2026-10-17T23:30"
     }
   ]
 }

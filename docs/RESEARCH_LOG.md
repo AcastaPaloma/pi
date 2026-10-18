@@ -978,3 +978,4 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   ki_vlm01 finished; the scheduler started **x_data_b2** (on-policy batch 2) on 4x H100 GPU 3 at 23:14.
   Steps: control_long 3400, control_r2 1520, data_v11_s1 4660, mem_s1 4880, goal75 560, data_b2 280. dagger17
   280/300 (success 179 of 237 kept). All seven GPUs busy; scheduler and caffeinate alive.
+- **2026-10-17 23:31** [scheduler] 193.122.189.119 was idle; launched **robust_c1_5000** (H25: the best policy (x_control_s1 step 5000, 104/120) is brittle to visual change: with randomized lighting, colours and textures (eval_sim --visual-randomization) on the same 30 seeds per task it drops far below 104. A large drop means visually randomized data must come before hardware; a small one means the sim-to-real gap is mostly elsewhere)
