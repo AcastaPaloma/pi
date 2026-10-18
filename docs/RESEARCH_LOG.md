@@ -1026,3 +1026,4 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   finished; the scheduler started **x_control_r2_s1** at 00:49. A10: robust_x_control_s0_6000 running (pick 30/30
   so far with randomization). Site sync: 7 new clips, pushed. Steps: control_long 5260, control_r2 3560, data_b2
   2280, goal75 2200, twobins2x 580. All GPUs busy; scheduler and caffeinate alive.
+- **2026-10-18 01:06** [scheduler] 193.122.189.119 was idle; launched **robust_x_control_s1_6000** (H26: the low-LR continuation's gain is mostly on the default look. Under visual randomization (the training distribution) the previous best scores 94 and the best continuation checkpoint 95, against 90 and 104 on the default look. Robust scores of more continuation checkpoints say whether the continuation improved the policy or only its default-look score)
