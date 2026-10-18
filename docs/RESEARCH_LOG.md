@@ -1055,3 +1055,8 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   robust_x_goal_s0_6000 running. Site synced (22 runs, 63 scores). All GPUs busy; H100 queue three deep (lr5e6, ema,
   control_s2); scheduler and caffeinate alive.
 - **2026-10-18 02:14** [scheduler] launch of robust_x_data_v11_6000 on 193.122.189.119 failed: job tag SCHEDJOB_robust_x_data_v11_6000 not seen and GPU not busy on 193.122.189.119 within 15 minutes
+- **2026-10-18 02:10** New: **rtc_s1 step 5000 = 26 / 30 / 18 / 23 = 97** (86, 89, 97 so far); **goal_s0 step 6000
+  with visual randomization ≈ 29 / 28 / 23 / 21 (about 101, default look 105)**, so it also holds up. A10 queue
+  extended with randomized scores for rtc_s0 and mem_s0 at step 6000 (checkpoints copied, site fields set).
+  Steps: control_long 7060, control_r2 5280, control_r2_s1 1880, data_b2 4020, goal75 3720, twobins2x 2640. Site
+  synced. All GPUs busy; scheduler and caffeinate alive.
