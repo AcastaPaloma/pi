@@ -1018,3 +1018,4 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   (continuation at half the LR). New: mem_s1 step 5000 = 97 (98, 90, 97); the scheduler started **x_twobins2x_r2**
   (H18) at 00:24. Site sync ran: 9 new clips, pushed. Steps: control_long 4820, control_r2 3100, mem_s1 5720,
   goal75 1780, data_b2 1780, twobins2x 80.
+- **2026-10-18 00:42** [scheduler] 193.122.189.119 was idle; launched **robust_x_control_s0_6000** (H26: the low-LR continuation's gain is mostly on the default look. Under visual randomization (the training distribution) the previous best scores 94 and the best continuation checkpoint 95, against 90 and 104 on the default look. Robust scores of more continuation checkpoints say whether the continuation improved the policy or only its default-look score)
