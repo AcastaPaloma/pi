@@ -6,18 +6,23 @@
         "tag": "p",
         "children": [
           {
-            "text": "Papers are wayyy too complicated for no reason. "
-          },
-          {
-            "tag": "br",
-            "children": []
-          },
-          {
-            "text": "This write-up is for you if:"
-          },
-          {
-            "tag": "br",
-            "children": []
+            "tag": "em",
+            "children": [
+              {
+                "text": "Papers are wayyy too complicated for no reason. "
+              },
+              {
+                "tag": "br",
+                "children": []
+              },
+              {
+                "text": "This write-up is for you if:"
+              },
+              {
+                "tag": "br",
+                "children": []
+              }
+            ]
           },
           {
             "tag": "ul",
@@ -26,7 +31,12 @@
                 "tag": "li",
                 "children": [
                   {
-                    "text": "You have an intuition of how ML models learn;"
+                    "tag": "em",
+                    "children": [
+                      {
+                        "text": "You have an intuition of how ML models learn;"
+                      }
+                    ]
                   }
                 ]
               },
@@ -34,7 +44,12 @@
                 "tag": "li",
                 "children": [
                   {
-                    "text": "You're a math nerd;"
+                    "tag": "em",
+                    "children": [
+                      {
+                        "text": "You're a math nerd;"
+                      }
+                    ]
                   }
                 ]
               },
@@ -42,7 +57,12 @@
                 "tag": "li",
                 "children": [
                   {
-                    "text": "You're just starting out in robotics;"
+                    "tag": "em",
+                    "children": [
+                      {
+                        "text": "You're just starting out in robotics;"
+                      }
+                    ]
                   }
                 ]
               },
@@ -50,9 +70,43 @@
                 "tag": "li",
                 "children": [
                   {
-                    "text": "You're too lazy to go through Pi0.7's own paper."
+                    "tag": "em",
+                    "children": [
+                      {
+                        "text": "You're too lazy to go through Pi0.7's own paper."
+                      }
+                    ]
                   }
                 ]
+              },
+              {
+                "tag": "li",
+                "children": [
+                  {
+                    "tag": "em",
+                    "children": [
+                      {
+                        "text": "Or "
+                      },
+                      {
+                        "tag": "strong",
+                        "children": [
+                          {
+                            "text": "anyone else, really!"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "tag": "div",
+            "children": [
+              {
+                "text": "Have fun! Kuan & Nathan. "
               }
             ]
           }
