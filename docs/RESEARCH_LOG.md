@@ -1132,3 +1132,4 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   s1 95 / 92 / 101; two_bins means ~19.6): a small two_bins lift, no total gain; the s1 twin decides. Steps:
   control_long 11720, lr5e6 3940, ema 2860, control_s2 1720, data_b2_s1 1540, goal75_s1 700. dagger18 handover
   200/300 (kept 161, success 119). Site synced (93 scores). All GPUs busy; scheduler and caffeinate alive.
+- **2026-10-18 05:40** [scheduler] 192.222.52.191:0 was idle; launched **x_combo_b2_tb2** (H29: the two positive signals add up. On-policy batch-2 data (x_data_b2: 96 / 97 / 102 / 107, mean 100.5 vs its reference's ~94.5) together with two_bins sampled twice as often (x_twobins2x_r2: two_bins 24 / 22 vs 16 at matched steps), from the same best checkpoint, beats each alone)
