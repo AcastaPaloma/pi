@@ -949,3 +949,4 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   control_long 1420, goal_s1 5720, data_v11 4840, data_v11_s1 2620, mem_s1 3760, ki_vlm01 4660. dagger16 two_bins
   180/300 (success 119 of 145 kept). Queue: control_r2, goal75, data_b2 for the next three free GPUs.
 - **2026-10-17 22:25** [scheduler] 192.222.52.191:1 was idle; launched **x_control_r2_s0** (H24: low-LR continuation compounds. The first round lifted pi05_dagger2 from 90 to a 97.4 mean (best 104); a second identical round started from that best checkpoint (x_control_s1 step 5000) ends higher again, or shows the plateau. Scored at 3000-6000)
+- **2026-10-17 22:30** [scheduler] 193.122.189.119 was idle; launched **dagger17_handover_best** (Track B: handover still fails by stalling while holding the cube (14 of 16 failures of the best checkpoint on non-test seeds); more on-policy takeovers in the stall window (4-16 s) from the best checkpoint, seeds 1700000+)

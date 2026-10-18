@@ -1031,11 +1031,13 @@
     {
       "name": "dagger17_handover_best",
       "hypothesis": "Track B: handover still fails by stalling while holding the cube (14 of 16 failures of the best checkpoint on non-test seeds); more on-policy takeovers in the stall window (4-16 s) from the best checkpoint, seeds 1700000+",
-      "status": "queued",
+      "status": "running",
       "requires_on_host": [
         "runs/x_control_s1/step_0005000/model.pt"
       ],
-      "eval": "MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.dagger --checkpoint runs/x_control_s1/step_0005000 --tasks handover --episodes-per-task 300 --takeover-min 4 --takeover-max 16 --seed 1700000 --out data/sim_dagger_v17"
+      "eval": "MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.dagger --checkpoint runs/x_control_s1/step_0005000 --tasks handover --episodes-per-task 300 --takeover-min 4 --takeover-max 16 --seed 1700000 --out data/sim_dagger_v17",
+      "host": "193.122.189.119",
+      "started": "2026-10-17T22:30"
     }
   ]
 }
