@@ -1113,3 +1113,9 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   (batch 3, rescued from the new best; data collection only, its A/B gets a site node when queued). Steps:
   control_long 10320, lr5e6 2460, control_r2_s1 5520, ema 1220. A10: robust goal75 4000 running. Site synced.
 - **2026-10-18 04:48** [scheduler] 192.222.55.167:0 was idle; launched **x_goal75_s1** (H21b replicate (seed 1): goal75_s0 scored 99 with oracle goals vs 93 without at step 3000, the reverse of the 25%-share runs; a second seed decides whether a larger goal share makes goal images reliably useful)
+- **2026-10-18 04:50** **H18 fading:** x_twobins2x_r2 step 5000 = 27 / 29 / 17 / 15 = **88**; its two_bins scores went
+  24, 22, 15 (the reference round two: 16, 21, 18, 23), so the early lift was not durable; 6000 and the seed-1 twin
+  decide. x_control_r2_s1 finished (95, 92 so far); the scheduler started **x_goal75_s1** on 4x H100 GPU 0 at 04:47,
+  within minutes of the slot freeing. Queue topped up with **H30 x_round3_b2mix** (a plain round from the new best
+  107 on the batch-2 mix, also batch 3's reference; site field set). Steps: control_long 10760, lr5e6 2980,
+  control_s2 720, data_b2_s1 540, ema 1760. A10: robust goal75 4000 running. Site synced.
