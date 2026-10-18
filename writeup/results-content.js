@@ -147,9 +147,9 @@ export const nodes = [
     id: 'goals-most', short: 'Goal pictures, more', kind: 'main', depth: 1, when: 'Oct 17',
     name: 'Goal pictures in most training examples',
     runs: ['x_goal75_s0'],
-    changed: 'The same idea, but with a goal picture in three of every four training examples instead of one in four, in case the model simply never learned to use them.',
-    result: "With goal pictures in 75% of the training examples, a perfect goal picture helps: 99 vs 93 and 100 vs 93 on the first run, 93 vs 94 and 101 vs 95 on the second (98.3 vs 93.8 on average).",
-    next: "The picture here comes from the simulator. A model that draws the goal picture (the world model in π0.7) is the missing piece; it was not built in this project.",
+    changed: "Same starting model, same data and same training as the plain runs, with no rescue data. The only change: 75% of the training examples include a picture of how the scene should look two seconds later, instead of the paper's 25%.",
+    result: "It helped. Given a perfect goal picture, it scored 98.3 on average (99, 100, 93, 101 at two checkpoints of two runs), against 94.3 for the plain runs at the same checkpoints and 93.8 for the same model without a picture. At the paper's 25% share, goal pictures hurt (86.2 vs 94.3): the model only learns to use them when it sees them in most examples.",
+    next: "The picture came from the simulator, so this is the most a goal picture can add. A model that draws it (π0.7's world model) is the missing piece, and goal pictures together with the rescue data were started but cut off by the shutdown: the clearest next experiment.",
     clips: [],
   },
   {

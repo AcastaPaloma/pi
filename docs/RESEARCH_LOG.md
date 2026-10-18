@@ -1282,3 +1282,12 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
     gains hold but shrink (best 102).
   Released: 24 checkpoints (public, KuanKuanKuan/so101-pi07-sim-models, round2/), DAgger rounds 11-19 (public data repo,
   round2/), records/2026-10-17_pi07_addons/ on GitHub, live site https://acastapaloma.github.io/pi/results.html.
+- **2026-10-18 13:05** **Emphasis (user request): the goal-image result is the round's positive add-on finding.**
+  x_goal75_s0/s1 used the same resume (pi05_dagger2 step 7000), data (sim_mixdagclean_v1, no rescue data), LR and
+  steps as the plain controls; the only change was goal images in 75% of training samples (max_subgoals=1,
+  subgoal_prob=0.75). At the checkpoints scored both ways (3000 and 6000, two seeds), with a perfect simulator goal it
+  scored **98.3** (99, 100, 93, 101) vs **94.3** for the three control seeds at the same checkpoints (82, 95, 98, 100,
+  89, 102) and **93.8** for itself without a goal; ahead in 3 of 4 pairs. At the paper's 25% share goal images hurt
+  (86.2 vs 94.3 over six pairs), so the share decides whether the policy learns to rely on the goal. Caveats: oracle
+  goals (an upper bound on what a world model can add), four pairs at ~±4.5 each. Goal images plus the rescue data
+  (x_goal75_b2) was cut off at step 2,020 by the shutdown: the clearest next experiment.
