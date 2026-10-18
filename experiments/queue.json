@@ -603,7 +603,9 @@
         "parent": "gentle",
         "kind": "test",
         "when": "Oct 18",
-        "note": "The same gentle training with updates half as large as above. We want to know whether the gain holds with even less drift away from the starting model."
+        "note": "The same gentle training with updates half as large as above. We want to know whether the gain holds with even less drift away from the starting model.",
+        "verdict": "dead",
+        "result": "94, 91, 96 and 95 at steps 3,000 to 6,000 (mean 94), below the plain runs at the normal step size."
       },
       "host": "192.222.52.191:1",
       "started": "2026-10-18T02:40"
@@ -624,7 +626,9 @@
         "parent": "gentle",
         "kind": "test",
         "when": "Oct 18",
-        "note": "Scores jumped by up to 21 points between checkpoints of one run. Here the saved model is a running average of the weights over recent training, which should give steadier checkpoints."
+        "note": "Scores jumped by up to 21 points between checkpoints of one run. Here the saved model is a running average of the weights over recent training, which should give steadier checkpoints.",
+        "verdict": "dead",
+        "result": "95, 94, 92 and 95 (mean 94): no better than plain training, and its scores swung just as much."
       },
       "host": "192.222.55.167:3",
       "started": "2026-10-18T03:36"
@@ -710,7 +714,9 @@
         "short": "Rescues + 2 cubes",
         "note": "The two ideas that helped, together: the new rescue data and seeing the two-cube task twice as often.",
         "parent": "rescues-2",
-        "kind": "test"
+        "kind": "test",
+        "verdict": "dead",
+        "result": "88, 101, 100 and 103 (mean 98) against 100.5 for the rescue data alone: the extra two-cube practice added nothing."
       },
       "host": "192.222.52.191:0",
       "started": "2026-10-18T05:40"
@@ -753,7 +759,9 @@
         "short": "Round 3",
         "note": "Plain extra training starting from the best model so far (107), with no new data, to see whether each round keeps adding points.",
         "parent": "rescues-2",
-        "kind": "test"
+        "kind": "test",
+        "verdict": "main",
+        "result": "106, 92, 104 and 108 (mean 102.5). 108 of 120 is the best model of the project."
       },
       "host": "192.222.55.167:3",
       "started": "2026-10-18T07:36"
@@ -761,7 +769,7 @@
     {
       "name": "x_control_long_s1",
       "hypothesis": "H23 replicate (seed 1): the 12000-step control climbed to 102-103 by steps 8000-10000 as its LR decayed; a second seed decides whether a longer schedule beats the 6000-step one (mean 97.4)",
-      "status": "running",
+      "status": "stopped",
       "train": "SEED=1 PI_TRIM_STILL_TAIL_S=1 LR=1e-5 RESUME=runs/pi05_dagger2/step_0007000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdagclean_v1 runs/{RUN} 12000",
       "eval": "GPU=0 VARIANTS='d0' bash scripts/box/c30_when_ready.sh runs/{RUN} 4000 6000 8000 10000 12000",
       "requires_on_host": [
@@ -776,12 +784,13 @@
         "kind": "replicate"
       },
       "host": "192.222.55.167:2",
-      "started": "2026-10-18T08:19"
+      "started": "2026-10-18T08:19",
+      "result": "machines shut down by the user on 2026-10-18 before this finished"
     },
     {
       "name": "x_data_b3",
       "hypothesis": "Track B batch 3 (on-policy, second iteration): successful takeovers from DAgger round 18 (345 successful, rescued from the new best x_data_b2 step 6000) added to the batch-2 mix, resumed from that checkpoint. Clean A/B against x_round3_b2mix (same resume and mix, no round-18 data). Tests whether the on-policy loop keeps paying",
-      "status": "running",
+      "status": "stopped",
       "setup": "mkdir -p data/sim_mixdagclean_b2 && cd data/sim_mixdagclean_b2 && for d in ../sim_mixdagclean_v1/episode_*; do ln -sfn ../sim_mixdagclean_v1/$(basename $d) $(basename $d); done && for v in 14 15; do for d in ../sim_dagger_v$v/episode_*; do grep -qs '\"success\": true' $d/meta.json && ln -sfn $d episode_dag${v}_$(basename $d | cut -d_ -f2); done; done; cd .. && mkdir -p sim_mixdagclean_b3 && cd sim_mixdagclean_b3 && for d in ../sim_mixdagclean_b2/episode_*; do ln -sfn ../sim_mixdagclean_b2/$(basename $d) $(basename $d); done && for d in ../sim_dagger_v18/episode_*; do grep -qs '\"success\": true' $d/meta.json && ln -sfn $d episode_dag18_$(basename $d | cut -d_ -f2); done; true",
       "train": "SEED=0 PI_TRIM_STILL_TAIL_S=1 LR=1e-5 RESUME=runs/x_data_b2/step_0006000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdagclean_b3 runs/{RUN} 6000",
       "eval": "GPU=0 VARIANTS='d0' bash scripts/box/c30_when_ready.sh runs/{RUN} 3000 4000 5000 6000",
@@ -797,15 +806,18 @@
         "short": "Rescues, round 3",
         "note": "A third batch of rescues, collected from the best model so far (107), added to the data. Compared with the same training without them.",
         "parent": "rescues-2",
-        "kind": "test"
+        "kind": "test",
+        "verdict": "dead",
+        "result": "102, 104 and 105 at steps 3,000 to 5,000, level with the same round without the new rescues (106, 92, 104, 108). Its second run was stopped at the shutdown."
       },
       "host": "192.222.55.167:1",
-      "started": "2026-10-18T08:21"
+      "started": "2026-10-18T08:21",
+      "result": "machines shut down by the user on 2026-10-18 before this finished"
     },
     {
       "name": "x_data_b3_s1",
       "hypothesis": "Seed-1 twin of x_data_b3: data versions and their references need two seeds",
-      "status": "running",
+      "status": "stopped",
       "setup": "mkdir -p data/sim_mixdagclean_b2 && cd data/sim_mixdagclean_b2 && for d in ../sim_mixdagclean_v1/episode_*; do ln -sfn ../sim_mixdagclean_v1/$(basename $d) $(basename $d); done && for v in 14 15; do for d in ../sim_dagger_v$v/episode_*; do grep -qs '\"success\": true' $d/meta.json && ln -sfn $d episode_dag${v}_$(basename $d | cut -d_ -f2); done; done; cd .. && mkdir -p sim_mixdagclean_b3 && cd sim_mixdagclean_b3 && for d in ../sim_mixdagclean_b2/episode_*; do ln -sfn ../sim_mixdagclean_b2/$(basename $d) $(basename $d); done && for d in ../sim_dagger_v18/episode_*; do grep -qs '\"success\": true' $d/meta.json && ln -sfn $d episode_dag18_$(basename $d | cut -d_ -f2); done; true",
       "train": "SEED=1 PI_TRIM_STILL_TAIL_S=1 LR=1e-5 RESUME=runs/x_data_b2/step_0006000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdagclean_b3 runs/{RUN} 6000",
       "eval": "GPU=0 VARIANTS='d0' bash scripts/box/c30_when_ready.sh runs/{RUN} 3000 4000 5000 6000",
@@ -824,12 +836,13 @@
         "kind": "replicate"
       },
       "host": "192.222.52.191:0",
-      "started": "2026-10-18T10:09"
+      "started": "2026-10-18T10:09",
+      "result": "machines shut down by the user on 2026-10-18 before this finished"
     },
     {
       "name": "x_round3_b2mix_s1",
       "hypothesis": "Seed-1 twin of x_round3_b2mix: data versions and their references need two seeds",
-      "status": "running",
+      "status": "stopped",
       "setup": "mkdir -p data/sim_mixdagclean_b2 && cd data/sim_mixdagclean_b2 && for d in ../sim_mixdagclean_v1/episode_*; do ln -sfn ../sim_mixdagclean_v1/$(basename $d) $(basename $d); done && for v in 14 15; do for d in ../sim_dagger_v$v/episode_*; do grep -qs '\"success\": true' $d/meta.json && ln -sfn $d episode_dag${v}_$(basename $d | cut -d_ -f2); done; done; true",
       "train": "SEED=1 PI_TRIM_STILL_TAIL_S=1 LR=1e-5 RESUME=runs/x_data_b2/step_0006000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdagclean_b2 runs/{RUN} 6000",
       "eval": "GPU=0 VARIANTS='d0' bash scripts/box/c30_when_ready.sh runs/{RUN} 3000 4000 5000 6000",
@@ -847,12 +860,13 @@
         "kind": "replicate"
       },
       "host": "192.222.55.167:0",
-      "started": "2026-10-18T10:11"
+      "started": "2026-10-18T10:11",
+      "result": "machines shut down by the user on 2026-10-18 before this finished"
     },
     {
       "name": "x_goal75_b2",
       "hypothesis": "H31: the two most promising lines combine. Goal images in 75% of training samples (x_goal75_s0: 99/93 and 100/93 with vs without oracle goals) trained on the on-policy batch-2 mix from the new best checkpoint (x_data_b2 step 6000, 107; 102 under randomization). Scored with and without oracle goals",
-      "status": "running",
+      "status": "stopped",
       "setup": "mkdir -p data/sim_mixdagclean_b2 && cd data/sim_mixdagclean_b2 && for d in ../sim_mixdagclean_v1/episode_*; do ln -sfn ../sim_mixdagclean_v1/$(basename $d) $(basename $d); done && for v in 14 15; do for d in ../sim_dagger_v$v/episode_*; do grep -qs '\"success\": true' $d/meta.json && ln -sfn $d episode_dag${v}_$(basename $d | cut -d_ -f2); done; done; true",
       "train": "SET='max_subgoals=1 subgoal_prob=0.75' SEED=0 PI_TRIM_STILL_TAIL_S=1 LR=1e-5 RESUME=runs/x_data_b2/step_0006000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdagclean_b2 runs/{RUN} 6000",
       "eval": "GPU=0 VARIANTS='d0 goal' bash scripts/box/c30_when_ready.sh runs/{RUN} 3000 6000 & GPU=0 VARIANTS='d0' bash scripts/box/c30_when_ready.sh runs/{RUN} 4000 5000",
@@ -867,15 +881,18 @@
         "short": "Goals + rescues",
         "note": "The two ideas that looked best, together: goal pictures in most training examples, trained on the new rescue data from the best model.",
         "parent": "rescues-2",
-        "kind": "test"
+        "kind": "test",
+        "verdict": "dead",
+        "result": "Stopped at step 2,020 of 6,000 when the machines were shut down; not judged."
       },
       "host": "192.222.52.191:1",
-      "started": "2026-10-18T10:49"
+      "started": "2026-10-18T10:49",
+      "result": "machines shut down by the user on 2026-10-18 before this finished"
     },
     {
       "name": "x_data_b4",
       "hypothesis": "Track B batch 4: handover is the best model's weakest task (40/60 non-test); round 19 rescues handover only from that model (229 successful). Batch 3's mix plus round 19, from the same best checkpoint; compared with x_data_b3 (same, without round 19) on handover first",
-      "status": "running",
+      "status": "stopped",
       "setup": "mkdir -p data/sim_mixdagclean_b2 && cd data/sim_mixdagclean_b2 && for d in ../sim_mixdagclean_v1/episode_*; do ln -sfn ../sim_mixdagclean_v1/$(basename $d) $(basename $d); done && for v in 14 15; do for d in ../sim_dagger_v$v/episode_*; do grep -qs '\"success\": true' $d/meta.json && ln -sfn $d episode_dag${v}_$(basename $d | cut -d_ -f2); done; done; cd .. && mkdir -p sim_mixdagclean_b3 && cd sim_mixdagclean_b3 && for d in ../sim_mixdagclean_b2/episode_*; do ln -sfn ../sim_mixdagclean_b2/$(basename $d) $(basename $d); done && for d in ../sim_dagger_v18/episode_*; do grep -qs '\"success\": true' $d/meta.json && ln -sfn $d episode_dag18_$(basename $d | cut -d_ -f2); done; cd .. && mkdir -p sim_mixdagclean_b4 && cd sim_mixdagclean_b4 && for d in ../sim_mixdagclean_b3/episode_*; do ln -sfn ../sim_mixdagclean_b3/$(basename $d) $(basename $d); done && for d in ../sim_dagger_v19/episode_*; do grep -qs '\"success\": true' $d/meta.json && ln -sfn $d episode_dag19_$(basename $d | cut -d_ -f2); done; true",
       "train": "SEED=0 PI_TRIM_STILL_TAIL_S=1 LR=1e-5 RESUME=runs/x_data_b2/step_0006000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdagclean_b4 runs/{RUN} 6000",
       "eval": "GPU=0 VARIANTS='d0' bash scripts/box/c30_when_ready.sh runs/{RUN} 3000 4000 5000 6000",
@@ -892,15 +909,18 @@
         "short": "Handover rescues",
         "note": "A fourth batch of rescues aimed at the hand-over task, the best model's weakest, added on top of the third batch.",
         "parent": "rescues-2",
-        "kind": "test"
+        "kind": "test",
+        "verdict": "dead",
+        "result": "Stopped at step 1,420 of 6,000 when the machines were shut down; not judged."
       },
       "host": "192.222.55.167:3",
-      "started": "2026-10-18T11:36"
+      "started": "2026-10-18T11:36",
+      "result": "machines shut down by the user on 2026-10-18 before this finished"
     },
     {
       "name": "x_data_b2_s2",
       "hypothesis": "Third seed of the best recipe (batch 2: on-policy rescues from the best model), to firm up the round's main positive result before it is reported",
-      "status": "running",
+      "status": "stopped",
       "requires_on_host": [
         "runs/x_control_s1/step_0005000/model.pt",
         "data/sim_mixdagclean_v1",
@@ -918,12 +938,13 @@
         "kind": "replicate"
       },
       "host": "192.222.55.167:1",
-      "started": "2026-10-18T12:23"
+      "started": "2026-10-18T12:23",
+      "result": "machines shut down by the user on 2026-10-18 before this finished"
     },
     {
       "name": "x_round4_r3",
       "hypothesis": "H30 continued: round three from the best checkpoint scored 106 at step 3000 (92 at 4000). Another plain round from that checkpoint on the same mix tests whether a fourth round still adds or the rounds have plateaued",
-      "status": "queued",
+      "status": "cancelled",
       "setup": "mkdir -p data/sim_mixdagclean_b2 && cd data/sim_mixdagclean_b2 && for d in ../sim_mixdagclean_v1/episode_*; do ln -sfn ../sim_mixdagclean_v1/$(basename $d) $(basename $d); done && for v in 14 15; do for d in ../sim_dagger_v$v/episode_*; do grep -qs '\"success\": true' $d/meta.json && ln -sfn $d episode_dag${v}_$(basename $d | cut -d_ -f2); done; done; true",
       "train": "SEED=0 PI_TRIM_STILL_TAIL_S=1 LR=1e-5 RESUME=runs/x_round3_b2mix/step_0003000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdagclean_b2 runs/{RUN} 6000",
       "eval": "GPU=0 VARIANTS='d0' bash scripts/box/c30_when_ready.sh runs/{RUN} 3000 4000 5000 6000",
@@ -938,8 +959,11 @@
         "short": "Round 4",
         "note": "One more plain round starting from round three's best model, to see whether repeated rounds keep adding points or have levelled off.",
         "parent": "rescues-2",
-        "kind": "test"
-      }
+        "kind": "test",
+        "verdict": "dead",
+        "result": "Not run: the machines were shut down before a GPU was free."
+      },
+      "result": "machines shut down by the user on 2026-10-18 before this finished"
     }
   ],
   "a10": [
@@ -1720,7 +1744,7 @@
     {
       "name": "robust_x_round3_b2mix_3000",
       "hypothesis": "H26 coverage: randomized-visuals score of a strong new checkpoint",
-      "status": "running",
+      "status": "stopped",
       "requires_on_host": [
         "runs/x_round3_b2mix/step_0003000/model.pt"
       ],
@@ -1738,7 +1762,7 @@
     {
       "name": "robust_x_data_b3_3000",
       "hypothesis": "H26 coverage: randomized-visuals score of a strong new checkpoint",
-      "status": "queued",
+      "status": "cancelled",
       "requires_on_host": [
         "runs/x_data_b3/step_0003000/model.pt"
       ],
