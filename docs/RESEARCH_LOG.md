@@ -1087,3 +1087,4 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   x_control_r2_s0 at the same step. A10 queue extended with randomized scores for x_control_r2_s0 4000 and
   x_goal75_s0 4000 (checkpoints copied); finished robust jobs marked done. Steps: control_long 8900, lr5e6 1000,
   control_r2_s1 4020, data_b2 5820, goal75 5120, twobins2x 4660. Site synced (76 scores). All GPUs busy.
+- **2026-10-18 03:36** [scheduler] 192.222.55.167:3 was idle; launched **x_control_ema_s0** (H28: checkpoints of one run swing by up to 21 points (control_s0: 82, 103, 96, 95), so any single checkpoint is a noisy pick. Keeping an exponential moving average of the weights during the low-LR continuation (--ema-decay 0.999, saved as the checkpoint) gives steadier checkpoints: smaller step-to-step swings and a mean at least as high as the plain control's 97.4 (an EMA run was planned on 2026-10-16 but never ran))
