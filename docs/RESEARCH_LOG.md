@@ -939,3 +939,12 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   stall window 4-16 s, seeds 1700000+). mem_s0 and rtc_s1 marked done. ki_vlm01 flow 0.068 at 4240 (its step-3000
   score has not landed yet: scoring shares the GPU with training). Steps: control_long 920, data_v11 4340,
   data_v11_s1 2060, mem_s1 3480, goal_s1 5320. All seven GPUs busy; scheduler and caffeinate alive.
+- **2026-10-17 22:10** **H22b refuted: x_ki_vlm01_s0 step 3000 = 0 / 0 / 0 / (two_bins scoring) out of 30**, the
+  hand mostly never closes on the cube (lift rates 0-7%). Slowing the VLM 10x kept the flow loss at 0.07 (plain
+  KI 0.10) but the policy still collapsed. **Knowledge insulation is closed for this setup:** bolting a fresh FAST
+  objective onto a VLM that was fine-tuned through the flow loss rewrites the features the frozen-gradient expert
+  depends on, whatever the VLM's learning rate; π0.5 learns FAST in pretraining instead. The run finishes to 6000
+  (~40 min) and frees GPU 3. New: **rtc_s1 step 3000 at delays 0 / 6 / 12 = 86 / 84 / 78** (rtc_s0: 90 / 82 / 75;
+  the baseline: 90 / 82 / 81); **mem_s1 step 3000 = 27 / 28 / 23 / 20 = 98** (mem_s0 had 94). Steps:
+  control_long 1420, goal_s1 5720, data_v11 4840, data_v11_s1 2620, mem_s1 3760, ki_vlm01 4660. dagger16 two_bins
+  180/300 (success 119 of 145 kept). Queue: control_r2, goal75, data_b2 for the next three free GPUs.
