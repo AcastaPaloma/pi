@@ -6,7 +6,55 @@
         "tag": "p",
         "children": [
           {
-            "text": "Papers are wayyy too complicated for no reason - this isn't that hard. Have fun reading! It's genuinely Google Gemma on crack."
+            "text": "Papers are wayyy too complicated for no reason. "
+          },
+          {
+            "tag": "br",
+            "children": []
+          },
+          {
+            "text": "This write-up is for you if:"
+          },
+          {
+            "tag": "br",
+            "children": []
+          },
+          {
+            "tag": "ul",
+            "children": [
+              {
+                "tag": "li",
+                "children": [
+                  {
+                    "text": "You have an intuition of how ML models learn;"
+                  }
+                ]
+              },
+              {
+                "tag": "li",
+                "children": [
+                  {
+                    "text": "You're a math nerd;"
+                  }
+                ]
+              },
+              {
+                "tag": "li",
+                "children": [
+                  {
+                    "text": "You're just starting out in robotics;"
+                  }
+                ]
+              },
+              {
+                "tag": "li",
+                "children": [
+                  {
+                    "text": "You're too lazy to go through Pi0.7's own paper."
+                  }
+                ]
+              }
+            ]
           }
         ]
       }
@@ -148,6 +196,103 @@
             "children": [
               {
                 "text": "You'll see this \"dropping\" often; it's for robustness."
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "vision-backbone": [
+      {
+        "tag": "p",
+        "children": [
+          {
+            "text": "The encoder is SigLIP So400m, the 400-million-parameter vision encoder that ships with Gemma 3. Its 27 layers each apply spatial attention: every token attends to every other token of the same frame. Each layer has 16 attention heads, each with its own keys and values, followed by a 2-layer MLP; each sub-block adds its output back to its input (the two residuals drawn in the first box)."
+          }
+        ]
+      },
+      {
+        "tag": "p",
+        "children": [
+          {
+            "text": "To run spatial attention, the frames are moved into the batch axis: [BV·6, 1024, 1152]. Each of the BV·6 frames is processed independently."
+          }
+        ]
+      },
+      {
+        "tag": "p",
+        "children": [
+          {
+            "text": "Every fourth layer (layers 4, 8, …, 24: six layers in total) also applies temporal attention. A token at patch position p in a frame attends to the tokens at position p in that frame and in earlier frames, never later ones. This is how information from the past reaches the current frame. Attending only within a frame or only along one patch position keeps the cost far below attention across all 6 × 1024 tokens at once."
+          }
+        ]
+      },
+      {
+        "tag": "p",
+        "children": [
+          {
+            "text": "It is okay to view the inside of every transformer block in this paper as a black box. What matters is which tokens are allowed to read which others (still cryptic? don't worry, keep reading)."
+          }
+        ]
+      }
+    ],
+    "pooling": [
+      {
+        "tag": "p",
+        "children": [
+          {
+            "text": "This column reduces the encoder output to what Gemma needs."
+          }
+        ]
+      },
+      {
+        "tag": "ul",
+        "children": [
+          {
+            "tag": "li",
+            "children": [
+              {
+                "tag": "strong",
+                "children": [
+                  {
+                    "text": "Discard the past frames."
+                  }
+                ]
+              },
+              {
+                "text": " [B, V, 6, 1024, 1152] → [B, V, (1), 1024, 1152]. After the last temporal layer, spatial attention never crosses frames, so the past frames can no longer change the current one. MEM drops their tokens and passes only the current frame onward, so the backbone receives the same number of tokens as a model without memory."
+              }
+            ]
+          },
+          {
+            "tag": "li",
+            "children": [
+              {
+                "tag": "strong",
+                "children": [
+                  {
+                    "text": "Average pooling with a 2 × 2 kernel."
+                  }
+                ]
+              },
+              {
+                "text": " Each 2 × 2 block of neighboring patches is averaged into one token: 1024 → 256 tokens. The tokens are still a flat list, so the grid is recovered with integer division and remainder (“mod”): token i sits in row i ÷ 32 and column i mod 32."
+              }
+            ]
+          },
+          {
+            "tag": "li",
+            "children": [
+              {
+                "tag": "strong",
+                "children": [
+                  {
+                    "text": "Linear(1152, 2560)."
+                  }
+                ]
+              },
+              {
+                "text": " Gemma 3's image projector widens each token to the backbone width: [B, V, (1), 256, 2560]."
               }
             ]
           }
