@@ -4,6 +4,7 @@ import { buildReadingEntries, readingIndex } from './reading.mjs?v=20261017-r2';
 
 import { validateCopy, renderNodes } from './rich-text.mjs';
 import { compileReferences, decorate, undecorate } from './math-text.mjs?v=20261017-r2';
+import { addSplitter } from './splitter.mjs?v=20261018-s1';
 
 const $ = id => document.getElementById(id);
 const viewport = $('viewport'), world = $('world'), reader = $('reader');
@@ -473,6 +474,7 @@ const layoutObserver = new ResizeObserver(() => {
   if (!detached && !overview) { syncReading(); fit(false); }
 });
 layoutObserver.observe(viewport); layoutObserver.observe(reader);
+addSplitter(document.querySelector('.workspace'), { name: 'training', label: 'Resize the drawing and the text' });
 
 
 async function loadArtwork() {

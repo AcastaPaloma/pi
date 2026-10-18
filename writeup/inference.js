@@ -1,6 +1,7 @@
 import { drawing, steps, lanes, task, subtasks } from './inference-content.js?v=20261015-i1';
-import { clamp, fitBounds, constrainCamera } from './camera.mjs';
+import { clamp, fitBounds, zoomAt, constrainCamera } from './camera.mjs';
 import { readingIndex } from './reading.mjs?v=20261017-r2';
+import { addSplitter } from './splitter.mjs?v=20261018-s1';
 
 const $ = id => document.getElementById(id);
 const reader = $('reader'), viewport = $('viewport'), world = $('world');
@@ -8,7 +9,7 @@ const reduced = matchMedia('(prefers-reduced-motion: reduce)');
 const svgNS = 'http://www.w3.org/2000/svg';
 const allBounds = [0, 0, drawing.width, drawing.height];
 const LOOP_START = 1; // looping skips the overview and restarts at startup
-let index = 0, cycle = 0, overview = false, ready = false;
+let index = 0, cycle = 0, overview = false, detached = false, ready = false;
 let camera = { x: 0, y: 0, scale: 1 }, animation = 0;
 let tops = [], scrollFrame = 0, jumpTarget = null, jumpTimer = 0;
 let playing = !reduced.matches, autoTimer = 0, autoStart = 0, stage = null;
@@ -67,6 +68,7 @@ function setCamera(next, animate) {
   animation = requestAnimationFrame(tick);
 }
 function fit(animate = true) {
+  detached = false; renderFocus();
   const pad = viewport.clientWidth < 500 ? 14 : 28, top = 44;
   const bounds = overview ? allBounds : steps[index].bounds;
   const f = fitBounds(bounds, viewport.clientWidth, viewport.clientHeight - top, pad, overview ? 1 : 1.1);
@@ -78,7 +80,7 @@ function renderFocus() {
   $('lifted').hidden = !focused;
   if (focused) { position($('lifted'), bounds); $('lifted').querySelector('svg')?.setAttribute('viewBox', bounds.join(' ')); }
   for (const button of $('hotspots').children) button.classList.toggle('is-current', Number(button.dataset.index) === index);
-  $('start').firstChild.textContent = overview ? 'Back to this block ' : 'Whole timeline ';
+  $('start').firstChild.textContent = overview || detached ? 'Back to this block ' : 'Whole timeline ';
 }
 async function loadDrawing() {
   try {
@@ -105,7 +107,7 @@ function buildHotspots() {
     if (!i) return;
     const button = make('button', undefined, 'hotspot'); button.type = 'button'; button.dataset.index = i; button.tabIndex = -1;
     button.setAttribute('aria-label', `Go to ${step.title}`); position(button, step.bounds);
-    button.addEventListener('click', () => { pause(); jumpTo(i); });
+    button.addEventListener('click', () => { if (moved) return; pause(); jumpTo(i); });
     $('hotspots').append(button);
   });
 }
@@ -183,11 +185,71 @@ function schedule() {
 let progressFrame = 0;
 function pause() { if (playing) { playing = false; schedule(); } }
 
+// ---- Dragging and zooming the timeline ----
+// Moving the drawing by hand pauses the walkthrough; "Back to this block" refits.
+const pointers = new Map();
+let gesture = null, moved = false;
+const minScale = () => fitBounds(allBounds, viewport.clientWidth, viewport.clientHeight, 0).scale * .6;
+function moveByHand() { if (!detached) { detached = true; pause(); renderFocus(); } }
+function zoom(factor, point = { x: viewport.clientWidth / 2, y: viewport.clientHeight / 2 }, animate = false) {
+  moveByHand(); setCamera(zoomAt(camera, point, clamp(camera.scale * factor, minScale(), 8)), animate);
+}
+function localPoint(event) { const rect = viewport.getBoundingClientRect(); return { x: event.clientX - rect.left, y: event.clientY - rect.top }; }
+function resetGesture() {
+  const [a, b] = pointers.values();
+  if (!a) gesture = null;
+  else if (!b) gesture = { type: 'pan', point: a, camera: { ...camera } };
+  else gesture = { type: 'pinch', center: { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }, distance: Math.max(1, Math.hypot(a.x - b.x, a.y - b.y)), camera: { ...camera } };
+}
+viewport.addEventListener('pointerdown', event => {
+  if (event.button !== 0) return;
+  cancelAnimationFrame(animation);
+  if (!pointers.size) moved = false;
+  pointers.set(event.pointerId, localPoint(event)); resetGesture();
+  // A press on a block stays a click until it becomes a drag.
+  if (!event.target.closest('button')) viewport.setPointerCapture(event.pointerId);
+});
+viewport.addEventListener('pointermove', event => {
+  if (!pointers.has(event.pointerId) || !gesture) return;
+  const point = localPoint(event); pointers.set(event.pointerId, point);
+  if (gesture.type === 'pan') {
+    const dx = point.x - gesture.point.x, dy = point.y - gesture.point.y;
+    if (!moved && Math.hypot(dx, dy) < 5) return;
+    moved = true; viewport.setPointerCapture(event.pointerId);
+    setCamera({ ...gesture.camera, x: gesture.camera.x + dx, y: gesture.camera.y + dy });
+  } else {
+    const [a, b] = pointers.values(), center = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+    const next = zoomAt(gesture.camera, gesture.center, clamp(gesture.camera.scale * Math.hypot(a.x - b.x, a.y - b.y) / gesture.distance, minScale(), 8));
+    next.x += center.x - gesture.center.x; next.y += center.y - gesture.center.y;
+    moved = true; setCamera(next);
+  }
+  viewport.classList.add('dragging'); moveByHand();
+});
+function pointerEnd(event) {
+  if (!pointers.has(event.pointerId)) return;
+  pointers.delete(event.pointerId);
+  if (viewport.hasPointerCapture(event.pointerId)) viewport.releasePointerCapture(event.pointerId);
+  resetGesture(); if (!pointers.size) viewport.classList.remove('dragging');
+  // The click that ends a drag sees moved=true; later clicks must not.
+  if (!pointers.size) setTimeout(() => { moved = false; }, 0);
+}
+window.addEventListener('pointerup', pointerEnd);
+window.addEventListener('pointercancel', pointerEnd);
+window.addEventListener('blur', () => { pointers.clear(); gesture = null; moved = false; viewport.classList.remove('dragging'); });
+viewport.addEventListener('wheel', event => {
+  event.preventDefault();
+  const factor = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? viewport.clientHeight : 1;
+  if (event.ctrlKey || event.metaKey) zoom(Math.exp(-event.deltaY * factor * .008), localPoint(event));
+  else { moveByHand(); setCamera({ ...camera, x: camera.x - event.deltaX * factor, y: camera.y - event.deltaY * factor }); }
+}, { passive: false });
+viewport.addEventListener('dblclick', event => { if (!event.target.closest('button')) zoom(event.shiftKey ? .65 : 1.5, localPoint(event), true); });
+viewport.addEventListener('scroll', () => { if (viewport.scrollTop || viewport.scrollLeft) viewport.scrollTo(0, 0); });
+
 // ---- Events ----
 $('prev').addEventListener('click', () => { pause(); prev(); });
 $('next').addEventListener('click', () => { pause(); next(); });
 $('play').addEventListener('click', () => { playing = !playing; if (playing && index === steps.length - 1) next(); else schedule(); });
-$('start').addEventListener('click', () => { overview = !overview; renderFocus(); fit(true); });
+$('start').addEventListener('click', () => { overview = !overview && !detached; fit(true); });
 reader.addEventListener('scroll', () => {
   if (jumpTarget != null) { clearTimeout(jumpTimer); jumpTimer = setTimeout(() => { jumpTarget = null; }, 140); return; }
   if (!scrollFrame) scrollFrame = requestAnimationFrame(() => { scrollFrame = 0; sync(); });
@@ -199,14 +261,18 @@ document.addEventListener('keydown', event => {
   if (event.key === 'ArrowRight') { event.preventDefault(); pause(); next(); }
   else if (event.key === 'ArrowLeft') { event.preventDefault(); pause(); prev(); }
   else if (event.key === ' ' && !event.target.closest('button,a')) { event.preventDefault(); playing = !playing; schedule(); }
-  else if (event.key === 'Escape' && overview) { overview = false; renderFocus(); fit(true); }
+  else if (event.key === 'Escape' && (overview || detached)) { overview = false; fit(true); }
+  else if (event.key === '+' || event.key === '=') { event.preventDefault(); zoom(1.2); }
+  else if (event.key === '-') { event.preventDefault(); zoom(1 / 1.2); }
 });
 window.addEventListener('hashchange', () => { const i = steps.findIndex(s => `#inf-${s.id}` === location.hash); if (i >= 0 && i !== index) { pause(); jumpTo(i, { history: 'none' }); } });
-new ResizeObserver(() => { measure(); fit(false); }).observe(viewport);
+new ResizeObserver(() => { measure(); if (detached) setCamera(camera); else fit(false); }).observe(viewport);
 new ResizeObserver(measure).observe(reader);
 document.addEventListener('visibilitychange', () => { if (document.hidden) { clearTimeout(autoTimer); cancelAnimationFrame(progressFrame); } else schedule(); });
 
 // ---- Start ----
+addSplitter(document.querySelector('.workspace'), { name: 'inference', label: 'Resize the visuals and the text' });
+addSplitter(document.querySelector('.visual-column'), { name: 'inference-stage', label: 'Resize the 3D view and the timeline' });
 buildArticle(); buildHotspots(); loopLabel();
 const initial = Math.max(0, steps.findIndex(s => `#inf-${s.id}` === location.hash));
 if (initial > 0) playing = false;

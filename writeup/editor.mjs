@@ -1,4 +1,4 @@
-import { applyCopy, decoratePassage, expandAll, focusPassage, plainPassage, previewPassage, refreshReadingMeasurements } from './app.js?v=20261017-r2';
+import { applyCopy, decoratePassage, expandAll, focusPassage, plainPassage, previewPassage, refreshReadingMeasurements } from './app.js?v=20261018-s1';
 import { serializeBody, validateCopy } from './rich-text.mjs';
 import { steps, details } from './content.js?v=20261017-r2';
 

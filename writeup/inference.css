@@ -1,5 +1,5 @@
 /* Inference tab: 3D stage over the timeline drawing on the left, walkthrough text on the right. */
-.visual-column{display:grid;grid-template-rows:minmax(0,62fr) minmax(0,38fr);min-width:0;min-height:0}
+.visual-column{--split-y:62%;position:relative;display:grid;grid-template-rows:minmax(0,var(--split-y)) minmax(0,1fr);min-width:0;min-height:0}
 .stage{position:relative;min-height:0;overflow:hidden;background:#2a2928;border-bottom:1px solid var(--rule)}
 .stage-canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 .stage-loading{position:absolute;inset:0;display:grid;place-content:center;color:#c9c5bd;font-size:14px;text-align:center;padding:24px}
@@ -60,8 +60,8 @@
 
 @media(max-width:1100px){.hud-joints{display:none}.hud-thumbs canvas{width:52px;height:39px}.hud-ticks{height:39px}}
 @media(max-width:760px){
-  .inference-page .workspace{grid-template-rows:minmax(0,54fr) minmax(0,46fr)}
-  .visual-column{grid-template-rows:minmax(0,64fr) minmax(0,36fr)}
+  .inference-page .workspace{--split-y:54%}
+  .visual-column{--split-y:64%}
   .hud-top{left:8px;right:8px;top:8px}.hud-caption,.hud-clock{padding:5px 8px}.hud-subtask{font-size:16px}.hud-note{display:none}.hud-time{font-size:13px}
   .hud-strip{left:6px;right:6px;bottom:6px;gap:5px}.hud-group{padding:4px 5px 5px;gap:3px}.hud-label{font-size:9px}
   .hud-thumbs{gap:2px}.hud-thumbs canvas{width:34px;height:26px}.hud-ticks{height:26px;gap:1px}
