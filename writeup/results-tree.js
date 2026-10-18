@@ -23,7 +23,10 @@ export function lineageParents(nodes, lineage, lossPlan, roots) {
   const parent = new Map();
   for (const n of nodes) {
     let p = null;
-    if (n.from) p = { id: n.from };
+    if (n.from) {  // fixed by hand; the resume step still comes from the run record when there is one
+      p = { id: n.from };
+      for (const r of runsOf(n)) if (lineage[r] && owner.get(lineage[r][0]) === n.from) { p.step = lineage[r][1]; break; }
+    }
     else {
       for (const r of runsOf(n)) {
         const src = lineage[r];

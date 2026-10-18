@@ -73,7 +73,7 @@ export const nodes = [
     clips: [],
   },
   {
-    id: 'recover', short: 'Staged mistakes', kind: 'dead', depth: 1, when: 'Oct 16',
+    id: 'recover', short: 'Staged mistakes', from: 'two-arms', kind: 'dead', depth: 1, when: 'Oct 16',
     name: 'Practice recovering from staged mistakes',
     score: { value: 72, of: 120 },
     changed: 'We added demonstrations with deliberate fumbles (knocked cubes, missed grasps) followed by recoveries.',
@@ -82,7 +82,7 @@ export const nodes = [
     clips: [],
   },
   {
-    id: 'restart', short: 'Different start', kind: 'dead', depth: 1, when: 'Oct 16',
+    id: 'restart', short: 'Different start', from: 'pi05-single', kind: 'dead', depth: 1, when: 'Oct 16',
     name: 'A second run from a different start',
     score: { value: 52, of: 120 },
     changed: 'A separate two-arm run warm-started from the one-arm model, with the recovery data mixed in.',
@@ -91,7 +91,7 @@ export const nodes = [
     clips: [],
   },
   {
-    id: 'dagger', short: 'From its mistakes', kind: 'main', depth: 0, when: 'Oct 16–17',
+    id: 'dagger', short: 'From its mistakes', from: 'two-arms', kind: 'main', depth: 0, when: 'Oct 16–17',
     name: 'Learning from its own mistakes',
     score: { value: 86, of: 120 },
     changed: 'We let the model run, and when it got stuck the scripted teacher took over from exactly that moment. Those rescues became new training data (a method called DAgger), in two rounds.',
