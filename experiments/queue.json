@@ -631,7 +631,7 @@
     {
       "name": "x_control_s2",
       "hypothesis": "Noise floor: a third seed of the first-round control. Every verdict this round leans on the control mean (97.4 from two seeds 6 points apart); a third seed tightens it, and it is the reference for H27 and H28",
-      "status": "queued",
+      "status": "running",
       "train": "SEED=2 PI_TRIM_STILL_TAIL_S=1 LR=1e-5 RESUME=runs/pi05_dagger2/step_0007000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdagclean_v1 runs/{RUN} 6000",
       "eval": "GPU=0 VARIANTS='d0' bash scripts/box/c30_when_ready.sh runs/{RUN} 3000 4000 5000 6000",
       "requires_on_host": [
@@ -644,7 +644,9 @@
         "kind": "replicate",
         "when": "Oct 18",
         "note": "A third run of the same recipe, so the comparison every idea is judged against rests on three runs instead of two."
-      }
+      },
+      "host": "192.222.55.167:2",
+      "started": "2026-10-18T04:15"
     },
     {
       "name": "x_data_b2_s1",
