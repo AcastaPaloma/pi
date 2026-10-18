@@ -1358,7 +1358,7 @@
     {
       "name": "robust_x_goal75_s0_4000",
       "hypothesis": "H26 coverage: randomized-visuals score of the strongest new checkpoints (round two 99, goal75 103 on the default look)",
-      "status": "queued",
+      "status": "running",
       "requires_on_host": [
         "runs/x_goal75_s0/step_0004000/model.pt"
       ],
@@ -1369,7 +1369,9 @@
         "note": "The same model tested with random colours and lighting, to see whether its score holds up.",
         "parent": "robust",
         "kind": "eval"
-      }
+      },
+      "host": "193.122.189.119",
+      "started": "2026-10-18T04:19"
     }
   ]
 }

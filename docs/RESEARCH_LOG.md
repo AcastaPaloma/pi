@@ -1103,3 +1103,4 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   twobins2x 5660, ema 720. Site synced (84 scores).
 - **2026-10-18 04:13** [scheduler] launch of robust_x_control_r2_s0_4000 on 193.122.189.119 failed: job tag SCHEDJOB_robust_x_control_r2_s0_4000 not seen and GPU not busy on 193.122.189.119 within 15 minutes
 - **2026-10-18 04:15** [scheduler] 192.222.55.167:2 was idle; launched **x_control_s2** (Noise floor: a third seed of the first-round control. Every verdict this round leans on the control mean (97.4 from two seeds 6 points apart); a third seed tightens it, and it is the reference for H27 and H28)
+- **2026-10-18 04:19** [scheduler] 193.122.189.119 was idle; launched **robust_x_goal75_s0_4000** (H26 coverage: randomized-visuals score of the strongest new checkpoints (round two 99, goal75 103 on the default look))
