@@ -1258,3 +1258,8 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   what is on Hugging Face (22 checkpoints, DAgger rounds 11-19) and the list of running/queued runs for terminations.
   x_goal75_s1 6000 and x_combo 6000 are on HF. Queue: x_round4_r3, A10 robustness for round three and batch 3.
 - **2026-10-18 12:27** [scheduler] 193.122.189.119 was idle; launched **robust_x_round3_b2mix_3000** (H26 coverage: randomized-visuals score of a strong new checkpoint)
+- **2026-10-18 12:37** Holding for the user's go on shutdown (they plan to terminate all VMs; nothing stopped by me).
+  Everything to keep is on Hugging Face: 24 checkpoints including round three's 108 and batch 3's 105 (the round-three
+  upload had been blocked by a wait loop whose pgrep matched its own command line; killed and re-run). New:
+  x_twobins2x_s1 = 88 / 87 / 97 / 97 (mean 92.2; H18 refuted on both seeds). Running: data_b3_s1 3800, goal75_b2 2020,
+  control_long_s1 6700, round3_s1 3620, data_b4 1420, data_b2_s2 260; A10 robust round three.
