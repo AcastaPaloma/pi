@@ -533,7 +533,7 @@
     {
       "name": "x_goal75_s0",
       "hypothesis": "H21b: oracle goal images hurt goal_s0 (76 with vs 87 without at step 3000) because goals were present in only 25% of training samples, so the model never learned to rely on them. With goals in 75% of samples the with-goal score beats the without-goal score and the controls. If it does not, goal conditioning is closed here",
-      "status": "running",
+      "status": "done",
       "train": "SET='max_subgoals=1 subgoal_prob=0.75' SEED=0 PI_TRIM_STILL_TAIL_S=1 LR=1e-5 RESUME=runs/pi05_dagger2/step_0007000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdagclean_v1 runs/{RUN} 6000",
       "eval": "GPU=0 VARIANTS='d0 goal' bash scripts/box/c30_when_ready.sh runs/{RUN} 3000 6000 & GPU=0 VARIANTS='d0' bash scripts/box/c30_when_ready.sh runs/{RUN} 4000 5000",
       "requires_on_host": [
@@ -563,7 +563,7 @@
     {
       "name": "x_twobins2x_r2",
       "hypothesis": "H18 (never run): two_bins is the weakest task of the best checkpoint (21/30 test, 37/60 non-test; the second arm stalls). Sampling two_bins episodes twice as often (PI_TASK_WEIGHTS=two_bins=2) in a second low-LR round from the best checkpoint raises two_bins without costing the other tasks. Matched against x_control_r2_s0 (same resume and recipe, uniform tasks)",
-      "status": "running",
+      "status": "done",
       "train": "PI_TASK_WEIGHTS=two_bins=2 SEED=0 PI_TRIM_STILL_TAIL_S=1 LR=1e-5 RESUME=runs/x_control_s1/step_0005000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdagclean_v1 runs/{RUN} 6000",
       "eval": "GPU=0 VARIANTS='d0' bash scripts/box/c30_when_ready.sh runs/{RUN} 3000 4000 5000 6000",
       "requires_on_host": [
@@ -686,6 +686,45 @@
         "short": "Goals+, seed 2",
         "note": "The same experiment repeated with a different random start, to check that goal pictures really help once the model sees them often.",
         "parent": "goals-most",
+        "kind": "replicate"
+      }
+    },
+    {
+      "name": "x_combo_b2_tb2",
+      "hypothesis": "H29: the two positive signals add up. On-policy batch-2 data (x_data_b2: 96 / 97 / 102 / 107, mean 100.5 vs its reference's ~94.5) together with two_bins sampled twice as often (x_twobins2x_r2: two_bins 24 / 22 vs 16 at matched steps), from the same best checkpoint, beats each alone",
+      "status": "queued",
+      "setup": "mkdir -p data/sim_mixdagclean_b2 && cd data/sim_mixdagclean_b2 && for d in ../sim_mixdagclean_v1/episode_*; do ln -sfn ../sim_mixdagclean_v1/$(basename $d) $(basename $d); done && for v in 14 15; do for d in ../sim_dagger_v$v/episode_*; do grep -qs '\"success\": true' $d/meta.json && ln -sfn $d episode_dag${v}_$(basename $d | cut -d_ -f2); done; done; true",
+      "train": "PI_TASK_WEIGHTS=two_bins=2 SEED=0 PI_TRIM_STILL_TAIL_S=1 LR=1e-5 RESUME=runs/x_control_s1/step_0005000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdagclean_b2 runs/{RUN} 6000",
+      "eval": "GPU=0 VARIANTS='d0' bash scripts/box/c30_when_ready.sh runs/{RUN} 3000 4000 5000 6000",
+      "requires_on_host": [
+        "runs/x_control_s1/step_0005000/model.pt",
+        "data/sim_mixdagclean_v1",
+        "data/sim_dagger_v14",
+        "data/sim_dagger_v15"
+      ],
+      "site": {
+        "title": "Best-model rescues plus more two-cube practice",
+        "short": "Rescues + 2 cubes",
+        "note": "The two ideas that helped, together: the new rescue data and seeing the two-cube task twice as often.",
+        "parent": "rescues-2",
+        "kind": "test"
+      }
+    },
+    {
+      "name": "x_twobins2x_s1",
+      "hypothesis": "H18 replicate (seed 1): two_bins x2 lifted two_bins to 24 and 22 at steps 3000 and 4000 against 16 for its reference",
+      "status": "queued",
+      "train": "PI_TASK_WEIGHTS=two_bins=2 SEED=1 PI_TRIM_STILL_TAIL_S=1 LR=1e-5 RESUME=runs/x_control_s1/step_0005000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdagclean_v1 runs/{RUN} 6000",
+      "eval": "GPU=0 VARIANTS='d0' bash scripts/box/c30_when_ready.sh runs/{RUN} 3000 4000 5000 6000",
+      "requires_on_host": [
+        "runs/x_control_s1/step_0005000/model.pt",
+        "data/sim_mixdagclean_v1"
+      ],
+      "site": {
+        "title": "More two-cube practice, second run",
+        "short": "2 cubes, seed 2",
+        "note": "The same experiment repeated with a different random start.",
+        "parent": "two-cubes-more",
         "kind": "replicate"
       }
     }
@@ -1374,6 +1413,15 @@
       },
       "host": "193.122.189.119",
       "started": "2026-10-18T04:19"
+    },
+    {
+      "name": "dagger18_from_b2",
+      "hypothesis": "Track B batch 3 (on-policy): batch 2, rescued from the best checkpoint of its time, is the first data version to lead its reference; the next batch is rescued from the new best (x_data_b2 step 6000, 107/120) on handover and two_bins, takeover 2-16 s, seeds 1800000+. Data collection only; its A/B gets a site node when queued",
+      "status": "queued",
+      "requires_on_host": [
+        "runs/x_data_b2/step_0006000/model.pt"
+      ],
+      "eval": "MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.dagger --checkpoint runs/x_data_b2/step_0006000 --tasks handover,two_bins --episodes-per-task 300 --takeover-min 2 --takeover-max 16 --seed 1800000 --out data/sim_dagger_v18"
     }
   ]
 }

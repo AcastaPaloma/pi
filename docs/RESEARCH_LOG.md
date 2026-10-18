@@ -1105,3 +1105,10 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
 - **2026-10-18 04:15** [scheduler] 192.222.55.167:2 was idle; launched **x_control_s2** (Noise floor: a third seed of the first-round control. Every verdict this round leans on the control mean (97.4 from two seeds 6 points apart); a third seed tightens it, and it is the reference for H27 and H28)
 - **2026-10-18 04:19** [scheduler] 193.122.189.119 was idle; launched **robust_x_goal75_s0_4000** (H26 coverage: randomized-visuals score of the strongest new checkpoints (round two 99, goal75 103 on the default look))
 - **2026-10-18 04:23** [scheduler] 192.222.55.167:1 was idle; launched **x_data_b2_s1** (Seed-1 twin of x_data_b2 (its first checkpoint scored 96 against its reference's 89; a data version needs two seeds before it joins the mix))
+- **2026-10-18 04:30** **New best checkpoint: x_data_b2 step 6000 = 29 / 28 / 25 / 25 = 107** (96, 97, 102, 107: mean
+  100.5 vs its round-two reference's ~94.5: x_control_r2_s0 89 / 99 / 95 / 97, x_control_r2_s1 95 / 92). On-policy
+  rescues from the best checkpoint are the first data version to lead its control; the seed-1 twin started 04:22.
+  goal75 and twobins2x finished; the scheduler started x_control_s2 and x_data_b2_s1. Queue: **H29 x_combo_b2_tb2**
+  (batch-2 data plus two_bins x2), **x_twobins2x_s1** (H18 replicate), both with site fields; A10: **dagger18_from_b2**
+  (batch 3, rescued from the new best; data collection only, its A/B gets a site node when queued). Steps:
+  control_long 10320, lr5e6 2460, control_r2_s1 5520, ema 1220. A10: robust goal75 4000 running. Site synced.
