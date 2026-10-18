@@ -988,3 +988,4 @@ leading run on the same task, or when its loss diverges. Otherwise it keeps trai
   **robust_dagger2_7000** (the previous best under the same randomization) to see whether the continuation helped
   robustness too. dagger17 done (300 episodes, 255 kept, 196 successful). Steps: control_long 3900, control_r2
   2040, data_v11_s1 5160, mem_s1 5160, goal75 940, data_b2 760. All seven GPUs busy; scheduler and caffeinate alive.
+- **2026-10-17 23:55** [scheduler] 193.122.189.119 was idle; launched **robust_dagger2_7000** (H25 comparison: the previous best (pi05_dagger2 step 7000, 90/120 default look) under the same visual randomization, to see whether the low-LR continuation also made the policy more robust to lighting and colour or only better on the default look)

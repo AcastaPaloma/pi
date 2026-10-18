@@ -1082,11 +1082,13 @@
     {
       "name": "robust_dagger2_7000",
       "hypothesis": "H25 comparison: the previous best (pi05_dagger2 step 7000, 90/120 default look) under the same visual randomization, to see whether the low-LR continuation also made the policy more robust to lighting and colour or only better on the default look",
-      "status": "queued",
+      "status": "running",
       "requires_on_host": [
         "runs/pi05_dagger2/step_0007000/model.pt"
       ],
-      "eval": "for T in pick_place_any bin handover two_bins; do MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.eval_sim --checkpoint runs/pi05_dagger2/step_0007000 --task $T --episodes 30 --episode-seconds 30 --execute 25 --delay 0 --device cuda --dtype bf16 --subtask oracle --seed 4000 --visual-randomization --tokenizer weights/paligemma/tokenizer.model --out outputs/robust_dagger2_7000_$T; done"
+      "eval": "for T in pick_place_any bin handover two_bins; do MUJOCO_GL=egl ~/lerobot-venv/bin/python -m pi_model.eval_sim --checkpoint runs/pi05_dagger2/step_0007000 --task $T --episodes 30 --episode-seconds 30 --execute 25 --delay 0 --device cuda --dtype bf16 --subtask oracle --seed 4000 --visual-randomization --tokenizer weights/paligemma/tokenizer.model --out outputs/robust_dagger2_7000_$T; done",
+      "host": "193.122.189.119",
+      "started": "2026-10-17T23:55"
     }
   ]
 }
