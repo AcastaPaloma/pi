@@ -570,13 +570,15 @@
     {
       "name": "x_control_r2_s1",
       "hypothesis": "H24 replicate (seed 1): the second-round control is the reference for both x_data_b2 and x_twobins2x_r2, and the first-round twins differed by up to 16 points at one checkpoint, so the reference needs two seeds",
-      "status": "queued",
+      "status": "running",
       "train": "SEED=1 PI_TRIM_STILL_TAIL_S=1 LR=1e-5 RESUME=runs/x_control_s1/step_0005000 META=data/sim_mix_v1/pi07_meta GPUS=0 bash scripts/box/train_pi05.sh data/sim_mixdagclean_v1 runs/{RUN} 6000",
       "eval": "GPU=0 VARIANTS='d0' bash scripts/box/c30_when_ready.sh runs/{RUN} 3000 4000 5000 6000",
       "requires_on_host": [
         "runs/x_control_s1/step_0005000/model.pt",
         "data/sim_mixdagclean_v1"
-      ]
+      ],
+      "host": "192.222.55.167:0",
+      "started": "2026-10-18T00:49"
     },
     {
       "name": "x_control_lr5e6_s0",
