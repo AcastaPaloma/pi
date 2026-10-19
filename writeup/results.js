@@ -1,4 +1,4 @@
-import { t, inlineBilingual } from './i18n.mjs';
+import { t, inlineBilingual } from './i18n.mjs?v=20261019-zh2';
 import { nodes as sourceNodes, tasks as sourceTasks, lossPlan as sourceLossPlan, treeRoots as sourceTreeRoots } from './results-content.js?v=20261018-t1';
 import { mountTree } from './results-tree.js?v=20261018-t1';
 

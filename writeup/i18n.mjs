@@ -1,11 +1,13 @@
+import { translateArtwork } from './diagram-i18n.mjs?v=20261019-zh2';
+import { HOVER_DELAY, LEAVE_DELAY, translationPosition } from './translation-ui.mjs?v=20261019-zh2';
 import { plain, translator, sentencePairs } from './i18n-core.mjs';
-const catalog = {};
+const catalog = {}, diagramCatalog = {};
 let failed = false;
-await Promise.all(['ui', 'article-a', 'article-b', 'inference', 'results'].map(async name => {
+await Promise.all(['ui', 'article-a', 'article-b', 'inference', 'results', 'diagram-training', 'diagram-other'].map(async name => {
   try {
-    const response = await fetch(`./locales/${name}.zh.json`);
+    const response = await fetch(`./locales/${name}.zh.json?v=20261019-zh2`, { cache: 'no-cache' });
     if (!response.ok) throw new Error(`${name}: ${response.status}`);
-    Object.assign(catalog, await response.json());
+    Object.assign(name.startsWith('diagram-') ? diagramCatalog : catalog, await response.json());
   } catch (error) { failed = true; console.warn('Translation catalog unavailable', error); }
 }));
 let stored;
@@ -16,6 +18,9 @@ export const language = isEditor ? 'en' : requested === 'en' ? 'en' : 'zh';
 export const t = translator(catalog, language);
 const reverse = new Map(Object.entries(catalog).map(([en, zh]) => [zh, en]));
 const normalized = new Map(Object.entries(catalog).map(([en, zh]) => [plain(en).trim(), { en: plain(en), zh: plain(zh) }]));
+// Work on the actual SVG text, shared by the full canvas and all focused <use> views.
+// The source's position, baseline, colors, masks and paths remain unchanged.
+export function localizeArtwork(root, locale = language) { translateArtwork(root, diagramCatalog, locale); }
 export function localizeCopy(value) {
   if (Array.isArray(value)) return value.map(localizeCopy);
   if (!value || typeof value !== 'object') return value;
@@ -66,7 +71,7 @@ export function localizeRich(root) {
   }
 }
 if (!isEditor) {
-const style = document.createElement('link'); style.rel = 'stylesheet'; style.href = './i18n.css'; document.head.append(style);
+const style = document.createElement('link'); style.rel = 'stylesheet'; style.href = './i18n.css?v=20261019-zh2'; document.head.append(style);
 document.title = t(document.title);
 document.documentElement.lang = language === 'zh' ? 'zh-CN' : 'en';
 const tools = document.createElement('div'); tools.className = 'translation-tools';
@@ -77,32 +82,54 @@ lang.addEventListener('click', () => {
   const url = new URL(location.href); url.searchParams.set('lang', next); location.href = url;
 });
 const mode = document.createElement('select'); mode.setAttribute('aria-label', 'Translation granularity / 对照范围');
-mode.innerHTML = language === 'zh' ? '<option value="sentence">逐句对照</option><option value="paragraph">整段对照</option>' : '<option value="sentence">Sentence</option><option value="paragraph">Paragraph</option>';
+mode.innerHTML = language === 'zh' ? '<option value="sentence">逐句对照</option><option value="paragraph">整段对照</option><option value="off">关闭对照</option>' : '<option value="sentence">Sentence</option><option value="paragraph">Paragraph</option><option value="off">Off</option>';
 try { mode.value = localStorage.getItem('pi-translation-mode') || 'sentence'; } catch {}
 mode.addEventListener('change', () => { hide(); try { localStorage.setItem('pi-translation-mode', mode.value); } catch {} });
 tools.append(mode, lang); (document.querySelector('.site-footer') || document.body).append(tools);
 const tip = document.createElement('div'); tip.id = 'translation-tooltip'; tip.className = 'translation-tooltip'; tip.role = 'tooltip'; tip.hidden = true;
-const label = document.createElement('div'); label.className = 'translation-label'; const copy = document.createElement('div');
+const label = document.createElement('div'); label.className = 'translation-label'; const copy = document.createElement('div'); copy.className = 'translation-copy';
 const close = document.createElement('button'); close.type = 'button'; close.textContent = '×'; close.className = 'translation-close'; close.setAttribute('aria-label', language === 'zh' ? '关闭对照' : 'Close translation');
-tip.append(label, copy, close); document.body.append(tip);
-let active = null, timer = 0, keyboardFocus = false;
-function hide() { clearTimeout(timer); if (active) active.removeAttribute('aria-describedby'); active = null; tip.hidden = true; }
-function targetFor(target) { return target.closest(mode.value === 'sentence' ? '[data-en][data-zh]' : '.bilingual'); }
+const expand = document.createElement('button'); expand.type = 'button'; expand.className = 'translation-expand';
+expand.textContent = language === 'zh' ? '展开' : 'Expand'; expand.setAttribute('aria-expanded', 'false');
+tip.append(label, copy, expand, close); document.body.append(tip);
+let active = null, pendingTarget = null, timer = 0, keyboardFocus = false;
+function hide() { clearTimeout(timer); pendingTarget = null; tip.classList.remove('is-expanded'); expand.setAttribute('aria-expanded', 'false'); if (active) active.removeAttribute('aria-describedby'); active = null; tip.hidden = true; }
+function targetFor(target) { if (mode.value === 'off') return null; return target?.closest?.(mode.value === 'sentence' ? '[data-en][data-zh]' : '.bilingual'); }
 function show(target) {
-  if (!target) return; clearTimeout(timer); if (active) active.removeAttribute('aria-describedby'); active = target;
-  label.textContent = language === 'zh' ? '英文原文' : '中文译文';
-  copy.textContent = target.dataset[language === 'zh' ? 'en' : 'zh']; target.setAttribute('aria-describedby', tip.id); tip.hidden = false;
-  const rect = target.getBoundingClientRect(), width = tip.offsetWidth, height = tip.offsetHeight;
-  tip.style.left = `${Math.max(8, Math.min(innerWidth - width - 8, rect.left))}px`;
-  const below = rect.bottom + 8;
-  tip.style.top = `${Math.max(8, below + height < innerHeight - 8 ? below : Math.min(innerHeight - height - 8, rect.top - height - 8))}px`;
+  if (!target) return; clearTimeout(timer); if (active) active.removeAttribute('aria-describedby'); active = target; pendingTarget = null;
+  label.textContent = language === 'zh' ? 'EN' : '中文';
+  copy.textContent = target.dataset[language === 'zh' ? 'en' : 'zh']; target.setAttribute('aria-describedby', tip.id);
+  tip.classList.remove('is-expanded'); expand.setAttribute('aria-expanded', 'false'); expand.textContent = language === 'zh' ? '展开' : 'Expand';
+  tip.hidden = false;
+  expand.hidden = copy.scrollHeight <= copy.clientHeight + 1;
+  positionTip();
 }
+function positionTip() {
+  const anchor = document.querySelector('.visual-column, .canvas-shell, .results-stage')?.getBoundingClientRect();
+  const point = translationPosition({ anchor, width: tip.offsetWidth, height: tip.offsetHeight, viewportWidth: innerWidth, viewportHeight: innerHeight, footerHeight: document.querySelector('.site-footer')?.offsetHeight });
+  tip.style.left = `${point.left}px`; tip.style.top = `${point.top}px`;
+}
+expand.addEventListener('click', () => {
+  const expanded = tip.classList.toggle('is-expanded'); expand.setAttribute('aria-expanded', String(expanded));
+  expand.textContent = language === 'zh' ? (expanded ? '收起' : '展开') : (expanded ? 'Collapse' : 'Expand');
+  positionTip();
+});
 close.addEventListener('click', hide);
 document.addEventListener('pointerover', event => {
   if (event.pointerType === 'touch') return;
   if (tip.contains(event.target)) { clearTimeout(timer); return; }
   const target = targetFor(event.target); if (target === active) return;
-  clearTimeout(timer); if (target) timer = setTimeout(() => show(target), 300); else if (active) timer = setTimeout(hide, 180);
+  clearTimeout(timer); if (active && target !== active) hide(); pendingTarget = target; if (target && !getSelection()?.toString()) timer = setTimeout(() => show(target), HOVER_DELAY);
+});
+document.addEventListener('pointerout', event => {
+  const next = event.relatedTarget;
+  if (next && (tip.contains(next) || ((active || pendingTarget) && targetFor(next) === (active || pendingTarget)))) return;
+  clearTimeout(timer); pendingTarget = null; if (active) timer = setTimeout(hide, LEAVE_DELAY);
+});
+document.addEventListener('selectionchange', () => { if (getSelection()?.toString()) hide(); });
+window.addEventListener('blur', hide);
+document.addEventListener('focusout', event => {
+  if (keyboardFocus && !tip.contains(event.relatedTarget) && !event.relatedTarget?.closest('.bilingual')) hide();
 });
 document.addEventListener('focusin', event => { const target = targetFor(event.target); if (keyboardFocus && target) show(target); });
 document.addEventListener('pointerup', event => { if (event.pointerType === 'touch' && !event.target.closest('a,button,input,select') && !getSelection()?.toString()) { const target = targetFor(event.target); if (target) target === active ? hide() : show(target); } });

@@ -1,4 +1,4 @@
-import { t, inlineBilingual } from './i18n.mjs';
+import { t, inlineBilingual, localizeArtwork } from './i18n.mjs?v=20261019-zh2';
 import { drawing, steps, lanes, task, subtasks } from './inference-content.js?v=20261015-i1';
 import { clamp, fitBounds, zoomAt, constrainCamera } from './camera.mjs';
 import { readingIndex } from './reading.mjs?v=20261017-r2';
@@ -99,6 +99,7 @@ async function loadDrawing() {
     $('artwork').replaceChildren(svg);
     const focus = document.createElementNS(svgNS, 'svg'); focus.setAttribute('preserveAspectRatio', 'none'); focus.append(use.cloneNode());
     $('lifted').replaceChildren(focus);
+    await document.fonts.ready; localizeArtwork(svg);
     $('loading').hidden = true; renderFocus(); fit(false);
   } catch (error) { console.error(error); $('loading').textContent = 'The timeline drawing could not load.'; }
 }

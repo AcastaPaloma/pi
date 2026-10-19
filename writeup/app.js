@@ -1,4 +1,4 @@
-import { t, inlineBilingual, localizeRich } from './i18n.mjs';
+import { t, inlineBilingual, localizeArtwork, localizeRich } from './i18n.mjs?v=20261019-zh2';
 import { artwork, macros, steps, details, annotations, references } from './content.js?v=20261017-r2';
 import { clamp, fitBounds, zoomAt, constrainCamera } from './camera.mjs';
 import { buildReadingEntries, readingIndex } from './reading.mjs?v=20261017-r2';
@@ -522,6 +522,7 @@ async function loadArtwork() {
     focus.setAttribute('preserveAspectRatio', 'none'); focus.append(use.cloneNode());
     $('lifted').replaceChildren(focus);
     await document.fonts.ready;
+    localizeArtwork(svg);
     measureReading(); render(); fit(false); $('loading').hidden = true;
   } catch (error) {
     console.error(error); $('loading').hidden = true; $('asset-error').hidden = false;
