@@ -1,4 +1,10 @@
+---
+status: draft
+updated: 2026-10-19
+---
 # Pi canvas
+
+中文版：[在线阅读](https://ultranity.github.io/pi/) · [双语阅读说明](LOCALIZATION.md)。默认中文，页脚可切换英文、选择逐句或整段对照。
 
 A static, text-led visual write-up using the supplied SVG artwork, in three tabs. **Inference** (index.html, the entry page) replays the inference timeline block by block beside a 3D model of two SO-101 arms. **Training** (training.html) is the illustrated architecture and training article. **Results** (results.html) shows rollout videos of the trained models. No framework, external font request, or build step; three.js r169 (MIT) is vendored in vendor/ for the 3D stage.
 

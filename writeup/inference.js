@@ -1,3 +1,4 @@
+import { t, inlineBilingual, localizeCopy } from './i18n.mjs';
 import { drawing, steps, lanes, task, subtasks } from './inference-content.js?v=20261015-i1';
 import { clamp, fitBounds, zoomAt, constrainCamera } from './camera.mjs';
 import { readingIndex } from './reading.mjs?v=20261017-r2';
@@ -17,13 +18,12 @@ world.style.width = `${drawing.width}px`; world.style.height = `${drawing.height
 
 function make(tag, text, className) {
   const el = document.createElement(tag);
-  if (text !== undefined) el.textContent = text;
+  if (text !== undefined) el.textContent = t(text);
   if (className) el.className = className;
   return el;
 }
 function inline(el, text) {
-  text.split(/\*\*(.+?)\*\*/).forEach((part, i) => { if (part) el.append(i % 2 ? make('strong', part) : document.createTextNode(part)); });
-  return el;
+  return inlineBilingual(el, text, make);
 }
 function block(item) {
   if (typeof item === 'string') return inline(make('p'), item);

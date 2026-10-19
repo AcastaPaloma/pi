@@ -1,4 +1,10 @@
+---
+status: draft
+updated: 2026-10-19
+---
 # A small SO-101 manipulation playground
+
+**中文交互解读**：[推理、训练与实验结果](https://ultranity.github.io/pi/)，支持中英切换和悬停对照。[本地预览与翻译维护](writeup/LOCALIZATION.md)。原始项目与作者署名见下文。
 
 **Interactive Pi write-up:** [open the canvas](https://acastapaloma.github.io/pi/) · [editing guide](writeup/README.md). For a local preview, run `npm run dev --prefix writeup` and open <http://127.0.0.1:4173/>.
 

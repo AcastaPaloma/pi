@@ -57,7 +57,7 @@ test('publisher limits writes to text, detects conflicts, and blocks foreign req
   assert.equal(result.status, 200);
   assert.equal((await result.json()).commit, 'a'.repeat(40));
   assert.equal(writes.length, 1);
-  assert.equal(writes[0].path, 'repos/AcastaPaloma/pi/contents/writeup/text.json');
+  assert.equal(writes[0].path, 'repos/' + (process.env.PI_GITHUB_REPO || 'ultranity/pi') + '/contents/writeup/text.json');
   assert.equal(writes[0].body.sha, 'old-blob');
   assert.equal(writes[0].body.branch, 'main');
   assert.deepEqual(remote.doc, example);

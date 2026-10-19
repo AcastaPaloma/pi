@@ -9,7 +9,7 @@ import { validateCopy, emptyCopy } from './rich-text.mjs';
 
 const root = dirname(fileURLToPath(import.meta.url));
 const ids = new Set([...steps, ...details].map(x => x.id));
-const repo = 'repos/AcastaPaloma/pi';
+const repo = 'repos/' + (process.env.PI_GITHUB_REPO || 'ultranity/pi');
 const contentPath = repo + '/contents/writeup/text.json';
 export function github(endpoint, method = 'GET', body) {
   return new Promise((resolve, reject) => {
