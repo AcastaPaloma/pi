@@ -1,3 +1,5 @@
+import { localizeReferences } from './i18n-core.mjs';
+import { t, language, inlineBilingual, localizeArtwork, localizeRich } from './i18n.mjs?v=20261019-zh3';
 import { artwork, macros, steps, details, annotations, references } from './content.js?v=20261017-r2';
 import { clamp, fitBounds, zoomAt, constrainCamera } from './camera.mjs';
 import { buildReadingEntries, readingIndex } from './reading.mjs?v=20261017-r2';
@@ -14,7 +16,7 @@ const entries = buildReadingEntries(steps, details, annotations);
 const entryById = new Map(entries.map(item => [item.id, item]));
 const allBounds = [0, 0, artwork.width, artwork.height];
 const svgNS = 'http://www.w3.org/2000/svg';
-const crossReferences = compileReferences(references);
+const crossReferences = compileReferences(localizeReferences(references, language));
 let ready = false;
 let stepIndex = 0, pinned = null, preview = null, activeId = steps[0].id;
 let camera = { x: 0, y: 0, scale: 1 }, animation = 0, frame = 0;
@@ -30,7 +32,7 @@ world.style.width = `${artwork.width}px`;
 world.style.height = `${artwork.height}px`;
 function make(tag, text, className) {
   const element = document.createElement(tag);
-  if (text !== undefined) element.textContent = text;
+  if (text !== undefined) element.textContent = t(text);
   if (className) element.className = className;
   return element;
 }
@@ -138,11 +140,7 @@ function readRoute() {
   jumpTo(detail && step.details.includes(detail) ? detail : step.id, { historyMode: 'none', animate: false });
 }
 function inline(element, text) {
-  // Only **bold** is interpreted; everything else stays literal text.
-  text.split(/\*\*(.+?)\*\*/).forEach((part, index) => {
-    if (part) element.append(index % 2 ? make('strong', part) : document.createTextNode(part));
-  });
-  return element;
+  return inlineBilingual(element, text, make);
 }
 function flowEquation() {
   const ns = 'http://www.w3.org/1998/Math/MathML';
@@ -525,6 +523,7 @@ async function loadArtwork() {
     focus.setAttribute('preserveAspectRatio', 'none'); focus.append(use.cloneNode());
     $('lifted').replaceChildren(focus);
     await document.fonts.ready;
+    localizeArtwork(svg);
     measureReading(); render(); fit(false); $('loading').hidden = true;
   } catch (error) {
     console.error(error); $('loading').hidden = true; $('asset-error').hidden = false;
@@ -535,7 +534,7 @@ export function applyCopy(doc) {
   validateCopy(doc, new Set(entries.map(entry => entry.id)));
   for (const entry of entries) {
     const body = document.querySelector('.passage-body[data-section="' + entry.id + '"]');
-    if (Object.hasOwn(doc.sections, entry.id)) body.replaceChildren(renderNodes(doc.sections[entry.id], document));
+    if (Object.hasOwn(doc.sections, entry.id)) { body.replaceChildren(renderNodes(doc.sections[entry.id], document)); localizeRich(body); }
     else body.replaceChildren(...entry.paragraphs.map(paragraph));
     decoratePassage(body);
   }

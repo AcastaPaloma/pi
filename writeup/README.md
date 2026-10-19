@@ -1,4 +1,10 @@
+---
+status: draft
+updated: 2026-10-19
+---
 # Pi canvas
+
+Chinese reading is available through the language button in the footer or `?lang=zh`. It includes the article, interface and SVG diagram labels, with sentence/paragraph hover translation in both directions. English remains the default. See [localization maintenance](LOCALIZATION.md).
 
 A static, text-led visual write-up using the supplied SVG artwork, in three tabs. **Inference** (index.html, the entry page) replays the inference timeline block by block beside a 3D model of two SO-101 arms. **Training** (training.html) is the illustrated architecture and training article. **Results** (results.html) shows rollout videos of the trained models. No framework, external font request, or build step; three.js r169 (MIT) is vendored in vendor/ for the 3D stage.
 

@@ -38,6 +38,8 @@ jobs:
         run: |
           mkdir -p _site/assets/so101 _site/assets/results _site/vendor
           cp writeup/index.html writeup/training.html writeup/style.css writeup/inference.css writeup/app.js writeup/content.js writeup/article.js writeup/inference.js writeup/inference-content.js writeup/robot-stage.js writeup/camera.mjs writeup/reading.mjs writeup/rich-text.mjs writeup/math-text.mjs writeup/splitter.mjs writeup/text.json writeup/results.html writeup/results.css writeup/results.js writeup/results-tree.js writeup/results-content.js writeup/results-runs.js writeup/results-loss.js _site/
+          cp writeup/diagram-i18n.mjs writeup/translation-ui.mjs writeup/i18n.mjs writeup/i18n-core.mjs writeup/i18n.css _site/
+          cp -r writeup/locales _site/locales
           cp writeup/assets/*.svg _site/assets/
           cp writeup/assets/results/*.mp4 writeup/assets/results/*.jpg _site/assets/results/
           cp writeup/assets/so101/so101.json writeup/assets/so101/so101.bin writeup/assets/so101/LICENSE _site/assets/so101/
