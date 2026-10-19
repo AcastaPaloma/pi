@@ -1,3 +1,4 @@
+export const selectLanguage = (requested, isEditor = false) => !isEditor && requested === 'zh' ? 'zh' : 'en';
 export const plain = text => String(text).replace(/\*\*(.+?)\*\*/g, '$1');
 export function translator(catalog, language = 'zh') {
   function translate(text) {

@@ -57,7 +57,7 @@ test('publisher limits writes to text, detects conflicts, and blocks foreign req
   assert.equal(result.status, 200);
   assert.equal((await result.json()).commit, 'a'.repeat(40));
   assert.equal(writes.length, 1);
-  assert.equal(writes[0].path, 'repos/' + (process.env.PI_GITHUB_REPO || 'ultranity/pi') + '/contents/writeup/text.json');
+  assert.equal(writes[0].path, 'repos/AcastaPaloma/pi/contents/writeup/text.json');
   assert.equal(writes[0].body.sha, 'old-blob');
   assert.equal(writes[0].body.branch, 'main');
   assert.deepEqual(remote.doc, example);
@@ -67,6 +67,10 @@ test('publisher limits writes to text, detects conflicts, and blocks foreign req
   assert.equal((await fetch(origin + '/api/deployment/not-a-sha')).status, 400);
   const deployment = await (await fetch(origin + '/api/deployment/' + 'a'.repeat(40))).json();
   assert.equal(deployment.conclusion, 'success');
+  for (const asset of ['i18n.mjs', 'i18n-core.mjs', 'diagram-i18n.mjs', 'translation-ui.mjs', 'i18n.css', ...['ui','article-a','article-b','inference','results','diagram-training','diagram-other'].map(name => `locales/${name}.zh.json`)]) {
+    assert.equal((await fetch(origin + '/' + asset)).status, 200, `Editor dependency: ${asset}`);
+  }
+  assert.equal((await fetch(origin + '/locales/unknown.zh.json')).status, 404);
   assert.equal((await fetch(origin + '/editor-server.mjs')).status, 404);
   assert.equal((await fetch(origin + '/author-copy.json')).status, 404);
 });

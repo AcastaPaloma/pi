@@ -2,31 +2,25 @@
 status: draft
 updated: 2026-10-19
 ---
-# π0.7 中文交互解读
+# Chinese reading and hover translation
 
-[在线阅读](https://ultranity.github.io/pi/) · [英文上游](https://github.com/AcastaPaloma/pi)
+The Inference, Training and Results pages support English and Simplified Chinese. English remains the default. Select 中文 in the footer or open a page with `?lang=zh`; the language and sentence/paragraph/off preference are remembered in local storage. The editor always stays in English and keeps its existing publishing target.
 
-推理、训练和实验结果三页默认显示中文。页脚的 EN / 中文按钮切换语言；“逐句对照 / 整段对照”选择悬停范围。悬停停留 900 毫秒后，在当前文字行附近显示最多三行的 popup，优先放在上方，空间不足时放到下方，长内容可主动展开，移开后收起。页脚也可选择“关闭对照”。用键盘 Tab 聚焦段落可立即查看对照，Esc 关闭。触屏可轻点文字打开，再次轻点关闭；选择文字和点击链接不触发对照。语言与对照范围保存在当前浏览器。
+Article prose, interface labels and SVG text switch together. Model names, formulas, tensor shapes, run IDs, original drawings and English source content are preserved. Chinese labels use system fonts and fit within the original text width. Both the main canvas and focused crops use the same SVG definition.
 
-译文保留作者的第一人称、实验数字和不确定性。白板中的标题、组件标签和说明文字随页面语言一起切换；模型名、公式、张量形状、运行 ID 和代码标识保留原样。中英文句子数量或格式边界无法对应时，自动显示整段对照。
+Hover translation works in both directions. After a 900 ms dwell, a compact popup appears near the source line, preferably above it. The preview is limited to three lines, with explicit expansion for longer content. Moving away, selecting text, scrolling the reader, or pressing Escape dismisses it. Scrolling inside an expanded popup keeps it open. Keyboard focus opens paragraph translation; touch users can tap text to toggle it. Physical touchscreen testing remains outstanding.
 
-## 本地预览
+## Preview and checks
 
-在仓库根目录运行 `npm run dev --prefix writeup`，打开 <http://127.0.0.1:4173/>。不需要安装依赖或下载模型。
+Run `npm run dev --prefix writeup` and open <http://127.0.0.1:4173/>. No new dependency, build step, font download or translation API is required. Use `npm test --prefix writeup` for content coverage, language defaults, sentence pairing, SVG restoration/width constraints, popup placement and existing tests. The local editor serves the explicit localization dependencies from its existing static allowlist.
 
-## 同步与维护
+## Maintaining translations
 
-上游基线：`AcastaPaloma/pi@1dbf0b5e379b9046b121ca6f64ecb6bf5a442a6c`。英文原文及图形保持在原文件中，中文词典位于 `locales/`，以精确英文原句为键。更新上游正文后，补充对应词典并运行 `npm test --prefix writeup`。未找到译文时保留英文；词典加载失败时显示重试提示。
+The dictionaries in `locales/` use exact English source strings as keys. Update the matching dictionary when upstream prose, rich-text fragments, diagram labels or result nodes change. Unknown strings remain in English. A failed dictionary request reports that some translations could not load. Technical identifiers and formulas intentionally stay untranslated.
 
-`i18n-core.mjs` 处理语言选择、动态标签与句子配对，`i18n.mjs` 负责段落对照、控件和静态界面文案。`diagram-i18n.mjs` 直接翻译 SVG 文本，并限制译文宽度，保留原图坐标、基线、连线和公式；`translation-ui.mjs` 根据当前文字行和阅读栏边界定位 popup；展开时保持原来的方向，长内容可在 popup 内滚动。正文加粗、公式和图文跳转继续使用原有渲染器。纯静态部署，无翻译 API 请求或新增字体下载。对照词典在运行时读取，GitHub Pages 工作流会一起打包。
+- `i18n-core.mjs`: language selection, dynamic labels and sentence pairing. A paragraph is used when sentence counts or formatting boundaries cannot be paired.
+- `i18n.mjs`: bilingual prose, saved rich-text overrides, interface labels and translation controls. Original bold text, math and cross-reference decoration continue through the existing renderers.
+- `diagram-i18n.mjs`: batched SVG text measurement, translation and exact English restoration without changing the diagram geometry.
+- `translation-ui.mjs`: source-line anchoring and viewport-aware popup placement.
 
-本地编辑器保持英文编辑。发布目标默认是 `ultranity/pi`，可通过 `PI_GITHUB_REPO=owner/repo` 覆盖；不会默认向上游保存。
-
-## 已验证与边界
-
-- 39 项测试：原有 31 项，以及正文/白板翻译覆盖、语言恢复、句子配对、格式边界和popup 定位等测试。
-- 桌面浏览器三页渲染、单句/整段原文对照、长段落展开、关闭对照、中英切换与英文白板恢复。训练白板实测 427 处文本替换，推理时间线 59 处；译文宽度未超出原英文占位。
-- 390 × 640 视口中的三页布局。
-- 保留原有推理动画、训练图文导航、实验视频和树形视图。
-
-触屏入口已实现，尚未用实体触屏设备验证。译文对应上述上游快照，后续新增英文内容需要继续翻译；覆盖测试会检查主要正文与动态实验节点。仿真和训练结果均为原作者内容，此 fork 的工作是中文阅读支持。
+The Pages workflow copies these modules, CSS and dictionaries into the static artifact. Keep that list in sync when adding runtime files. Browser checks covered desktop layouts, 390 × 640 frames, English/Chinese switching, short/long popups, expansion, dismissal, and both training and inference diagrams. Simulation and training claims remain the original author's content.

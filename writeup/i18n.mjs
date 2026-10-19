@@ -1,6 +1,6 @@
 import { translateArtwork } from './diagram-i18n.mjs?v=20261019-zh3';
 import { HOVER_DELAY, LEAVE_DELAY, translationPosition, translationLine } from './translation-ui.mjs?v=20261019-zh3';
-import { plain, translator, sentencePairs } from './i18n-core.mjs';
+import { plain, translator, sentencePairs, selectLanguage } from './i18n-core.mjs';
 const catalog = {}, diagramCatalog = {};
 let failed = false;
 await Promise.all(['ui', 'article-a', 'article-b', 'inference', 'results', 'diagram-training', 'diagram-other'].map(async name => {
@@ -14,7 +14,7 @@ let stored;
 try { stored = localStorage.getItem('pi-language'); } catch {}
 const isEditor = location.pathname.includes('editor');
 const requested = new URLSearchParams(location.search).get('lang') || stored;
-export const language = isEditor ? 'en' : requested === 'en' ? 'en' : 'zh';
+export const language = selectLanguage(requested, isEditor);
 export const t = translator(catalog, language);
 const reverse = new Map(Object.entries(catalog).map(([en, zh]) => [zh, en]));
 const normalized = new Map(Object.entries(catalog).map(([en, zh]) => [plain(en).trim(), { en: plain(en), zh: plain(zh) }]));

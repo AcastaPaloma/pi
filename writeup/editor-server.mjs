@@ -9,7 +9,7 @@ import { validateCopy, emptyCopy } from './rich-text.mjs';
 
 const root = dirname(fileURLToPath(import.meta.url));
 const ids = new Set([...steps, ...details].map(x => x.id));
-const repo = 'repos/' + (process.env.PI_GITHUB_REPO || 'ultranity/pi');
+const repo = 'repos/AcastaPaloma/pi';
 const contentPath = repo + '/contents/writeup/text.json';
 export function github(endpoint, method = 'GET', body) {
   return new Promise((resolve, reject) => {
@@ -89,8 +89,8 @@ export function createEditorServer({ api = github, port = 4174 } = {}) {
       }
       if (req.method !== 'GET' && req.method !== 'HEAD') return json(res, 405, { error: 'Method not allowed.' });
       const name = path === '/' || path === '/editor' ? 'training.html' : decodeURIComponent(path.slice(1));
-      const allowed = new Set(['training.html', 'style.css', 'app.js', 'content.js', 'article.js', 'camera.mjs', 'reading.mjs', 'rich-text.mjs', 'math-text.mjs', 'splitter.mjs', 'text.json', 'editor.mjs', 'editor.css']);
-      if (!allowed.has(name) && !/^assets\/[a-z0-9-]+\.svg$/.test(name)) return json(res, 404, { error: 'Not found.' });
+      const allowed = new Set(['training.html', 'style.css', 'app.js', 'content.js', 'article.js', 'camera.mjs', 'reading.mjs', 'rich-text.mjs', 'math-text.mjs', 'splitter.mjs', 'text.json', 'editor.mjs', 'editor.css', 'i18n.mjs', 'i18n-core.mjs', 'diagram-i18n.mjs', 'translation-ui.mjs', 'i18n.css']);
+      if (!allowed.has(name) && !/^assets\/[a-z0-9-]+\.svg$/.test(name) && !/^locales\/(ui|article-a|article-b|inference|results|diagram-training|diagram-other)\.zh\.json$/.test(name)) return json(res, 404, { error: 'Not found.' });
       let data = await readFile(resolve(root, name));
       if (name === 'training.html' && path !== '/') data = Buffer.from(data.toString().replace('</head>', '<link rel="stylesheet" href="./editor.css"><script type="module" src="./editor.mjs"></script></head>'));
       const types = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.svg': 'image/svg+xml' };

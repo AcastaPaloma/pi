@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import { annotations } from '../article.js';
 import { steps, lanes, task, subtasks } from '../inference-content.js';
 import { extraNodes } from '../results-runs.js';
-import { translator, sentencePairs, plain } from '../i18n-core.mjs';
+import { translator, sentencePairs, plain, selectLanguage } from '../i18n-core.mjs';
 const read = name => JSON.parse(fs.readFileSync(new URL(`../${name}`, import.meta.url), 'utf8'));
 const catalogs = ['ui','article-a','article-b','inference','results'].map(name => read(`locales/${name}.zh.json`));
 const catalog = Object.assign({}, ...catalogs);
@@ -35,4 +35,10 @@ test('sentence boundaries preserve bold delimiters and both exact source strings
   assert.equal(pairs.map(p => p.en).join(''), en);
   assert.equal(pairs.map(p => p.zh).join(''), zh);
   for (const pair of pairs) for (const text of Object.values(pair)) assert.equal((text.match(/\*\*/g) || []).length % 2, 0);
+});
+
+test('Chinese is opt-in and the English editor ignores saved Chinese preferences', () => {
+  assert.equal(selectLanguage(undefined), 'en'); assert.equal(selectLanguage('en'), 'en');
+  assert.equal(selectLanguage('zh'), 'zh'); assert.equal(selectLanguage('invalid'), 'en');
+  assert.equal(selectLanguage('zh', true), 'en');
 });
