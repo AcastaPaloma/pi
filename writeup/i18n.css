@@ -6,15 +6,19 @@ html[lang=zh-CN] .passage-body p,html[lang=zh-CN] .passage-body li{line-height:1
 .translation-tools button:active,.translation-close:active{transform:translateY(1px)}
 .bilingual:focus-visible{outline:2px solid var(--accent);outline-offset:5px;border-radius:2px}
 
-/* A quiet reading aid, anchored in the drawing pane instead of over the prose. */
-.translation-tooltip{box-sizing:border-box;position:fixed;z-index:100;width:min(300px,calc(100vw - 28px));padding:10px 26px 10px 12px;background:var(--paper,#fbfbfa);color:var(--secondary,#55554f);border:1px solid var(--rule,#deded8);border-radius:4px;font:13px/1.55 Georgia,'Songti SC',serif;overflow-wrap:anywhere;user-select:text}
+/* A small annotation beside the source line, with no title bar or entrance motion. */
+.translation-tooltip{box-sizing:border-box;position:fixed;z-index:100;width:max-content;min-width:160px;max-width:min(380px,calc(100vw - 24px));padding:11px 27px 8px 13px;background:#fffefa;color:#393832;border:1px solid #dcdad1;border-radius:6px;box-shadow:0 3px 12px #2220150d;font:14px/1.55 -apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;overflow-wrap:anywhere;user-select:text}
 .translation-tooltip[hidden]{display:none}
+.translation-tooltip::after{content:'';position:absolute;left:calc(var(--translation-arrow-x,24px) - 4px);width:7px;height:7px;background:#fffefa;transform:rotate(45deg);pointer-events:none}
+.translation-tooltip[data-placement=above]::after{bottom:-5px;border-right:1px solid #dcdad1;border-bottom:1px solid #dcdad1}
+.translation-tooltip[data-placement=below]::after{top:-5px;border-left:1px solid #dcdad1;border-top:1px solid #dcdad1}
 .translation-copy{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden;white-space:pre-line}
-.translation-tooltip.is-expanded{width:min(360px,calc(100vw - 28px))}
-.translation-tooltip.is-expanded .translation-copy{display:block;max-height:min(32dvh,260px);overflow:auto}
-.translation-label{font:10px/1.2 -apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif;color:var(--secondary);opacity:.7;margin-bottom:4px}
-.translation-close{position:absolute;right:4px;top:4px;border:0;background:transparent;color:var(--secondary);cursor:pointer;font:16px/1 sans-serif;padding:4px}
-.translation-expand{border:0;background:transparent;color:var(--accent);padding:4px 0 0;cursor:pointer;font:11px/1.4 -apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif}
+.translation-tooltip.is-expanded{max-width:min(460px,calc(100vw - 24px))}
+.translation-tooltip.is-expanded .translation-copy{display:block;max-height:min(38dvh,300px);overflow:auto}
+.translation-meta{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-top:6px;font:10px/1.4 -apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif;color:#858278}
+.translation-close{position:absolute;right:5px;top:5px;border:0;background:transparent;color:#96938b;cursor:pointer;font:15px/1 sans-serif;padding:4px}
+.translation-close:hover,.translation-close:focus-visible{color:var(--ink)}
+.translation-expand{border:0;background:transparent;color:var(--accent);padding:0;cursor:pointer;font:11px/1.4 -apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif}
 .translation-expand[hidden]{display:none}
 .translation-error{position:fixed;left:12px;bottom:42px;z-index:101;background:var(--paper);border:1px solid var(--rule);padding:10px;font:13px/1.5 sans-serif}
 @media(max-width:480px){.translation-tools{gap:5px;margin-left:6px}.translation-tools select{max-width:95px}.translation-tooltip{font-size:13px}.reading-nav{gap:8px}.page-tabs a{padding:5px 7px}}

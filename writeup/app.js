@@ -1,4 +1,4 @@
-import { t, inlineBilingual, localizeArtwork, localizeRich } from './i18n.mjs?v=20261019-zh2';
+import { t, inlineBilingual, localizeArtwork, localizeRich } from './i18n.mjs?v=20261019-zh3';
 import { artwork, macros, steps, details, annotations, references } from './content.js?v=20261017-r2';
 import { clamp, fitBounds, zoomAt, constrainCamera } from './camera.mjs';
 import { buildReadingEntries, readingIndex } from './reading.mjs?v=20261017-r2';

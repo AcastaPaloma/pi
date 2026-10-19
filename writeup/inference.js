@@ -1,4 +1,4 @@
-import { t, inlineBilingual, localizeArtwork } from './i18n.mjs?v=20261019-zh2';
+import { t, inlineBilingual, localizeArtwork } from './i18n.mjs?v=20261019-zh3';
 import { drawing, steps, lanes, task, subtasks } from './inference-content.js?v=20261015-i1';
 import { clamp, fitBounds, zoomAt, constrainCamera } from './camera.mjs';
 import { readingIndex } from './reading.mjs?v=20261017-r2';
