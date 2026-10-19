@@ -1,6 +1,6 @@
 # A small SO-101 manipulation playground
 
-**Interactive Pi write-up:** [open the canvas](https://acastapaloma.github.io/pi/) · [editing guide](writeup/README.md). For a local preview, run `npm run dev --prefix writeup` and open <http://127.0.0.1:4173/>.
+**Interactive Pi write-up:** [open the canvas](https://www.kuant.space/pi/) · [editing guide](writeup/README.md). For a local preview, run `npm run dev --prefix writeup` and open <http://127.0.0.1:4173/>.
 
 **For your encoder: [128 observations directly in Python](docs/BATCH_ENCODER.md).** Use `RobotBatch(...).observations()` for static simulated scenes or `ObservationBatch(...).observations()` for fast cached real SO-101 samples. Both return batched RGB images, proprioception, and text; neither includes a model or policy. The examples generate previews and small real-data caches in `outputs/`.
 

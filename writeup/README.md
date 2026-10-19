@@ -4,7 +4,7 @@ A static, text-led visual write-up using the supplied SVG artwork, in three tabs
 
 ## Published site
 
-Open <https://acastapaloma.github.io/pi/>. The GitHub Pages workflow verifies and publishes changes to writeup/ on main. Only runtime HTML, CSS, JavaScript modules, and SVG assets are deployed.
+Open <https://www.kuant.space/pi/>. The portfolio site copies writeup/ from main each time it deploys, leaving out the editor and its tooling, so a change here goes live with the next portfolio deploy. The GitHub Pages workflow still runs the tests, then publishes redirect stubs that send old acastapaloma.github.io/pi/ links to the same page on kuant.space.
 
 ## Preview
 

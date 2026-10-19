@@ -6,7 +6,7 @@
 web
 
 ## Stack
-Static HTML, CSS, and JavaScript in `writeup/`, published by GitHub Pages at https://acastapaloma.github.io/pi/. No framework, runtime dependency, font download, or build step. A separate local Node editor publishes text through the existing GitHub CLI login.
+Static HTML, CSS, and JavaScript in `writeup/`, published at https://www.kuant.space/pi/ (the portfolio copies it from main on each deploy). No framework, runtime dependency, font download, or build step. A separate local Node editor publishes text through the existing GitHub CLI login.
 
 ## Product Purpose
 Explain π0.7 in two tabs. Inference is the entry point: the inference timeline drawing, walked block by block (arrows, autoplay, loop), beside a cinematic 3D replay of two SO-101 arms with an overhead and two wrist cameras. Training is the illustrated architecture and training article, which need not be read linearly. A Start-here chapter (preface, map with reading routes, notation) orients first-time readers; component notes fold under each main section. Readers should associate each passage with the exact part of the drawing while retaining the freedom to explore the whole model.

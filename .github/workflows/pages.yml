@@ -1,4 +1,4 @@
-name: Deploy Pi canvas
+name: Redirect Pages to kuant.space
 
 on:
   push:
@@ -34,14 +34,31 @@ jobs:
           node --check writeup/results.js
           node --check writeup/results-tree.js
       - uses: actions/configure-pages@v5
-      - name: Prepare static site
+      # The write-up now lives at https://www.kuant.space/pi/ (the portfolio copies writeup/ at build time).
+      # Pages keeps serving one stub per page so old links, hash included, land on the same page there.
+      - name: Build redirect stubs
         run: |
-          mkdir -p _site/assets/so101 _site/assets/results _site/vendor
-          cp writeup/index.html writeup/training.html writeup/style.css writeup/inference.css writeup/app.js writeup/content.js writeup/article.js writeup/inference.js writeup/inference-content.js writeup/robot-stage.js writeup/camera.mjs writeup/reading.mjs writeup/rich-text.mjs writeup/math-text.mjs writeup/splitter.mjs writeup/text.json writeup/results.html writeup/results.css writeup/results.js writeup/results-tree.js writeup/results-content.js writeup/results-runs.js writeup/results-loss.js _site/
-          cp writeup/assets/*.svg _site/assets/
-          cp writeup/assets/results/*.mp4 writeup/assets/results/*.jpg _site/assets/results/
-          cp writeup/assets/so101/so101.json writeup/assets/so101/so101.bin writeup/assets/so101/LICENSE _site/assets/so101/
-          cp writeup/vendor/three.module.min.js writeup/vendor/LICENSE-three.txt _site/vendor/
+          mkdir -p _site
+          stub() {
+            cat > "_site/$1" <<HTML
+          <!doctype html>
+          <html lang="en">
+          <head>
+            <meta charset="utf-8">
+            <title>Moved to kuant.space</title>
+            <link rel="canonical" href="$2">
+            <script>location.replace('https://www.kuant.space' + location.pathname + location.search + location.hash);</script>
+            <noscript><meta http-equiv="refresh" content="0; url=$2"></noscript>
+          </head>
+          <body><p>This page moved to <a href="$2">$2</a>.</p></body>
+          </html>
+          HTML
+          }
+          for page in writeup/*.html; do
+            name=$(basename "$page")
+            if [ "$name" = index.html ]; then stub "$name" https://www.kuant.space/pi/; else stub "$name" "https://www.kuant.space/pi/$name"; fi
+          done
+          stub 404.html https://www.kuant.space/pi/
           touch _site/.nojekyll
       - uses: actions/upload-pages-artifact@v4
         with:
