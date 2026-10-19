@@ -1,4 +1,4 @@
-import { t, inlineBilingual, localizeCopy } from './i18n.mjs';
+import { t, inlineBilingual } from './i18n.mjs';
 import { drawing, steps, lanes, task, subtasks } from './inference-content.js?v=20261015-i1';
 import { clamp, fitBounds, zoomAt, constrainCamera } from './camera.mjs';
 import { readingIndex } from './reading.mjs?v=20261017-r2';
@@ -124,7 +124,7 @@ function stageSpec(i) {
     if (s.splice && pending) { active = { ...pending, animate: false, skip: 6 }; pending = null; }
   }
   return {
-    beat: st.beat, T: base + st.tau, dwell: st.dwell, caption: subtaskOf(st.caption), typing: Boolean(st.type),
+    beat: st.beat, T: base + st.tau, dwell: st.dwell, caption: t(subtaskOf(st.caption)), typing: Boolean(st.type),
     goal: st.goal ? [(base + (st.goal[0] === 'B' ? 1 : 0)) % subtasks.length, st.goal[1], st.goal[2]] : null,
     active, pending, time: step.time, lane: step.lane, laneTitle: step.lane ? lanes[step.lane].title : null
   };
@@ -279,7 +279,7 @@ if (initial > 0) playing = false;
 ready = true; measure();
 jumpTo(initial, { animate: false, history: 'none' });
 loadDrawing();
-import('./robot-stage.js?v=20261015-i1').then(m => m.createStage($('stage'), { task, subtasks })).then(created => {
+import('./robot-stage.js?v=20261015-i1').then(m => m.createStage($('stage'), { task: t(task), subtasks: subtasks.map(t) })).then(created => {
   stage = created; $('stage-loading').hidden = true;
   if (new URLSearchParams(location.search).has('debug')) window.__stage = stage;
   stage.play(stageSpec(index)); schedule();
