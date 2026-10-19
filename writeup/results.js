@@ -1,3 +1,4 @@
+import { firstSentence } from './i18n-core.mjs';
 import { t, inlineBilingual } from './i18n.mjs?v=20261019-zh3';
 import { nodes as sourceNodes, tasks as sourceTasks, lossPlan as sourceLossPlan, treeRoots as sourceTreeRoots } from './results-content.js?v=20261018-t1';
 import { mountTree } from './results-tree.js?v=20261018-t1';
@@ -458,7 +459,7 @@ for (const v of viewParts) if (v === 'tree' || v === 'list') layout = v;
 const describe = node => {
   const view = views.get(node.id);
   const label = stateLabel(node, view);
-  const note = (node.changed.match(/^.*?[.!?](\s|$)/) || [node.changed])[0].trim();
+  const note = firstSentence(node.changed);
   const pending = view.list.filter(r => r.state !== 'done' && r.state !== 'stopped');
   const progress = pending.map(r => r.state === 'queued' ? 'waiting for a free GPU' : r.state === 'starting' ? 'starting'
     : `training, step ${fmt(r.step)} of ${fmt(r.of)}`).join(' · ');

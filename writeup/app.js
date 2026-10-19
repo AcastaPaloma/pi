@@ -1,4 +1,5 @@
-import { t, inlineBilingual, localizeArtwork, localizeRich } from './i18n.mjs?v=20261019-zh3';
+import { localizeReferences } from './i18n-core.mjs';
+import { t, language, inlineBilingual, localizeArtwork, localizeRich } from './i18n.mjs?v=20261019-zh3';
 import { artwork, macros, steps, details, annotations, references } from './content.js?v=20261017-r2';
 import { clamp, fitBounds, zoomAt, constrainCamera } from './camera.mjs';
 import { buildReadingEntries, readingIndex } from './reading.mjs?v=20261017-r2';
@@ -15,7 +16,7 @@ const entries = buildReadingEntries(steps, details, annotations);
 const entryById = new Map(entries.map(item => [item.id, item]));
 const allBounds = [0, 0, artwork.width, artwork.height];
 const svgNS = 'http://www.w3.org/2000/svg';
-const crossReferences = compileReferences(references);
+const crossReferences = compileReferences(localizeReferences(references, language));
 let ready = false;
 let stepIndex = 0, pinned = null, preview = null, activeId = steps[0].id;
 let camera = { x: 0, y: 0, scale: 1 }, animation = 0, frame = 0;

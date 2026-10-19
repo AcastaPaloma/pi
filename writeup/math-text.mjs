@@ -171,10 +171,10 @@ function sequence(s, start, end, ctx = {}) {
 }
 function referenceAt(text, i, references, linked) {
   for (const ref of references) {
-    if (linked.has(ref.target)) continue;
+    if (linked.has(ref.target) || ref.text[0].toLowerCase() !== text[i].toLowerCase()) continue;
     ref.pattern.lastIndex = i;
     const m = ref.pattern.exec(text);
-    if (m && !wordChar(text[i + m[0].length])) return { ref, length: m[0].length };
+    if (m && (ref.locale === 'zh' || !wordChar(text[i + m[0].length]))) return { ref, length: m[0].length };
   }
   return null;
 }
@@ -182,16 +182,24 @@ export function compileReferences(list) {
   // Longest phrases first so "World model" does not shadow a longer alias.
   return [...list].sort((a, b) => b.text.length - a.text.length).map(ref => ({
     ...ref,
-    pattern: new RegExp(ref.text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + (ref.chapter ? '(?=[^.;]*\\bchapters?\\b)' : ''), ref.caseSensitive || ref.chapter ? 'y' : 'iy')
+    pattern: new RegExp(ref.text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + (ref.chapter ? (ref.locale === 'zh' ? '(?=[^。；]*章节)' : '(?=[^.;]*\\bchapters?\\b)') : ''), ref.caseSensitive || ref.chapter ? 'y' : 'iy')
   }));
 }
 // Splits text into text, math, and ref segments. Joining every segment's source
 // gives back the input exactly.
 export function segment(text, references = [], linked = new Set()) {
   const out = [];
+  const localized = references.filter(ref => ref.locale === 'zh');
   let i = 0, plain = 0;
   const flush = to => { if (to > plain) out.push({ type: 'text', source: text.slice(plain, to) }); };
   while (i < text.length) {
+    // Chinese prose has no whitespace word boundaries around reference phrases.
+    const localizedRef = localized.length ? referenceAt(text, i, localized, linked) : null;
+    if (localizedRef) {
+      flush(i); linked.add(localizedRef.ref.target);
+      out.push({ type: 'ref', source: text.slice(i, i + localizedRef.length), target: localizedRef.ref.target });
+      i = plain = i + localizedRef.length; continue;
+    }
     if (!wordChar(text[i - 1]) && !has(SUB, text[i - 1]) && text[i] !== ' ') {
       const run = sequence(text, i, text.length);
       if (run && run.math && run.end > i) {

@@ -51,3 +51,20 @@ export function sentencePairs(en, zh) {
   const a = split(en, 'en'), b = split(zh, 'zh');
   return a.length === b.length ? a.map((text, i) => ({ en: text, zh: b[i] })) : [{ en, zh }];
 }
+
+const referenceAliases = {
+  'VLM loss': ['VLM 损失'], 'EAM loss': ['EAM 损失'],
+  'flow loss': ['流匹配损失', '流损失', 'flow 损失'],
+  'knowledge insulation': ['知识隔离'], 'attention mask': ['注意力掩码'],
+  'transformer panel': ['Transformer 面板', 'transformer 面板'],
+  'flow-matching panel': ['流匹配面板'], 'ingestion chapter': ['输入章节', '摄取章节'],
+  'Ingestion': ['输入'], 'Decision model': ['决策模型'], 'Training losses': ['训练损失'],
+  'High-level policy': ['高层策略'], 'World model': ['世界模型'],
+};
+export function localizeReferences(references, language) {
+  return language !== 'zh' ? references : [...references, ...references.flatMap(ref =>
+    (referenceAliases[ref.text] || []).map(text => ({...ref, text, locale: 'zh'})))];
+}
+export function firstSentence(text) {
+  return new Intl.Segmenter(undefined, {granularity:'sentence'}).segment(text)[Symbol.iterator]().next().value?.segment.trim() || '';
+}
